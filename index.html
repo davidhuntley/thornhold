@@ -1,0 +1,2256 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Thornhold: Relics of the Warlord</title><link rel=icon href=favicon.svg><style>
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:"Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;background:#1d1610 radial-gradient(circle at 30% 20%,#3a2a1a 0,#1d1610 70%);color:#f3e6c8;min-height:100vh}
+button{font-family:inherit;cursor:pointer}
+h1,h2,h3{font-family:"Cinzel","Trajan Pro",Georgia,serif;letter-spacing:.04em;margin:.2em 0}
+.btn{background:linear-gradient(#6b4a22,#4a3115);color:#fbe9bd;border:1px solid #c99a4a;border-radius:6px;padding:7px 13px;font-size:14px;margin:3px;box-shadow:0 2px 0 #2a1a08}
+.btn:hover:not(:disabled){background:linear-gradient(#83592a,#5c3d1a)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:linear-gradient(#b8862f,#8a5f17);color:#1d1306;font-weight:bold}
+.btn.danger{background:linear-gradient(#8a2a22,#5e1813);border-color:#d26a5a}
+.btn.small{padding:3px 8px;font-size:12px}
+.wrap{max-width:1400px;margin:0 auto;padding:10px}
+.topbar{display:flex;flex-wrap:wrap;align-items:center;gap:14px;background:rgba(0,0,0,.35);border:1px solid #6b4f2a;border-radius:10px;padding:8px 14px}
+.topbar h1{font-size:22px;color:#e8c46a;margin-right:auto}
+.doom{display:flex;align-items:center;gap:6px;font-size:13px}
+.doomtrack{display:flex;gap:2px}
+.doomtrack span{width:13px;height:16px;border-radius:2px;background:#3b2c1c;border:1px solid #6b4f2a}
+.doomtrack span.on{background:#b3261e;border-color:#ff7b6b}
+.doomtrack span.mile{outline:1px solid #e8c46a}
+.seals{display:flex;gap:5px;font-size:12px}
+.seal{padding:2px 7px;border-radius:10px;border:1px solid #7a2f8a;background:#3b1744}
+.seal.broken{background:#2a3a22;border-color:#6fa35b;text-decoration:line-through;opacity:.75}
+.main{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:12px;margin-top:10px}
+@media(max-width:1000px){.main{grid-template-columns:1fr}}
+.panel{background:rgba(245,230,195,.06);border:1px solid #6b4f2a;border-radius:10px;padding:10px}
+.boardwrap{background:#c9b48a url();border-radius:12px;border:3px solid #5b3d1c;box-shadow:inset 0 0 60px rgba(60,35,10,.55);background:radial-gradient(circle at 50% 40%,#e3d2a8,#b99c68)}
+svg.board{width:100%;height:auto;display:block}
+.node{cursor:default}
+.node.reach{cursor:pointer}
+.node.reach circle.ring{stroke:#ffd85a;stroke-width:5;animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{stroke-opacity:1}50%{stroke-opacity:.35}}
+.locpanel{margin-top:10px}
+.locpanel .desc{font-size:14px;color:#e5d4ad;margin:4px 0}
+.locpanel .region{font-size:13px;color:#a9d48f;font-style:italic}
+.player{border:1px solid #6b4f2a;border-radius:8px;padding:8px;margin-bottom:8px;background:rgba(0,0,0,.25)}
+.player.active{border-color:#e8c46a;box-shadow:0 0 10px rgba(232,196,106,.35)}
+.player .pname{font-weight:bold;font-size:16px}
+.bar{height:10px;background:#3b2c1c;border-radius:5px;overflow:hidden;border:1px solid #000;margin:3px 0}
+.bar>i{display:block;height:100%;background:linear-gradient(#e04a3a,#a3221a)}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.chip{font-size:11px;padding:2px 7px;border-radius:10px;background:#4a3518;border:1px solid #c99a4a;cursor:help}
+.chip.relic{background:#2b3f5a;border-color:#7fb2e6}
+.chip.perk{background:#40351a;border-color:#e8c46a}
+.chip.eperk{background:#4a1a1a;border-color:#d26a5a}
+.chip.quest{background:#2f4a2a;border-color:#8fc57a}
+.log{font-size:12px;max-height:300px;overflow:auto;line-height:1.45;background:rgba(0,0,0,.3);padding:6px;border-radius:6px}
+.log div{border-bottom:1px dotted #4a3a24;padding:1px 0}
+.overlay{position:fixed;inset:0;background:rgba(10,6,2,.82);display:flex;align-items:flex-start;justify-content:center;overflow:auto;z-index:10;padding:20px 8px}
+.modal{background:linear-gradient(#3a2a18,#241a0f);border:2px solid #c99a4a;border-radius:12px;padding:16px;max-width:1150px;width:100%;box-shadow:0 10px 40px #000}
+.modal h2{color:#e8c46a}
+.cards{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
+.card{width:132px;min-height:188px;border-radius:9px;background:linear-gradient(#f6ecd2,#dcc89c);color:#2a1a0a;border:3px solid #7a5a2a;position:relative;padding:22px 7px 26px;font-size:12px;box-shadow:0 3px 8px rgba(0,0,0,.6);display:flex;flex-direction:column;transition:transform .12s}
+.card.play{cursor:pointer}
+.card.play:hover{transform:translateY(-6px)}
+.card.cant{opacity:.55;filter:grayscale(.5)}
+.card .mana{position:absolute;top:-9px;left:-9px;width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#8fd0ff,#1f5fa8);color:#fff;font-weight:bold;display:flex;align-items:center;justify-content:center;border:2px solid #0c2c55;font-size:15px}
+.card .cost{position:absolute;bottom:-9px;right:-9px;min-width:30px;height:28px;border-radius:14px;padding:0 5px;background:radial-gradient(circle at 35% 30%,#ffe58a,#b8860b);color:#3a2500;font-weight:bold;display:flex;align-items:center;justify-content:center;border:2px solid #6b4a00;font-size:13px}
+.card .cname{font-weight:bold;font-size:13px;text-align:center;line-height:1.15}
+.card .ctype{font-size:10px;text-align:center;text-transform:uppercase;letter-spacing:.08em;color:#6b4a22;margin:2px 0}
+.card .art{text-align:center;font-size:30px;margin:4px 0;border-radius:6px;background:rgba(0,0,0,.08);padding:4px 0}
+.card .ctext{font-size:11.5px;line-height:1.3;text-align:center;flex:1}
+.card .tier{position:absolute;bottom:3px;left:7px;font-size:10px;color:#6b4a22}
+.card.druid{border-color:#3f7d3a}.card.elf{border-color:#2f7a8c}.card.warlock{border-color:#6b2f8a}.card.dwarf{border-color:#8a5a2b}.card.neutral{border-color:#7a6a50}
+.card.relic{background:linear-gradient(#e3ecf7,#b7c9e0);border-color:#2b4f7a}
+.card.perk{background:linear-gradient(#fbefc4,#e2c56e);border-color:#8a6a10}
+.card .buy{margin-top:6px;text-align:center}
+.enemy{width:150px;border-radius:9px;background:linear-gradient(#3b1d1d,#1f0e0e);border:3px solid #7a2a2a;padding:8px;color:#f3d6c8;cursor:pointer;position:relative;font-size:12px}
+.enemy.boss{width:200px;border-color:#b8862f;background:linear-gradient(#2a0f33,#120616)}
+.enemy.tgt{box-shadow:0 0 0 3px #ffd85a,0 0 18px #ffd85a}
+.enemy.dead{opacity:.25;cursor:default;filter:grayscale(1)}
+.enemy .ename{font-weight:bold;font-size:14px}
+.enemy .stats{display:flex;gap:8px;margin:4px 0;font-size:13px}
+.enemy .abil{font-size:11px;color:#d8b5a5;font-style:italic}
+.tag{display:inline-block;font-size:10px;padding:1px 5px;border-radius:6px;background:#5a4a20;margin:1px}
+.fighters{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0}
+.fighter{border:1px solid #6b4f2a;border-radius:8px;padding:6px 10px;background:rgba(0,0,0,.3);min-width:220px}
+.fighter.act{border-color:#e8c46a}
+.creature{display:inline-block;font-size:11px;padding:2px 6px;border-radius:6px;background:#2f4a2a;border:1px solid #8fc57a;margin:2px}
+.manabar{display:inline-flex;gap:3px;vertical-align:middle}
+.manabar i{width:14px;height:14px;border-radius:50%;background:#1f5fa8;border:1px solid #8fd0ff;display:inline-block}
+.manabar i.off{background:#222;border-color:#444}
+.clog{font-size:12px;max-height:120px;overflow:auto;background:rgba(0,0,0,.35);padding:6px;border-radius:6px;line-height:1.4}
+.setup .fac{display:inline-block;width:200px;border:2px solid #6b4f2a;border-radius:10px;padding:10px;margin:6px;cursor:pointer;background:rgba(0,0,0,.25);vertical-align:top}
+.setup .fac.sel{border-color:#e8c46a;box-shadow:0 0 12px #e8c46a}
+.setup .fac .ic{font-size:36px}
+.endscreen{text-align:center;padding:40px}
+.endscreen h1{font-size:46px}
+.muted{color:#b9a47c;font-size:12px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.decklist{display:flex;flex-wrap:wrap;gap:6px}
+.decklist .dl{font-size:12px;border:1px solid #6b4f2a;border-radius:6px;padding:3px 6px;background:rgba(0,0,0,.25)}
+.help{font-size:13px;line-height:1.5}
+.help summary{cursor:pointer;color:#e8c46a}
+.err{background:#5e1813;color:#fff;padding:6px;border-radius:6px;margin:6px 0;font-size:12px}
+
+.crs{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.mini{width:110px;padding:4px 6px;border-radius:7px;background:#2f4a2a;border:1px solid #8fc57a;font-size:11px;line-height:1.25}
+.mini.token{border-style:dashed;background:#2a3d2a}
+.mini.artf{background:#3d3a33;border-color:#c9a45a}
+.mini .mn{font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini .kw{color:#e6d9a8;font-size:10px;min-height:12px}
+.mini .pt{font-weight:bold;font-size:14px;text-align:right}
+.mini .ctr{font-size:10px;background:#5b7d2a;border-radius:4px;padding:0 3px}
+.respond{border:2px solid #d4a017;background:#3a2a12}
+/* ===== v3 additions ===== */
+.card{width:138px}
+.card .mana{background:radial-gradient(circle at 35% 30%,#8fd0ff,#1f5fa8)}
+.card.creature{background:linear-gradient(#eef3dc,#c9d6a4)}
+.card.spell,.card.instant{background:linear-gradient(#ecebf8,#c3c3e6)}
+.card.artifact,.card.equipment{background:linear-gradient(#f4eadb,#d9c3a0)}
+.card.manac{background:linear-gradient(#e2f0fb,#a9cbe8);border-color:#1f5fa8}
+.card.junk{background:linear-gradient(#ddd,#aaa);border-color:#666}
+.card .pt{position:absolute;bottom:4px;left:8px;font-weight:bold;font-size:15px}
+.card .stars{position:absolute;top:2px;right:6px;color:#b8860b;font-size:12px}
+.card.sel{box-shadow:0 0 0 3px #ffd85a,0 0 14px #ffd85a}
+.gauntlet{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0;padding:8px;border-radius:10px;background:rgba(90,20,20,.25);border:1px solid #7a2a2a}
+.gstop{padding:6px 10px;border-radius:8px;border:2px solid #6b1e1e;background:#3a1212;font-size:13px}
+.gstop.done{background:#2a3a22;border-color:#6fa35b;text-decoration:line-through;opacity:.8}
+.gstop.next{border-color:#ffd85a;box-shadow:0 0 10px rgba(255,216,90,.5)}
+.gstop.lock{opacity:.6}
+.cr{width:118px;padding:5px 6px;border-radius:8px;background:#2f4a2a;border:2px solid #8fc57a;font-size:11px;line-height:1.25;cursor:pointer;position:relative;transition:transform .15s}
+.cr.boss{background:#4a1f1f;border-color:#d26a5a}
+.cr.token{border-style:dashed}
+.cr.tapped{transform:rotate(9deg);opacity:.6;filter:saturate(.5)}
+.cr.atk{box-shadow:0 0 0 3px #ff6a3a,0 0 14px #ff6a3a}
+.cr.ally{box-shadow:0 0 0 3px #7fd3ff,0 0 12px #7fd3ff}
+.cr.tgt{box-shadow:0 0 0 3px #ffd85a,0 0 14px #ffd85a}
+.cr .mn{font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cr .kw{color:#e6d9a8;font-size:10px;min-height:12px}
+.cr .pt{font-weight:bold;font-size:15px;text-align:right}
+.cr .eq{font-size:10px;color:#ffd9a0}
+.cr .sh{position:absolute;top:-8px;right:-6px;background:#5a7fa8;border:1px solid #cfe6ff;border-radius:10px;padding:0 5px;font-size:11px;font-weight:bold}
+.field{display:flex;flex-wrap:wrap;gap:8px;min-height:30px;padding:6px;border-radius:8px;background:rgba(0,0,0,.2)}
+.bosspanel{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start;padding:10px;border-radius:10px;background:linear-gradient(#2a0f33,#120616);border:2px solid #b8862f}
+.bosspanel .bname{font-size:20px;font-weight:bold;color:#e8c46a}
+.bossbox{cursor:pointer;padding:6px;border-radius:8px}
+.bossbox.tgt{box-shadow:0 0 0 3px #ffd85a,0 0 14px #ffd85a}
+.phase{font-size:16px;padding:8px 12px;border-radius:8px;background:#3a2a12;border:1px solid #c99a4a;margin:8px 0}
+.atkrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:6px;border-radius:8px;border:1px solid #6b4f2a;margin:4px 0;background:rgba(0,0,0,.25);cursor:pointer}
+.atkrow.sel{border-color:#ffd85a;background:rgba(80,60,10,.4)}
+.atkrow.cancel{opacity:.5;text-decoration:line-through}
+.eventcard{max-width:460px;width:90%;margin:auto;text-align:center;border-radius:16px;padding:24px;border:4px solid #c99a4a;background:linear-gradient(#f6ecd2,#dcc89c);color:#2a1a0a;box-shadow:0 10px 50px #000;animation:pop .35s ease-out}
+.eventcard.bad{border-color:#a3221a;background:linear-gradient(#f6d8d2,#dca89c)}
+.eventcard.good{border-color:#3f7d3a;background:linear-gradient(#e6f6d2,#b9dc9c)}
+.eventcard .big{font-size:96px}
+.eventcard h2{color:#2a1a0a!important;font-size:32px}
+.eventcard p{font-size:17px}
+.eventcard .res{font-size:20px;font-weight:bold;margin:12px 0}
+@keyframes pop{0%{transform:scale(.4) rotate(-8deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
+.tabs{display:flex;gap:6px;margin:6px 0}
+.mats{display:inline-flex;gap:8px;font-size:12px}
+.uprow{display:flex;flex-wrap:wrap;gap:4px;align-items:center;border-bottom:1px dotted #6b4f2a;padding:4px 0}
+.ready{font-size:12px;padding:4px 8px;border-radius:6px;background:rgba(0,0,0,.3);border:1px solid #6b4f2a;margin:4px 0}
+.diffsel .fac{width:180px}
+
+/* ===== Finished card art ===== */
+.card.artcard{width:138px;min-height:0;height:auto;padding:0;border:none;background:transparent;box-shadow:0 3px 10px rgba(0,0,0,.7);overflow:visible}
+.card.artcard .cardface{width:100%;height:auto;display:block;border-radius:8px;pointer-events:none;user-select:none}
+.card.artcard .stars{top:6px;right:8px;text-shadow:0 1px 3px #000}
+.card.artcard .why{position:absolute;left:6px;right:6px;bottom:28px;background:rgba(20,10,0,.8);color:#ffd9a0;font-size:10px;padding:3px 5px;border-radius:4px;text-align:center;pointer-events:none}
+.card.artcard .buy{position:absolute;left:0;right:0;bottom:10px;margin:0}
+.zoom-btn{position:absolute;top:6px;left:6px;z-index:2;width:22px;height:22px;border:0;border-radius:11px;background:rgba(0,0,0,.55);color:#f6ecd2;font-size:11px;line-height:22px;padding:0;cursor:pointer;opacity:.85}
+.zoom-btn:hover{background:rgba(40,24,8,.9);opacity:1}
+.card.artcard .up-tag{position:absolute;left:6px;right:6px;bottom:36px;color:#ffe08a;font-size:10px;text-align:center;text-shadow:0 1px 3px #000;pointer-events:none}
+
+.cr.artcr{width:92px;padding:0 0 22px;overflow:visible;background:#1a120c;border-width:2px}
+.cr.artcr .cr-face{width:100%;display:block;border-radius:6px 6px 0 0;pointer-events:none;user-select:none}
+.cr.artcr .mn,.cr.artcr .kw,.cr.artcr .eq{display:none}
+.cr.artcr .pt{position:absolute;left:0;right:0;bottom:2px;text-align:center;font-size:13px;color:#f6ecd2;text-shadow:0 1px 3px #000}
+.cr.artcr .zoom-btn{top:4px;left:4px;width:18px;height:18px;font-size:10px;line-height:18px}
+
+.chip.artchip{display:inline-flex;align-items:center;gap:4px;padding:2px 6px 2px 2px}
+.chip.artchip img{width:28px;height:44px;object-fit:cover;border-radius:3px;display:block}
+
+.setup .fac{width:220px}
+.setup .fac .hero-art{width:100%;border-radius:8px;margin:0 0 8px;display:block;box-shadow:0 2px 8px #000}
+
+.player .hero-mini{width:44px;height:68px;object-fit:cover;border-radius:5px;float:right;margin:0 0 4px 8px;cursor:pointer;box-shadow:0 2px 6px #000}
+
+.bosspanel{display:flex;gap:12px;align-items:flex-start}
+.bossbox{display:flex;gap:10px;align-items:flex-start}
+.bossbox .boss-art{width:110px;height:auto;border-radius:8px;display:block;box-shadow:0 2px 8px #000;flex:none}
+
+#cardzoom{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:80;pointer-events:none}
+#cardzoom.show{display:flex}
+#cardzoom.pinned{pointer-events:auto;background:rgba(8,4,2,.72)}
+#cardzoom img{max-width:min(520px,92vw);max-height:92vh;height:auto;border-radius:14px;box-shadow:0 12px 40px #000;pointer-events:none}
+#cardzoom .cardzoom-close{display:none;position:fixed;top:16px;right:18px;width:40px;height:40px;border:0;border-radius:20px;background:#3a2a18;color:#f6ecd2;font-size:24px;cursor:pointer}
+#cardzoom.pinned .cardzoom-close{display:block}
+</style></head><body><div id="app"></div><script>
+'use strict';
+/* Auto-generated card art map. Do not edit by hand. */
+const CARD_ART = {
+  "boss:apprentice": "assets/cards/apprentice.webp",
+  "boss:bandit": "assets/cards/bandit.webp",
+  "boss:banditBoss": "assets/cards/banditBoss.webp",
+  "boss:cryptKeeper": "assets/cards/cryptKeeper.webp",
+  "boss:direAlpha": "assets/cards/direAlpha.webp",
+  "boss:drake": "assets/cards/drake.webp",
+  "boss:lich": "assets/cards/lich.webp",
+  "boss:treeline": "assets/cards/treeline.webp",
+  "boss:warlord": "assets/cards/warlord.webp",
+  "boss:youngDrake": "assets/cards/youngDrake.webp",
+  "boss_relic:ambusherHorn": "assets/cards/ambusherHorn.webp",
+  "boss_relic:broodClutch": "assets/cards/broodClutch.webp",
+  "boss_relic:crown": "assets/cards/crown.webp",
+  "boss_relic:dragonscale": "assets/cards/dragonscale.webp",
+  "boss_relic:e_phylactery": "assets/cards/e_phylactery.webp",
+  "boss_relic:graveTide": "assets/cards/graveTide.webp",
+  "boss_relic:ironWill": "assets/cards/ironWill.webp",
+  "boss_relic:loadedDice": "assets/cards/loadedDice.webp",
+  "boss_relic:packHunt": "assets/cards/packHunt.webp",
+  "boss_relic:phylactery": "assets/cards/e_phylactery.webp",
+  "boss_relic:scaleLite": "assets/cards/scaleLite.webp",
+  "boss_relic:searingBreath": "assets/cards/searingBreath.webp",
+  "boss_relic:stolenPurse": "assets/cards/stolenPurse.webp",
+  "boss_relic:warhost": "assets/cards/warhost.webp",
+  "boss_relic:witheringAura": "assets/cards/witheringAura.webp",
+  "enemy:alphaFang": "assets/cards/alphaFang.webp",
+  "enemy:banditArcher": "assets/cards/banditArcher.webp",
+  "enemy:banshee": "assets/cards/banshee.webp",
+  "enemy:blackDragon": "assets/cards/blackDragon.webp",
+  "enemy:boneGolem": "assets/cards/boneGolem.webp",
+  "enemy:caltrops": "assets/cards/caltrops.webp",
+  "enemy:catapult": "assets/cards/catapult.webp",
+  "enemy:cleave": "assets/cards/cleave.webp",
+  "enemy:command": "assets/cards/command.webp",
+  "enemy:corpseExplode": "assets/cards/corpseExplode.webp",
+  "enemy:crushingBlow": "assets/cards/crushingBlow.webp",
+  "enemy:cutthroat": "assets/cards/cutthroat.webp",
+  "enemy:deathKnight": "assets/cards/deathKnight.webp",
+  "enemy:decree": "assets/cards/decree.webp",
+  "enemy:direWolf": "assets/cards/direWolf.webp",
+  "enemy:dirtyTrick": "assets/cards/dirtyTrick.webp",
+  "enemy:elderDrake": "assets/cards/elderDrake.webp",
+  "enemy:exileCurse": "assets/cards/exileCurse.webp",
+  "enemy:fireBreath": "assets/cards/fireBreath.webp",
+  "enemy:fireDrake": "assets/cards/fireDrake.webp",
+  "enemy:ghast": "assets/cards/ghast.webp",
+  "enemy:grunt": "assets/cards/grunt.webp",
+  "enemy:inferno": "assets/cards/inferno.webp",
+  "enemy:kobold": "assets/cards/kobold.webp",
+  "enemy:lieutenant": "assets/cards/lieutenant.webp",
+  "enemy:moltenHoard": "assets/cards/moltenHoard.webp",
+  "enemy:orcBerserker": "assets/cards/orcBerserker.webp",
+  "enemy:orcShield": "assets/cards/orcShield.webp",
+  "enemy:raiseFallen": "assets/cards/raiseFallen.webp",
+  "enemy:sapper": "assets/cards/sapper.webp",
+  "enemy:scaledGuard": "assets/cards/scaledGuard.webp",
+  "enemy:shiv": "assets/cards/shiv.webp",
+  "enemy:skelArcher": "assets/cards/skelArcher.webp",
+  "enemy:smokeBomb": "assets/cards/smokeBomb.webp",
+  "enemy:snarl": "assets/cards/snarl.webp",
+  "enemy:soulDrain": "assets/cards/soulDrain.webp",
+  "enemy:thug": "assets/cards/thug.webp",
+  "enemy:trollChief": "assets/cards/trollChief.webp",
+  "enemy:warDrums": "assets/cards/warDrums.webp",
+  "enemy:wargRider": "assets/cards/wargRider.webp",
+  "enemy:whelp": "assets/cards/whelp.webp",
+  "enemy:wingBuffet": "assets/cards/wingBuffet.webp",
+  "enemy:zombie": "assets/cards/enemies_zombie.webp",
+  "hc:aimedShot": "assets/cards/aimedShot.webp",
+  "hc:ancientSeasons": "assets/cards/ancientSeasons.webp",
+  "hc:antlerCrown": "assets/cards/antlerCrown.webp",
+  "hc:axeSwing": "assets/cards/axeSwing.webp",
+  "hc:axethrower": "assets/cards/axethrower.webp",
+  "hc:ballista": "assets/cards/ballista.webp",
+  "hc:banish": "assets/cards/banish.webp",
+  "hc:barkPlating": "assets/cards/barkPlating.webp",
+  "hc:bloodImp": "assets/cards/bloodImp.webp",
+  "hc:bloodKnight": "assets/cards/bloodKnight.webp",
+  "hc:bloodprice": "assets/cards/bloodprice.webp",
+  "hc:boar": "assets/cards/boar.webp",
+  "hc:boneAltar": "assets/cards/boneAltar.webp",
+  "hc:boneThrall": "assets/cards/boneThrall.webp",
+  "hc:brambleLash": "assets/cards/brambleLash.webp",
+  "hc:brokk": "assets/cards/brokk.webp",
+  "hc:buckler": "assets/cards/buckler.webp",
+  "hc:caelthorn": "assets/cards/caelthorn.webp",
+  "hc:caravanGuard": "assets/cards/caravanGuard.webp",
+  "hc:clockWall": "assets/cards/clockWall.webp",
+  "hc:corruption": "assets/cards/corruption.webp",
+  "hc:counterShot": "assets/cards/counterShot.webp",
+  "hc:crossbow": "assets/cards/crossbow.webp",
+  "hc:curseWeak": "assets/cards/curseWeak.webp",
+  "hc:cursedDagger": "assets/cards/cursedDagger.webp",
+  "hc:deepDelve": "assets/cards/deepDelve.webp",
+  "hc:denMother": "assets/cards/denMother.webp",
+  "hc:drainLife": "assets/cards/drainLife.webp",
+  "hc:elderwood": "assets/cards/elderwood.webp",
+  "hc:elfScout": "assets/cards/elfScout.webp",
+  "hc:elvenSong": "assets/cards/elvenSong.webp",
+  "hc:evasion": "assets/cards/evasion.webp",
+  "hc:feralSurge": "assets/cards/feralSurge.webp",
+  "hc:forgehand": "assets/cards/forgehand.webp",
+  "hc:galeBurst": "assets/cards/galeBurst.webp",
+  "hc:galeblade": "assets/cards/galeblade.webp",
+  "hc:gearDrone": "assets/cards/gearDrone.webp",
+  "hc:giantGrowth": "assets/cards/giantGrowth.webp",
+  "hc:gladeRunner": "assets/cards/gladeRunner.webp",
+  "hc:graveHound": "assets/cards/graveHound.webp",
+  "hc:groveTender": "assets/cards/groveTender.webp",
+  "hc:groveTotem": "assets/cards/groveTotem.webp",
+  "hc:hammerAnvil": "assets/cards/hammerAnvil.webp",
+  "hc:hammerBlow": "assets/cards/hammerBlow.webp",
+  "hc:harvester": "assets/cards/harvester.webp",
+  "hc:hawkrider": "assets/cards/hawkrider.webp",
+  "hc:headbutt": "assets/cards/headbutt.webp",
+  "hc:healer": "assets/cards/healer.webp",
+  "hc:hellfire": "assets/cards/hellfire.webp",
+  "hc:highLord": "assets/cards/highLord.webp",
+  "hc:holdSentinel": "assets/cards/holdSentinel.webp",
+  "hc:hydra": "assets/cards/hydra.webp",
+  "hc:ilyara": "assets/cards/ilyara.webp",
+  "hc:imp": "assets/cards/imp.webp",
+  "hc:ironGolem": "assets/cards/ironGolem.webp",
+  "hc:ironclad": "assets/cards/ironclad.webp",
+  "hc:ironhide": "assets/cards/ironhide.webp",
+  "hc:khazrun": "assets/cards/khazrun.webp",
+  "hc:leafCloak": "assets/cards/leafCloak.webp",
+  "hc:lichLord": "assets/cards/lichLord.webp",
+  "hc:longbow": "assets/cards/longbow.webp",
+  "hc:luckyCharm": "assets/cards/luckyCharm.webp",
+  "hc:marksman": "assets/cards/marksman.webp",
+  "hc:mistwalk": "assets/cards/mistwalk.webp",
+  "hc:mithril": "assets/cards/mithril.webp",
+  "hc:mkWrath": "assets/cards/mkWrath.webp",
+  "hc:moonScout": "assets/cards/moonScout.webp",
+  "hc:moonShard": "assets/cards/moonShard.webp",
+  "hc:mossShambler": "assets/cards/mossShambler.webp",
+  "hc:offering": "assets/cards/offering.webp",
+  "hc:packHowl": "assets/cards/packHowl.webp",
+  "hc:packleader": "assets/cards/packleader.webp",
+  "hc:phylactery": "assets/cards/phylactery.webp",
+  "hc:plagueBearer": "assets/cards/plagueBearer.webp",
+  "hc:plagueRat": "assets/cards/plagueRat.webp",
+  "hc:quickShot": "assets/cards/quickShot.webp",
+  "hc:raiseDead": "assets/cards/raiseDead.webp",
+  "hc:recall": "assets/cards/recall.webp",
+  "hc:recruit": "assets/cards/recruit.webp",
+  "hc:runeBulwark": "assets/cards/runeBulwark.webp",
+  "hc:runeguard": "assets/cards/runeguard.webp",
+  "hc:runesmith": "assets/cards/runesmith.webp",
+  "hc:rustyDagger": "assets/cards/rustyDagger.webp",
+  "hc:secondWind": "assets/cards/secondWind.webp",
+  "hc:seedField": "assets/cards/seedField.webp",
+  "hc:seedling": "assets/cards/seedling.webp",
+  "hc:sellsword": "assets/cards/sellsword.webp",
+  "hc:shadowBolt": "assets/cards/shadowBolt.webp",
+  "hc:shadowpaw": "assets/cards/shadowpaw.webp",
+  "hc:shieldBash": "assets/cards/shieldBash.webp",
+  "hc:shieldWall": "assets/cards/shieldWall.webp",
+  "hc:shortsword": "assets/cards/shortsword.webp",
+  "hc:siphon": "assets/cards/siphon.webp",
+  "hc:skelMinion": "assets/cards/skelMinion.webp",
+  "hc:skyArcher": "assets/cards/skyArcher.webp",
+  "hc:smokeScreen": "assets/cards/smokeScreen.webp",
+  "hc:soulRend": "assets/cards/soulRend.webp",
+  "hc:spiritOwl": "assets/cards/spiritOwl.webp",
+  "hc:stampede": "assets/cards/stampede.webp",
+  "hc:starfall": "assets/cards/starfall.webp",
+  "hc:starweaver": "assets/cards/starweaver.webp",
+  "hc:steamTank": "assets/cards/steamTank.webp",
+  "hc:stoneskin": "assets/cards/stoneskin.webp",
+  "hc:strike": "assets/cards/strike.webp",
+  "hc:stumble": "assets/cards/stumble.webp",
+  "hc:swarm": "assets/cards/swarm.webp",
+  "hc:swiftArrow": "assets/cards/swiftArrow.webp",
+  "hc:sylvaris": "assets/cards/sylvaris.webp",
+  "hc:thane": "assets/cards/thane.webp",
+  "hc:thornhideBear": "assets/cards/thornhideBear.webp",
+  "hc:throwingAxe": "assets/cards/throwingAxe.webp",
+  "hc:timberWolf": "assets/cards/timberWolf.webp",
+  "hc:towerPlate": "assets/cards/towerPlate.webp",
+  "hc:twinArrows": "assets/cards/twinArrows.webp",
+  "hc:unholyReturn": "assets/cards/unholyReturn.webp",
+  "hc:ursanox": "assets/cards/ursanox.webp",
+  "hc:vampThrall": "assets/cards/vampThrall.webp",
+  "hc:vexmora": "assets/cards/vexmora.webp",
+  "hc:vineWhip": "assets/cards/vineWhip.webp",
+  "hc:volleyLight": "assets/cards/volleyLight.webp",
+  "hc:warBanner": "assets/cards/warBanner.webp",
+  "hc:wardenOwl": "assets/cards/wardenOwl.webp",
+  "hc:warhammer": "assets/cards/warhammer.webp",
+  "hc:wildGrowth": "assets/cards/wildGrowth.webp",
+  "hc:wildMother": "assets/cards/wildMother.webp",
+  "hc:wildRegrowth": "assets/cards/wildRegrowth.webp",
+  "hc:windcaller": "assets/cards/windcaller.webp",
+  "hc:wrathOaks": "assets/cards/wrathOaks.webp",
+  "hero:druid": "assets/cards/rowan.webp",
+  "hero:durgan": "assets/cards/durgan.webp",
+  "hero:dwarf": "assets/cards/durgan.webp",
+  "hero:elf": "assets/cards/lyria.webp",
+  "hero:lyria": "assets/cards/lyria.webp",
+  "hero:rowan": "assets/cards/rowan.webp",
+  "hero:vesper": "assets/cards/vesper.webp",
+  "hero:warlock": "assets/cards/vesper.webp",
+  "mana:bloodwell": "assets/cards/bloodwell.webp",
+  "mana:cryptPool": "assets/cards/cryptPool.webp",
+  "mana:crystal": "assets/cards/crystal.webp",
+  "mana:deepVein": "assets/cards/deepVein.webp",
+  "mana:hearth": "assets/cards/hearth.webp",
+  "mana:plain": "assets/cards/plain.webp",
+  "mana:primal": "assets/cards/primal.webp",
+  "mana:starlit": "assets/cards/starlit.webp",
+  "mana:sylvan": "assets/cards/sylvan.webp",
+  "mana:wildgrove": "assets/cards/wildgrove.webp",
+  "relic:anvil": "assets/cards/anvil.webp",
+  "relic:bloodPact": "assets/cards/bloodPact.webp",
+  "relic:circleThorns": "assets/cards/circleThorns.webp",
+  "relic:golemCore": "assets/cards/golemCore.webp",
+  "relic:hawk": "assets/cards/relics_hawk.webp",
+  "relic:helm": "assets/cards/helm.webp",
+  "relic:impFamiliar": "assets/cards/impFamiliar.webp",
+  "relic:quiver": "assets/cards/quiver.webp",
+  "relic:shadowVeil": "assets/cards/shadowVeil.webp",
+  "relic:swiftwind": "assets/cards/swiftwind.webp",
+  "relic:verdantHeart": "assets/cards/verdantHeart.webp",
+  "relic:wolfTotem": "assets/cards/wolfTotem.webp",
+  "token:bee": "assets/cards/bee.webp",
+  "token:bonePile": "assets/cards/bonePile.webp",
+  "token:golem": "assets/cards/golem.webp",
+  "token:hawk": "assets/cards/tokens_hawk.webp",
+  "token:impTok": "assets/cards/impTok.webp",
+  "token:sapling": "assets/cards/sapling.webp",
+  "token:saplingGrow": "assets/cards/saplingGrow.webp",
+  "token:wolf": "assets/cards/wolf.webp",
+  "token:wolfPup": "assets/cards/wolfPup.webp",
+  "token:zombie": "assets/cards/tokens_zombie.webp"
+};
+const HERO_ART_FAC = {
+  "druid": "assets/cards/rowan.webp",
+  "elf": "assets/cards/lyria.webp",
+  "warlock": "assets/cards/vesper.webp",
+  "dwarf": "assets/cards/durgan.webp"
+};
+// ===== Thornhold v3 — data =====
+const PARTY_HP={1:0.55,2:0.9,3:1.05,4:0.9}; // commander HP multiplier by number of heroes in the game (small parties get fewer shop turns)
+// ===== RNG & utils =====
+let SEED = (Date.now() % 2147483646) + 1;
+function setSeed(s){ SEED = Math.abs(Math.floor(s)) % 2147483646 + 1; }
+function rnd(){ SEED = (SEED * 16807) % 2147483647; return (SEED - 1) / 2147483646; }
+const ri = n => Math.floor(rnd() * n);
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=ri(i+1); const t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+const pick = a => a[ri(a.length)];
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const sum = a => a.reduce((x,y)=>x+y,0);
+
+// ===== Core numbers =====
+const START_GOLD = 8, START_HP = 20, INCOME = 2, ROUND_LIMIT = 30, ESCALATE_ROUNDS = [10,20,30];
+const HAND_BOUGHT = 5;           // hand = free Basic Strike + up to 5 bought cards
+const START_MANA_CARDS = 3;      // every hero starts with 3 Plain Mana
+const SHOP_REVEAL = 5, SHOP_BUY = 3;
+const WARLORD_UNLOCK = 2;        // Malgrath can be called once this many Gauntlet stops are cleared
+const SOLO_HP = 5, SOLO_INCOME = 1, SOLO_MANA = 1; // Lone Hero bonus (solo games only)
+const MAX_UPGRADES = 2;
+
+// ===== Factions (faction = your 3 Relics + location perks) =====
+const FACTIONS = {
+  druid:  {name:'Druids',   one:'Druid',   color:'#3f7d3a', icon:'🌿', relics:['wolfTotem','circleThorns','verdantHeart'], perk:'Forage gives both heal and gold. Creature shops charge 1 less per card.'},
+  elf:    {name:'Elves',    one:'Elf',     color:'#2f7a8c', icon:'🏹', relics:['hawk','quiver','swiftwind'], perk:'Mage Tower spells cost 1 less. May move 1 extra space.'},
+  warlock:{name:'Warlocks', one:'Warlock', color:'#6b2f8a', icon:'🔮', relics:['impFamiliar','bloodPact','shadowVeil'], perk:'Ruins: see 2 extra cards and pay 2 less HP. Abbey healing costs 1 less.'},
+  dwarf:  {name:'Dwarves',  one:'Dwarf',   color:'#8a5a2b', icon:'⚒️', relics:['helm','anvil','golemCore'], perk:'+2 gold at the Mine. Forge artifacts cost 1 less and upgrades cost 1 less material.'},
+};
+const PCOLORS = ['#e8c46a', '#7fd3ff', '#ff8a7a', '#b4f08a'];
+
+const RELICS = {
+  wolfTotem:   {fac:'druid', name:'Wolf Pup Totem', text:'Every other combat round (2, 4, 6…), create a 2/2 Wolf Pup token, tapped. Max 2 pups at once.'},
+  circleThorns:{fac:'druid', name:'Circle of Thorns', text:'Start of your turn: each of your creatures with a +1/+1 counter and no Shield gains Shield 1.'},
+  verdantHeart:{fac:'druid', name:'Verdant Heart', text:'Once per fight, when one of your creatures dies, return it to play tapped with a +1/+1 counter.'},
+  hawk:        {fac:'elf', name:'Hawk Companion', text:'Start of each fight: create a 2/2 Flying Hawk token, tapped.'},
+  quiver:      {fac:'elf', name:"Ranger's Quiver", text:'The first damage spell you cast each turn deals +1 damage.'},
+  swiftwind:   {fac:'elf', name:'Swiftwind Boots', text:'Once per turn, after your creatures attack, untap your strongest attacker.'},
+  impFamiliar: {fac:'warlock', name:'Imp Familiar', text:'Start of each fight: create a 1/1 Imp token, tapped. When it dies, deal 2 damage to the enemy commander.'},
+  bloodPact:   {fac:'warlock', name:'Blood Pact', text:'Once per turn: pay 2 HP to gain 1 mana.'},
+  shadowVeil:  {fac:'warlock', name:'Shadow Veil', text:'Once per fight, when you would drop to 0 HP, drop to 1 instead.'},
+  helm:        {fac:'dwarf', name:'Ironbeard Helm', text:'Your creatures enter with Shield 1 (in addition to any they have).'},
+  anvil:       {fac:'dwarf', name:'Runic Anvil', text:'Equipment costs you 1 less mana. Your equipment gives +1 more ATK.'},
+  golemCore:   {fac:'dwarf', name:'Stone Golem Core', text:'Start of each fight: create a 0/6 Golem token with Taunt, tapped.'},
+};
+
+// ===== Keywords =====
+const KW = {fly:'Flying', reach:'Reach', first:'First Strike', life:'Lifelink', trample:'Trample', taunt:'Taunt', haste:'Haste', dt:'Deathtouch', twice:'Double Attack', pierce:'Pierce', vig:'Vigilance', ward:'Ward', rally:'Rally', fortify:'Fortify', overgrow:'Overgrow', noblock:"Can't block"};
+const KW_HELP = {
+  fly:'Can only be blocked by creatures with Flying or Reach.',
+  reach:'Can block creatures with Flying.',
+  first:'Deals its combat damage first; if that kills the other creature, it takes no damage back.',
+  life:'Damage it deals heals its controller.',
+  trample:'Damage beyond what kills its blocker goes through to the hero or commander.',
+  taunt:'While untapped, single-target damage from the other side must aim at a Taunt creature.',
+  haste:'Enters untapped and attacks at once.',
+  dt:'Any damage it deals to a creature destroys it.',
+  twice:'Deals its combat damage twice.',
+  pierce:'Its damage ignores Armor and Shield.',
+  vig:'Attacking does not tap it, so it can still block.',
+  ward:'The first enemy spell that targets it each fight is canceled.',
+  rally:'When it attacks, your other attackers get +1 ATK for that combat.',
+  fortify:'When it blocks, it gains Shield 1.',
+  overgrow:'At the start of your next turn it becomes 2/2.',
+  noblock:'Cannot block.',
+  shield:'Shield N: each hit is reduced by N, then the creature loses 1 Shield (whatever the hit size).',
+  armor:'Armor N: each hit is reduced by N.',
+};
+
+// ===== Materials =====
+const MATS = {iron:{name:'Iron',icon:'⛓️'}, hide:{name:'Hide',icon:'🦴'}, rune:{name:'Rune Shard',icon:'🔷'}, ash:{name:'Soul Ash',icon:'⚱️'}};
+
+// ===== Hero cards =====
+// type: creature | spell | instant | artifact | equipment ; stack: creature | spell | artifact
+// c = creature stats, fx = spell/artifact effect, eq = equipment bonus
+const HC = {};
+// Gold price: cards are spent when played and must be rebought, so prices are low: about the mana cost (min 1), +1 for strong cards, +2 for Legendary.
+function hc(id,name,type,stack,cost,gold,text,o){ o=o||{}; const g=Math.max(1,cost)+(o.strong?1:0)+(o.legend?2:0)+((type==='equipment'||type==='artifact')&&stack==='artifact'?0:0); HC[id]=Object.assign({id,name,type,stack,cost,gold:(stack==='none'?0:g),text},o); }
+// --- basics & junk (never in a Supply Deck) ---
+hc('strike','Basic Strike','spell','none',0,0,'Free once per turn. Deal 2 damage. Gain 1 Block. Returns to your hand every turn.',{fx:{dmg:2,block:1},basic:1});
+hc('rustyDagger','Rusty Dagger','spell','none',0,0,'Junk (your deck ran dry). Deal 1 damage.',{fx:{dmg:1},junk:1});
+hc('stumble','Stumble','spell','none',0,0,'Junk (your deck ran dry). Does nothing.',{fx:{},junk:1});
+// --- Wild Pack (Druid flavor) ---
+hc('timberWolf','Timber Wolf','creature','creature',2,3,'2/2. ETB: put a +1/+1 counter on each other creature you control.',{c:{atk:2,hp:2,etb:{counters:'others'}},tags:['wolf']});
+hc('seedling','Seedling','creature','creature',1,1,'1/3. Taunt.',{c:{atk:1,hp:3,kw:{taunt:1}}});
+hc('boar','Thornback Boar','creature','creature',2,2,'3/2. Trample.',{c:{atk:3,hp:2,kw:{trample:1}}});
+hc('groveTender','Grove Tender','creature','creature',2,2,'1/2. ETB: create a 0/2 Sapling token with Taunt.',{c:{atk:1,hp:2,etb:{tokens:[1,'sapling']}}});
+hc('denMother','Den Mother','creature','creature',3,4,'2/3. End of your turn: if she is untapped, create a 1/1 Wolf token (max 3 Wolves).',{c:{atk:2,hp:3,eot:{wolfIfUntapped:3}}});
+hc('mossShambler','Moss Shambler','creature','creature',2,3,'1/4. Taunt, Shield 1. Dies: each hero heals 2.',{c:{atk:1,hp:4,shield:1,kw:{taunt:1},death:{healAll:2}}});
+hc('packleader','Packleader','creature','creature',3,5,'3/3. ETB: create two 1/1 Wolf tokens.',{c:{atk:3,hp:3,etb:{tokens:[2,'wolf']}},tags:['wolf']});
+hc('spiritOwl','Spirit Owl','creature','creature',1,2,'1/1. Flying. Dies: you heal 3.',{c:{atk:1,hp:1,kw:{fly:1},death:{heal:3}}});
+hc('thornhideBear','Thornhide Bear','creature','creature',4,5,'4/4. Reach. When it blocks, put a +1/+1 counter on it.',{c:{atk:4,hp:4,kw:{reach:1},onBlock:{counterSelf:1}}});
+hc('wildMother','Wild Mother','creature','creature',3,5,'2/3. Your other creatures get +1 ATK.',{c:{atk:2,hp:3,lord:1}});
+hc('hydra','Verdant Hydra','creature','creature',5,7,'3/3. Trample. Start of your turn: put two +1/+1 counters on it.',{c:{atk:3,hp:3,kw:{trample:1},upkeep:{counterSelf:2}},strong:1});
+hc('ancientSeasons','Ancient of Seasons','creature','creature',6,9,'Legendary 6/7. Reach, Vigilance. Start of your turn: +1/+1 counter on each other creature you control.',{c:{atk:6,hp:7,kw:{reach:1,vig:1},upkeep:{countersOthers:1}},legend:1});
+hc('brambleLash','Bramble Lash','spell','spell',1,1,'Deal 3 damage.',{fx:{dmg:3}});
+hc('vineWhip','Vine Whip','spell','spell',2,2,'Deal 4 damage. Heal 1.',{fx:{dmg:4,heal:1}});
+hc('feralSurge','Feral Surge','instant','spell',1,2,'Instant. Your chosen creature gets +2/+2 until your next attack (+3/+3 if it is a token).',{fx:{pump:{atk:2,hp:2,token:1}}});
+hc('seedField','Seed the Field','spell','spell',2,2,'Create two 0/2 Growing Sapling tokens with Taunt and Overgrow (they become 2/2 next turn).',{fx:{tokens:[2,'saplingGrow']}});
+hc('packHowl','Pack Howl','spell','spell',2,3,'Your creatures get +1 ATK for each Wolf you control (max +3) until your next attack ends.',{fx:{packHowl:3}});
+hc('giantGrowth','Giant Growth','instant','spell',1,3,'Instant. Your chosen creature gets +3/+3 until your next attack.',{fx:{pump:{atk:3,hp:3}}});
+hc('wildGrowth','Wild Growth','spell','spell',2,3,'Put a +1/+1 counter on each creature you control. Heal 1.',{fx:{countersAll:1,heal:1}});
+hc('stampede','Stampede','spell','spell',3,4,'Untap all your creatures. They get +1 ATK until your next attack ends.',{fx:{untapAll:1,pumpAll:1}});
+hc('wildRegrowth','Wild Regrowth','spell','spell',3,4,'Return one of your creatures that died this fight to play, tapped, with a +1/+1 counter.',{fx:{raise:{n:1,counter:1}}});
+hc('swarm','Call the Swarm','spell','spell',3,4,'Create three 1/1 Bee tokens with Flying.',{fx:{tokens:[3,'bee']}});
+hc('wrathOaks','Wrath of Oaks','spell','spell',4,6,'Deal 3 damage to every enemy (commander and creatures).',{fx:{aoe:3},strong:1});
+hc('antlerCrown','Antler Crown','equipment','artifact',2,3,'Equipment. +1/+1 and Trample. +1 more ATK if the creature has a +1/+1 counter.',{eq:{atk:1,hp:1,kw:{trample:1},counterBonus:1}});
+hc('barkPlating','Bark Plating','equipment','artifact',2,3,"Equipment. Start of your turn: the creature's Shield refills to 2.",{eq:{refill:2,shield:2}});
+hc('groveTotem','Grove Totem','artifact','artifact',2,3,'Artifact. Whenever a token enters under your control, put a +1/+1 counter on it.',{art:{tokenCounter:1}});
+hc('warBanner','War Banner','artifact','artifact',3,5,'Artifact. Your creatures get +1 ATK.',{art:{lord:1},strong:1});
+// --- shared gear ---
+hc('shortsword','Iron Shortsword','equipment','artifact',1,2,'Equipment. +2 ATK.',{eq:{atk:2}});
+hc('buckler',"Traveler's Buckler",'equipment','artifact',1,2,'Equipment. +Shield 2.',{eq:{shield:2}});
+hc('luckyCharm','Lucky Charm','artifact','artifact',1,3,"Artifact. The next spell the enemy commander casts is canceled; then sacrifice this.",{art:{cancelSpell:1}});
+hc('crossbow','Crossbow','equipment','artifact',2,3,'Equipment. +2 ATK and Pierce.',{eq:{atk:2,kw:{pierce:1}}});
+// --- Skyblade (Elf flavor) ---
+hc('windcaller','Windcaller','creature','creature',2,3,'1/2. Flying. When it attacks, untap your strongest other attacker.',{c:{atk:1,hp:2,kw:{fly:1},onAttack:{untapOther:1}}});
+hc('moonScout','Moonshadow Scout','creature','creature',1,2,'1/1. Haste, Vigilance. ETB: Scry 2.',{c:{atk:1,hp:1,kw:{haste:1,vig:1},etb:{scry:2}}});
+hc('elfScout','Elf Scout','creature','creature',1,2,'1/1. Haste. ETB: draw a card.',{c:{atk:1,hp:1,kw:{haste:1},etb:{draw:1}}});
+hc('wardenOwl','Warden Owl','creature','creature',2,3,'1/2. Flying. ETB: draw a card.',{c:{atk:1,hp:2,kw:{fly:1},etb:{draw:1}}});
+hc('skyArcher','Sky Archer','creature','creature',2,3,'2/2. Flying. ETB: deal 1 damage to your target.',{c:{atk:2,hp:2,kw:{fly:1},etb:{dmg:1}}});
+hc('gladeRunner','Glade Runner','creature','creature',1,2,'2/1. Haste.',{c:{atk:2,hp:1,kw:{haste:1}}});
+hc('hawkrider','Silverwing Hawkrider','creature','creature',3,4,'3/2. Flying, First Strike.',{c:{atk:3,hp:2,kw:{fly:1,first:1}}});
+hc('marksman','Thornwood Marksman','creature','creature',3,4,'2/3. Reach, Pierce. End of your turn: if untapped, deal 1 damage to an enemy creature (or the commander).',{c:{atk:2,hp:3,kw:{reach:1,pierce:1},eot:{pingIfUntapped:1}}});
+hc('galeblade','Galeblade','creature','creature',3,5,'3/3. Flying, First Strike.',{c:{atk:3,hp:3,kw:{fly:1,first:1}}});
+hc('starweaver','Starweaver Sage','creature','creature',4,5,'2/4. Whenever you cast your second spell in a turn, draw a card.',{c:{atk:2,hp:4,sage:1}});
+hc('highLord','Elven High Lord','creature','creature',4,7,'3/4. Flying. Your other creatures get +1 ATK. ETB: draw a card.',{c:{atk:3,hp:4,kw:{fly:1},lord:1,etb:{draw:1}},strong:1});
+hc('ilyara','Ilyara, Canopy Queen','creature','creature',5,9,'Legendary 4/4. Flying, First Strike, Vigilance. Your other Flying creatures get +1/+1.',{c:{atk:4,hp:4,kw:{fly:1,first:1,vig:1},flyLord:1},legend:1});
+hc('quickShot','Quick Shot','spell','spell',1,1,'Deal 2 damage. Pierce.',{fx:{dmg:2,pierce:1}});
+hc('swiftArrow','Swift Arrow','spell','spell',1,1,'Deal 1 damage. Draw a card.',{fx:{dmg:1,draw:1}});
+hc('twinArrows','Twin Arrows','instant','spell',1,2,'Instant. Deal 1 damage twice (the second hit moves on if the first kills). If both kill, draw a card.',{fx:{twin:1}});
+hc('mistwalk','Mistwalk','instant','spell',1,2,"Instant. Your chosen creature can't be blocked and has Vigilance on your next attack.",{fx:{mistwalk:1}});
+hc('galeBurst','Gale Burst','spell','spell',2,3,"Tap up to 2 enemy creatures. They don't untap on the commander's next turn.",{fx:{freeze:2}});
+hc('evasion','Evasion','instant','spell',1,3,'Instant (block step). Cancel one attack. Draw a card.',{fx:{cancelAttack:1,draw:1}});
+hc('counterShot','Counter Shot','instant','spell',2,3,'Instant. Deal 4 damage to an attacking enemy (or your target). Pierce.',{fx:{counterShot:4}});
+hc('elvenSong','Elven Song','spell','spell',1,3,'Draw 2 cards.',{fx:{draw:2}});
+hc('volleyLight','Volley of Light','spell','spell',4,5,'Deal 2 damage to each enemy creature with Flying and 1 to every other enemy.',{fx:{volley:1}});
+hc('aimedShot','Aimed Shot','spell','spell',2,5,'Deal 6 damage. Pierce.',{fx:{dmg:6,pierce:1},strong:1});
+hc('starfall','Starfall','spell','spell',4,7,'Deal 3 damage to every enemy. Draw a card.',{fx:{aoe:3,draw:1},strong:1});
+hc('longbow','Elvish Longbow','equipment','artifact',2,3,'Equipment. +1 ATK and Pierce. When the creature attacks, deal 1 damage to the commander.',{eq:{atk:1,kw:{pierce:1},pingBoss:1}});
+hc('leafCloak','Leafweave Cloak','equipment','artifact',2,3,'Equipment. The creature has Flying and Ward.',{eq:{kw:{fly:1,ward:1}}});
+hc('moonShard','Moonwell Shard','artifact','artifact',1,2,'Artifact. When played: sacrifice it and draw 2 cards.',{art:{drawNow:2}});
+// --- Blood and Bone (Warlock flavor) ---
+hc('boneThrall','Bone Thrall','creature','creature',1,1,'1/1. Sacrifice (button): gain 1 mana this turn.',{c:{atk:1,hp:1,sacMana:1}});
+hc('skelMinion','Skeletal Minion','creature','creature',1,2,'2/1. Dies: create a 1/1 Bone Pile token.',{c:{atk:2,hp:1,death:{token:'bonePile'}}});
+hc('imp','Summon Imp','creature','creature',2,2,'2/1. Dies: deal 2 damage to the commander.',{c:{atk:2,hp:1,death:{dmgBoss:2}}});
+hc('graveHound','Grave Hound','creature','creature',2,3,'2/2. Haste. Dies: create a 1/1 Bone Pile token, tapped.',{c:{atk:2,hp:2,kw:{haste:1},death:{token:'bonePile'}}});
+hc('plagueRat','Plague Rat','creature','creature',1,2,'1/1. Deathtouch.',{c:{atk:1,hp:1,kw:{dt:1}}});
+hc('bloodImp','Blood Imp','creature','creature',1,2,'1/1. Flying, Lifelink.',{c:{atk:1,hp:1,kw:{fly:1,life:1}}});
+hc('harvester','Soul Harvester','creature','creature',3,4,'1/3. Whenever another creature dies (either side), put a +1/+1 counter on it.',{c:{atk:1,hp:3,harvest:1}});
+hc('plagueBearer','Plague Bearer','creature','creature',3,4,'2/2. Deathtouch. When it blocks, deal 1 damage to each attacking creature.',{c:{atk:2,hp:2,kw:{dt:1},onBlock:{pingAttackers:1}}});
+hc('vampThrall','Vampiric Thrall','creature','creature',2,3,'2/3. Lifelink.',{c:{atk:2,hp:3,kw:{life:1}}});
+hc('bloodKnight','Blood Knight','creature','creature',4,5,'4/3. First Strike, Lifelink. ETB: you lose 2 HP.',{c:{atk:4,hp:3,kw:{first:1,life:1},etb:{selfDmg:2}},strong:1});
+hc('lichLord','Lich Lord','creature','creature',4,7,'3/5. Start of your turn: you lose 1 HP and create a 2/2 Zombie token, tapped.',{c:{atk:3,hp:5,upkeep:{selfDmg:1,token:'zombie'}},strong:1});
+hc('vexmora','Vexmora, the Pale Queen','creature','creature',6,9,'Legendary 5/5. Flying, Lifelink. Whenever any creature dies, the commander loses 1 HP and you heal 1.',{c:{atk:5,hp:5,kw:{fly:1,life:1},vex:1},legend:1});
+hc('shadowBolt','Shadow Bolt','spell','spell',1,1,'Deal 3 damage. Lose 1 HP.',{fx:{dmg:3,selfDmg:1}});
+hc('siphon','Siphon','spell','spell',1,1,'Deal 2 damage. Heal 1.',{fx:{dmg:2,heal:1}});
+hc('offering','Offering','instant','spell',0,2,'Instant. Sacrifice your chosen creature: deal damage equal to its ATK to your target.',{fx:{offering:1}});
+hc('bloodprice','Bloodprice','spell','spell',1,2,'Pay up to 3 HP: draw that many cards (up to your hand space).',{fx:{bloodprice:3}});
+hc('drainLife','Drain Life','spell','spell',2,4,'Deal 4 damage. Heal 4.',{fx:{dmg:4,heal:4}});
+hc('curseWeak','Curse of Weakness','spell','spell',1,3,'Your target gets -2 ATK for the rest of this fight.',{fx:{curse:2}});
+hc('corruption','Corruption','spell','spell',2,4,'Deal 2 damage to every enemy. Lose 1 HP.',{fx:{aoe:2,selfDmg:1}});
+hc('unholyReturn','Unholy Return','spell','spell',3,4,'Return up to 2 of your creatures that died this fight, tapped. They are exiled when the fight ends.',{fx:{raise:{n:2,exile:1}}});
+hc('raiseDead','Raise Dead','spell','spell',3,5,'Return your most recent creature that died this fight, tapped, with +2 ATK.',{fx:{raise:{n:1,atk:2}}});
+hc('soulRend','Soul Rend','spell','spell',4,6,'Destroy your target enemy creature and exile it (it cannot come back).',{fx:{destroy:{exile:1}},strong:1});
+hc('hellfire','Hellfire','spell','spell',4,7,'Deal 4 damage to every enemy. Lose 2 HP.',{fx:{aoe:4,selfDmg:2},strong:1});
+hc('boneAltar','Bone Altar','artifact','artifact',2,3,'Artifact. Whenever a creature you control dies, gain 1 mana (max 2 per turn).',{art:{altar:2}});
+hc('cursedDagger','Cursed Dagger','equipment','artifact',2,3,'Equipment. +2 ATK and Deathtouch. You lose 1 HP at the start of each of your turns while it is attached.',{eq:{atk:2,kw:{dt:1},upkeepSelfDmg:1}});
+hc('phylactery','Soulstone Phylactery','artifact','artifact',3,6,'Artifact. Once per fight, when you would drop to 0 HP, sacrifice a creature instead and go to 5 HP.',{art:{phylactery:5},legend:1});
+// --- Iron Hold (Dwarf flavor) ---
+hc('holdSentinel','Hold Sentinel','creature','creature',2,3,'1/4. Taunt, Shield 2, Fortify.',{c:{atk:1,hp:4,shield:2,kw:{taunt:1,fortify:1}}});
+hc('recruit','Shieldwall Recruit','creature','creature',1,2,'1/3. Taunt, Armor 1.',{c:{atk:1,hp:3,armor:1,kw:{taunt:1}}});
+hc('ironhide','Ironhide Warrior','creature','creature',2,2,'2/3. Armor 1.',{c:{atk:2,hp:3,armor:1}});
+hc('forgehand','Forgehand Smith','creature','creature',2,3,'2/2. ETB: the next equipment you play this fight costs 0.',{c:{atk:2,hp:2,etb:{freeEquip:1}}});
+hc('gearDrone','Gearwork Drone','creature','creature',1,2,"Artifact creature 1/1. Flying, can't block. Dies: your sturdiest creature gains Shield 1.",{c:{atk:1,hp:1,kw:{fly:1,noblock:1},death:{shieldAlly:1}}});
+hc('axethrower','Dwarf Axethrower','creature','creature',2,3,'2/2. ETB: deal 2 damage to your target.',{c:{atk:2,hp:2,etb:{dmg:2}}});
+hc('clockWall','Clockwork Wall','creature','creature',2,3,'Artifact creature 1/6. Taunt, Armor 1.',{c:{atk:1,hp:6,armor:1,kw:{taunt:1}}});
+hc('runesmith','Runesmith','creature','creature',2,4,'2/3. Start of your turn: you gain 2 Block.',{c:{atk:2,hp:3,upkeep:{block:2}}});
+hc('ironclad','Ironclad Charger','creature','creature',4,5,'4/4. Armor 1, Trample. +1 ATK for each equipment attached to it.',{c:{atk:4,hp:4,armor:1,kw:{trample:1},eqAtk:1}});
+hc('runeguard','Runeguard Captain','creature','creature',4,5,'3/5. Vigilance. Your other creatures with Shield get +1 ATK.',{c:{atk:3,hp:5,kw:{vig:1},shieldLord:1}});
+hc('steamTank','Steam Tank','creature','creature',3,6,'Artifact creature 3/5. Armor 1, Trample.',{c:{atk:3,hp:5,armor:1,kw:{trample:1}},strong:1});
+hc('thane','Thane of the Hold','creature','creature',3,6,'3/4. Armor 1. Your other creatures get +1 ATK.',{c:{atk:3,hp:4,armor:1,lord:1},strong:1,max:1});
+hc('brokk','Brokk Stonefather','creature','creature',6,9,'Legendary 5/8. Taunt, Armor 1, Shield 3. Your equipment costs 0.',{c:{atk:5,hp:8,armor:1,shield:3,kw:{taunt:1},brokk:1},legend:1});
+hc('axeSwing','Axe Swing','spell','spell',1,1,'Deal 3 damage.',{fx:{dmg:3}});
+hc('headbutt','Headbutt','spell','spell',1,1,'Deal 2 damage. Gain 2 Block.',{fx:{dmg:2,block:2}});
+hc('shieldBash','Shield Bash','spell','spell',1,2,'Gain 3 Block. Deal 2 damage.',{fx:{block:3,dmg:2}});
+hc('shieldWall','Shield Wall','instant','spell',2,3,'Instant. Each of your creatures gains Shield 2.',{fx:{shieldAll:2}});
+hc('hammerAnvil','Hammer and Anvil','spell','spell',3,4,'Your chosen creature deals damage equal to its ATK + Shield to your target (it keeps its shields).',{fx:{hammer:1}});
+hc('deepDelve','Deep Delve','spell','spell',1,2,'Draw the first artifact or equipment card from your draw pile. If there is none, draw a card.',{fx:{delve:1}});
+hc('stoneskin','Stoneskin','instant','spell',1,2,'Instant. Gain 5 Block.',{fx:{block:5}});
+hc('hammerBlow','Hammer Blow','spell','spell',2,3,'Deal 5 damage.',{fx:{dmg:5}});
+hc('throwingAxe','Throwing Axe','spell','spell',1,2,'Deal 3 damage. Pierce.',{fx:{dmg:3,pierce:1}});
+hc('mkWrath',"Mountain King's Wrath",'spell','spell',5,8,'Deal 4 damage to every enemy. Gain 4 Block.',{fx:{aoe:4,block:4},strong:1});
+hc('mithril','Mithril Ingot','artifact','artifact',1,2,'Artifact. When played: your chosen creature gains Shield 2. At the Forge you can melt an owned Ingot into 1 Iron.',{art:{shieldNow:2}});
+hc('warhammer','Runic Warhammer','equipment','artifact',3,5,'Equipment. +3 ATK and Pierce.',{eq:{atk:3,kw:{pierce:1}},strong:1});
+hc('towerPlate','Tower Plate','equipment','artifact',2,3,'Equipment. +Shield 3, +1 Armor, -1 ATK.',{eq:{shield:3,armor:1,atk:-1}});
+hc('ballista','Steam Ballista','artifact','artifact',3,5,'Artifact. Start of your turn: deal 2 damage to a tapped enemy creature (or the commander if none).',{art:{ballista:2}});
+hc('runeBulwark','Rune Bulwark','artifact','artifact',2,4,'Artifact. Start of your turn: gain 3 Block.',{art:{bulwark:3}});
+hc('ironGolem','Iron Golem','creature','artifact',4,7,'Artifact creature 4/7. Taunt, Armor 1.',{c:{atk:4,hp:7,armor:1,kw:{taunt:1}},strong:1});
+// --- extra neutral cards (from the Card Ideas page) ---
+hc('caravanGuard','Caravan Guard','creature','creature',2,3,'2/3. Vigilance.',{c:{atk:2,hp:3,kw:{vig:1}}});
+hc('sellsword','Sellsword Captain','creature','creature',4,5,'3/4. First Strike, Rally.',{c:{atk:3,hp:4,kw:{first:1,rally:1}}});
+hc('healer','Wandering Healer','creature','creature',2,3,"1/2. End of your turn: if untapped, heal your most wounded hero 2.",{c:{atk:1,hp:2,eot:{healIfUntapped:2}}});
+hc('banish','Banish','spell','spell',3,4,'Exile your target enemy creature if it has 4 or less ATK.',{fx:{destroy:{exile:1,maxAtk:4}}});
+hc('secondWind','Second Wind','instant','spell',1,2,'Instant. Untap your chosen creature. It gets +0/+2 until your next attack.',{fx:{untapOne:1,pump:{atk:0,hp:2}}});
+hc('recall','Recall','spell','spell',2,3,'Return a card you used this fight (not Recall) to your hand.',{fx:{recall:1}});
+hc('smokeScreen','Smoke Screen','instant','spell',2,3,'Instant (block step). This turn, enemy attacks aimed at heroes deal no damage to heroes.',{fx:{smoke:1}});
+
+// Tokens
+const TOKENS = {
+  wolf:{name:'Wolf',atk:1,hp:1,tags:['wolf']}, wolfPup:{name:'Wolf Pup',atk:2,hp:2,tags:['wolf']},
+  sapling:{name:'Sapling',atk:0,hp:2,kw:{taunt:1}}, saplingGrow:{name:'Growing Sapling',atk:0,hp:2,kw:{taunt:1,overgrow:1}},
+  bee:{name:'Bee',atk:1,hp:1,kw:{fly:1}}, bonePile:{name:'Bone Pile',atk:1,hp:1}, zombie:{name:'Zombie',atk:2,hp:2},
+  hawk:{name:'Hawk',atk:2,hp:2,kw:{fly:1}}, impTok:{name:'Imp',atk:1,hp:1,death:{dmgBoss:2}}, golem:{name:'Stone Golem',atk:0,hp:6,kw:{taunt:1}},
+};
+
+// ===== Mana (shared Tavern stack) =====
+const MANA = {
+  plain:   {name:'Plain Mana', gold:2, text:'Gives 1 mana each turn once played.', sick:0},
+  wildgrove:{name:'Wildgrove', gold:3, text:'Enters sick (no mana the turn you play it). When played: heal 2.', sick:1, onPlay:{heal:2}},
+  primal:  {name:'Primal Spring', gold:4, text:'Gives 1 mana, or 2 if you control 3+ creatures.', sick:0, primal:1},
+  starlit: {name:'Starlit Glade', gold:3, text:'Enters sick. When played: draw a card.', sick:1, onPlay:{draw:1}},
+  sylvan:  {name:'Sylvan Spring', gold:4, text:'Gives 1 mana. Your first instant each turn costs 1 less.', sick:0, sylvan:1},
+  bloodwell:{name:'Bloodwell', gold:4, text:'Gives 1 mana. When played: you may pay 1 HP for 1 extra mana this turn.', sick:0, bloodwell:1},
+  cryptPool:{name:'Crypt Pool', gold:3, text:'Enters sick. When played: return a card you used this fight to your hand.', sick:1, onPlay:{recall:1}},
+  deepVein:{name:'Deep Vein', gold:3, text:'Enters sick. Your equipment costs 1 less this fight.', sick:1, onPlay:{eqDiscount:1}},
+  hearth:  {name:'Forge Hearth', gold:4, text:'Gives 1 mana. When played: your sturdiest creature gains Shield 1.', sick:0, onPlay:{shieldAlly:1}},
+  crystal: {name:'Wild Crystal', gold:3, text:'Enters sick. Gives 2 mana. Exiled when the fight ends.', sick:1, mana:2, exileAfter:1},
+};
+const TAVERN_SPECIALS = {wildgrove:3, primal:3, starlit:3, sylvan:3, bloodwell:3, cryptPool:3, deepVein:3, hearth:3, crystal:4};
+
+// ===== The 4 prebuilt decks (each is one deck split into 3 stacks) =====
+const DECKS = {
+  wildPack:{name:'Wild Pack', fac:'druid', blurb:'Go wide with wolves and saplings, grow them with counters, heal through long fights.',
+    creature:{timberWolf:4,seedling:4,boar:4,groveTender:4,denMother:4,mossShambler:4,packleader:4,spiritOwl:4,thornhideBear:3,wildMother:2,hydra:2,ancientSeasons:1},
+    spell:{brambleLash:4,vineWhip:4,feralSurge:4,seedField:4,packHowl:4,giantGrowth:3,wildGrowth:3,stampede:2,wildRegrowth:2,swarm:2,wrathOaks:2},
+    artifact:{antlerCrown:4,barkPlating:4,groveTotem:4,shortsword:4,buckler:4,luckyCharm:4,warBanner:2},
+    combos:['Den Mother, Packleader, Grove Tender and Seed the Field make tokens; Grove Totem puts a counter on each one.','Pack Howl and Wild Mother turn a wide board of wolves into big damage.','Stampede untaps your attackers so the whole pack attacks and still blocks.','Bark Plating on a Taunt creature makes a wall that refills every turn.']},
+  skyblade:{name:'Skyblade', fac:'elf', blurb:'Win the air, tap down blockers, chain cheap spells to draw more spells.',
+    creature:{windcaller:4,moonScout:4,elfScout:4,wardenOwl:4,skyArcher:4,gladeRunner:4,hawkrider:4,marksman:4,galeblade:3,starweaver:2,highLord:2,ilyara:1},
+    spell:{quickShot:4,swiftArrow:4,twinArrows:4,mistwalk:4,galeBurst:4,evasion:3,counterShot:3,elvenSong:3,volleyLight:2,aimedShot:2,starfall:1},
+    artifact:{longbow:4,leafCloak:4,moonShard:4,shortsword:4,luckyCharm:4,crossbow:3,buckler:3},
+    combos:["Gale Burst taps the commander's Reach blockers so your flyers hit him unopposed.",'Windcaller untaps a Hawkrider after it attacks, so it can still block.','Cheap instants trigger Starweaver Sage draws.','Elvish Longbow on a Vigilance creature pings the commander every attack.']},
+  bloodBone:{name:'Blood and Bone', fac:'warlock', blurb:'Pay HP for power, sacrifice fodder, profit whenever anything dies.',
+    creature:{boneThrall:4,skelMinion:4,imp:4,graveHound:4,plagueRat:4,bloodImp:4,harvester:4,plagueBearer:4,vampThrall:3,bloodKnight:2,lichLord:2,vexmora:1},
+    spell:{shadowBolt:4,siphon:4,offering:4,bloodprice:4,drainLife:3,curseWeak:3,corruption:3,unholyReturn:3,raiseDead:2,soulRend:2,hellfire:2},
+    artifact:{boneAltar:4,cursedDagger:4,shortsword:4,luckyCharm:4,buckler:3,crossbow:3,warBanner:3,phylactery:1},
+    combos:['Sacrifice a Bone Thrall with Offering; Bone Altar refunds mana and Soul Harvester grows.','Skeletal Minion, Grave Hound and Summon Imp leave something behind when they die.','Unholy Return or Raise Dead brings back the Blood Knight or Lich Lord you lost.','Cursed Dagger on a Lifelink creature pays back its HP cost.']},
+  ironHold:{name:'Iron Hold', fac:'dwarf', blurb:'Wall up with Taunt and Shield, strap gear onto heavy hitters, turn shields into damage.',
+    creature:{holdSentinel:4,recruit:4,ironhide:4,forgehand:4,gearDrone:4,axethrower:4,clockWall:3,runesmith:3,ironclad:3,runeguard:3,steamTank:2,thane:1,brokk:1},
+    spell:{axeSwing:4,headbutt:4,shieldBash:4,shieldWall:4,hammerAnvil:4,deepDelve:4,stoneskin:3,hammerBlow:3,throwingAxe:2,mkWrath:2},
+    artifact:{mithril:4,shortsword:4,buckler:4,warhammer:3,towerPlate:3,ballista:3,warBanner:2,runeBulwark:2,ironGolem:1},
+    combos:['Forgehand Smith makes your next equipment free; Ironclad Charger gets +1 ATK per piece.','Shield Wall plus Runeguard Captain gives every creature Shield 2 and +1 ATK.','Hammer and Anvil on a creature wearing Tower Plate hits hard and keeps the shields.','Spare Mithril Ingots melt into Iron for Forge upgrades.']},
+};
+const DECK_IDS = Object.keys(DECKS);
+
+// ===== Forge upgrades =====
+const UPGRADES = {
+  hardened:{name:'Hardened', for:'creature', cost:{iron:2}, text:'Enters with Shield 1 (a second Hardened makes it Shield 2).'},
+  thickHide:{name:'Thick Hide', for:'creature', cost:{hide:2}, text:'+2 HP.'},
+  keen:{name:'Keen', for:'creature', cost:{rune:2,iron:1}, text:'Gains First Strike.', once:1},
+  quickened:{name:'Quickened', for:'creature', cost:{hide:2,rune:1}, text:'Gains Haste.', once:1},
+  soulforged:{name:'Soulforged', for:'creature', cost:{ash:2}, text:'Once per fight, when it dies, it returns to your hand.', once:1},
+  honed:{name:'Honed Edge', for:'equipment', cost:{iron:2}, text:'+1 to the ATK it gives.'},
+  bonded:{name:'Bonded', for:'equipment', cost:{iron:1,rune:1}, text:'Costs 1 less mana.', once:1},
+  runed:{name:'Runed', for:'spell', cost:{rune:2}, text:'+1 to its damage, heal or Block.'},
+  masterwork:{name:'Masterwork', for:'artifact', cost:{rune:3}, text:'+1 to the number on this artifact (ATK, Block, damage, Shield, mana or cards).', once:1},
+  ashBlessed:{name:'Ash-Blessed', for:'spell', cost:{ash:2}, text:'Costs 1 less mana (minimum 0).', once:1},
+};
+
+// ===== Board (one-way) =====
+// Trunk: Crossroads -> Tavern -> Shrine; at the Shrine choose the left loop or the right loop; both return to the Crossroads.
+const LOCS = {
+  cross:   {name:'Crossroads', icon:'✴️', x:600,y:300, desc:'Start and respawn point. Campfire: heal 4. Passing through it pays 1 gold.'},
+  tavern:  {name:'The Prancing Boar Tavern', icon:'🍺', x:600,y:490, desc:'Buy mana cards (Plain Mana always in stock, plus 2 special mana from the shared Tavern stack) and pick up quests.'},
+  shrine:  {name:'Moonstone Shrine', icon:'🌙', x:290,y:640, desc:'The fork: choose the left or right loop. Pray: your next fight starts with 1 extra mana in play.'},
+  forest:  {name:'Ancient Forest', icon:'🌲', x:100,y:440, desc:'Forage: heal 5 or gain 2 gold (Druids get both).'},
+  beastden:{name:'Beast Den', icon:'🐾', x:150,y:170, desc:'Creature shop: reveal 5 from your Creature stack, buy up to 3. The rest are exiled.'},
+  abbey:   {name:"Healer's Abbey", icon:'⛪', x:420,y:60, desc:'Pay 2 gold: heal to full (Warlocks pay 1).'},
+  mine:    {name:'Deepdelve Mine', icon:'⛏️', x:640,y:690, desc:'Mine for 4 gold (Dwarves 6).'},
+  forge:   {name:'Mountain Forge', icon:'⚒️', x:890,y:630, desc:'Artifact shop (reveal 5 from your Artifact stack, buy up to 3) and Forge upgrades with materials.'},
+  tower:   {name:'Mage Tower', icon:'🔮', x:450,y:610, desc:'Spell shop: reveal 5 from your Spell stack, buy up to 3. The rest are exiled.'},
+  lodge:   {name:"Hunter's Lodge", icon:'🏹', x:1090,y:380, desc:'Creature shop: reveal 5 from your Creature stack, buy up to 3. The rest are exiled.'},
+  ruins:   {name:'Cursed Ruins', icon:'🏚️', x:1000,y:170, desc:'Forbidden cache: pay 3 HP, reveal 3 from a stack you choose, take 1 free. The rest are exiled.'},
+};
+const SPACE_POS = {
+  t1:[600,360], t2:[600,425], t3:[545,565], t4:[365,650],
+  l1:[190,605], l2:[120,530], l3:[85,350], l4:[100,260], l5:[220,100], l6:[320,62], l7:[500,130], l8:[555,215],
+  r1:[330,705], r2:[480,712], r3:[770,675], r4:[985,560], r5:[1065,470], r6:[1070,280], r7:[880,125], r8:[730,200],
+};
+for(const k in SPACE_POS) LOCS[k]={name:'Road space', kind:'space', x:SPACE_POS[k][0], y:SPACE_POS[k][1]};
+const ROUTE = {
+  trunk:['cross','t1','t2','tavern','t3','tower','t4','shrine'],
+  left:['shrine','l1','l2','forest','l3','l4','beastden','l5','l6','abbey','l7','l8','cross'],
+  right:['shrine','r1','r2','mine','r3','forge','r4','r5','lodge','r6','ruins','r7','r8','cross'],
+};
+const NEXT = {}; // directed edges
+for(const r of Object.values(ROUTE)) for(let i=0;i<r.length-1;i++) (NEXT[r[i]]=NEXT[r[i]]||[]).push(r[i+1]);
+const SPACE_IDS = Object.keys(SPACE_POS);
+const SPACE_MIX = {plain:7, event:6, good:4, bad:3};
+const SPACE_INFO = {plain:'Plain road. Nothing happens.', event:'? Event: flip a coin. Heads a blessing, tails a peril.', good:'+ Blessing space: always good.', bad:'− Peril space: always bad.'};
+const GOOD_EVENTS = [
+  {id:'purse', icon:'💰', name:'Lost Purse', text:'You find a purse on the road. Gain 3 gold.'},
+  {id:'spring', icon:'💧', name:'Healing Spring', text:'Cool, clear water. Heal 5 HP.'},
+  {id:'gift', icon:'🎁', name:"Traveler's Gift", text:'A grateful traveler gives you a card. Take the top card of a random stack of your Supply Deck for free.'},
+  {id:'cache', icon:'📦', name:'Abandoned Cache', text:'You find crafting supplies. Gain 1 random material.'},
+  {id:'tailwind', icon:'🍃', name:'Tailwind', text:'The road is kind today. Gain 1 gold and heal 2.'},
+];
+const BAD_EVENTS = [
+  {id:'ambush', icon:'🗡️', name:'Roadside Ambush', text:'Bandits jump out of the bushes. Lose 3 HP.'},
+  {id:'pickpocket', icon:'🫳', name:'Pickpocket', text:'Someone bumps into you. Lose 2 gold.'},
+  {id:'tornPack', icon:'🎒', name:'Torn Pack', text:'Your pack rips open. A random card you own falls out and goes back into your Supply Deck.'},
+  {id:'thorns', icon:'🌵', name:'Thorn Thicket', text:'You push through brambles. Lose 2 HP.'},
+  {id:'mud', icon:'🟫', name:'Deep Mud', text:'You are stuck. No location action or Call to Fight this turn.'},
+];
+
+// ===== Round events (one flips at the start of each round) =====
+const ROUND_EVENTS = [
+  {id:'raiders',name:'Raiders at the Mine',text:'Deepdelve Mine yields no gold this round.'},
+  {id:'plague',name:'Plague in the Markets',text:'Shop cards cost +1 gold this round.'},
+  {id:'dragon',name:'Dragon Sighting',text:'Every hero at the Forge or the Mine takes 4 damage.'},
+  {id:'herald',name:"Warlord's Herald",text:'The next Gauntlet commander gains +5 HP until defeated.'},
+  {id:'storm',name:'Storm on the Roads',text:'Everyone moves 1 fewer space this round.'},
+  {id:'toll',name:'Bandit Toll',text:'Each hero pays 1 gold or takes 3 damage.'},
+  {id:'merchant',name:'Wandering Merchant',text:'Shops reveal 1 extra card this round.'},
+  {id:'rally',name:'Rally the Villages',text:'Every hero heals 4 HP.'},
+  {id:'goldRush',name:'Gold Rush',text:'Mining gives +2 gold this round.'},
+  {id:'calm',name:'A Quiet Day',text:'Nothing happens.'},
+  {id:'festival',name:'Harvest Festival',text:'Every hero gains 1 extra gold.'},
+  {id:'caravan',name:'Ore Caravan',text:'Every hero gains 1 Iron.'},
+];
+
+// ===== Enemy cards (commanders play these with the same mana and tapping rules) =====
+const EC = {};
+function ec(id,name,type,cost,text,o){ EC[id]=Object.assign({id,name,type,cost,text},o||{}); }
+// Bandits
+ec('cutthroat','Bandit Cutthroat','creature',1,'2/1. Haste.',{c:{atk:2,hp:1,kw:{haste:1}}});
+ec('banditArcher','Bandit Archer','creature',2,"1/2. Reach. Start of his turn: 1 damage to a hero's creature (or a hero).",{c:{atk:1,hp:2,kw:{reach:1},upkeep:{ping:1}}});
+ec('thug','Hired Thug','creature',3,'3/3.',{c:{atk:3,hp:3}});
+ec('lieutenant','Bandit Lieutenant','creature',4,'3/4. First Strike, Rally.',{c:{atk:3,hp:4,kw:{first:1,rally:1}}});
+ec('dirtyTrick','Dirty Trick','spell',1,"Tap a hero's untapped creature.",{fx:{tap:1}});
+ec('shiv','Shiv','spell',1,'Deal 2 damage to a hero or creature.',{fx:{hit:2}});
+ec('smokeBomb','Smoke Bomb','instant',2,"Instant. Cancel the strongest hero attacker's damage this combat.",{fx:{cancelAttack:1}});
+ec('caltrops','Caltrops','artifact',2,"Artifact. Heroes' attacking creatures take 1 damage.",{art:{caltrops:1}});
+// Drakes
+ec('whelp','Drake Whelp','creature',2,'2/2. Flying.',{c:{atk:2,hp:2,kw:{fly:1}},tags:['whelp']});
+ec('kobold','Kobold Slinger','creature',1,'1/1. ETB: 1 damage to a hero or creature.',{c:{atk:1,hp:1,etb:{hit:1}}});
+ec('fireDrake','Fire Drake','creature',4,'4/3. Flying.',{c:{atk:4,hp:3,kw:{fly:1}}});
+ec('scaledGuard','Scaled Guardian','creature',3,'2/5. Taunt, Shield 2.',{c:{atk:2,hp:5,shield:2,kw:{taunt:1}}});
+ec('elderDrake','Elder Drake','creature',6,'6/6. Flying, Trample.',{c:{atk:6,hp:6,kw:{fly:1,trample:1}}});
+ec('fireBreath','Fire Breath','spell',2,'Deal 3 damage to a creature (or a hero if none).',{fx:{hitCre:3}});
+ec('wingBuffet','Wing Buffet','spell',2,"Tap 2 of the heroes' untapped creatures.",{fx:{tap:2}});
+ec('inferno','Inferno','spell',5,'Deal 2 damage to every hero and every hero creature.',{fx:{aoeHeroes:2}});
+ec('moltenHoard','Molten Hoard','artifact',3,'Artifact. His Whelps get +1 ATK.',{art:{whelpLord:1}});
+// Undead
+ec('zombie','Shambling Zombie','creature',2,'2/2.',{c:{atk:2,hp:2}});
+ec('skelArcher','Skeleton Archer','creature',1,'1/2. Reach.',{c:{atk:1,hp:2,kw:{reach:1}}});
+ec('ghast','Ghast','creature',3,'2/2. Deathtouch.',{c:{atk:2,hp:2,kw:{dt:1}}});
+ec('banshee','Banshee','creature',3,'2/2. Flying. Dies: each hero loses 2 HP.',{c:{atk:2,hp:2,kw:{fly:1},death:{hurtHeroes:2}}});
+ec('boneGolem','Bone Golem','creature',5,'4/6. Taunt.',{c:{atk:4,hp:6,kw:{taunt:1}}});
+ec('deathKnight','Death Knight','creature',6,'5/4. First Strike, Lifelink.',{c:{atk:5,hp:4,kw:{first:1,life:1}}});
+ec('soulDrain','Soul Drain','spell',3,'Deal 4 damage to a hero. He heals 4.',{fx:{hitHero:4,heal:4}});
+ec('raiseFallen','Raise the Fallen','spell',4,'Return 2 of his dead creatures to play, tapped.',{fx:{raise:2}});
+ec('corpseExplode','Corpse Explosion','spell',3,"Sacrifice his creature: deal its ATK to each hero creature.",{fx:{corpse:1}});
+ec('exileCurse','Exile Curse','spell',4,"Exile a random card from a hero's hand (gone for the game).",{fx:{exileHand:1}});
+// Orc warhost
+ec('grunt','Orc Grunt','creature',1,'2/2.',{c:{atk:2,hp:2}});
+ec('sapper','Goblin Sapper','creature',2,"1/1. Dies: 2 damage to a hero's creature (or a hero).",{c:{atk:1,hp:1,death:{hit:2}}});
+ec('orcBerserker','Orc Berserker','creature',3,'4/2. Haste.',{c:{atk:4,hp:2,kw:{haste:1}}});
+ec('wargRider','Warg Rider','creature',3,'3/3. Trample.',{c:{atk:3,hp:3,kw:{trample:1}}});
+ec('orcShield','Orc Shieldbearer','creature',3,'2/5. Taunt, Shield 2.',{c:{atk:2,hp:5,shield:2,kw:{taunt:1}}});
+ec('trollChief','Troll Warchief','creature',6,'6/6. Heals fully at the start of his turn.',{c:{atk:6,hp:6,regen:1}});
+ec('blackDragon','Black Dragon','creature',7,'7/7. Flying, Deathtouch.',{c:{atk:7,hp:7,kw:{fly:1,dt:1}}});
+ec('cleave','Cleave','spell',2,'Deal 3 damage to a creature and 1 to another (or a hero).',{fx:{cleave:[3,1]}});
+ec('command',"Warlord's Command",'spell',3,'Untap all his creatures. They get +1 ATK this turn.',{fx:{untapPump:1}});
+ec('crushingBlow','Crushing Blow','spell',4,"Destroy a tapped hero creature.",{fx:{destroyTapped:1}});
+ec('decree',"Malgrath's Decree",'spell',5,'Each fighting hero exiles a random card from their hand.',{fx:{decree:1}});
+ec('catapult','Siege Catapult','artifact',4,'Artifact. Start of his turn: 2 damage to a hero.',{art:{catapult:2}});
+ec('warDrums','War Drums','artifact',4,'Artifact. His creatures have Haste.',{art:{drums:1}});
+// Beasts (quests)
+ec('direWolf','Dire Wolf','creature',2,'3/2.',{c:{atk:3,hp:2}});
+ec('snarl','Snarl','spell',1,'Deal 2 damage to a hero or creature.',{fx:{hit:2}});
+ec('alphaFang','Alpha Fang','creature',4,'4/4. Trample.',{c:{atk:4,hp:4,kw:{trample:1}}});
+
+const ERELICS = {
+  stolenPurse:{name:'Stolen Purse', text:"When one of his creatures damages a hero, that hero loses 1 gold."},
+  ambusherHorn:{name:"Ambusher's Horn", text:'Start of the fight: he creates two 2/1 Bandit Cutthroats with Haste, untapped.'},
+  loadedDice:{name:'Loaded Dice', text:'Once per fight, he cancels the first instant a hero casts.'},
+  dragonscale:{name:'Dragonscale', text:'He has Shield 3. It refills every 3 rounds.'},
+  broodClutch:{name:'Brood Clutch', text:'Rounds 3, 6, 9…: he creates a 2/2 Flying Whelp.'},
+  searingBreath:{name:'Searing Breath', text:"The first time he drops below half HP: 3 damage to each hero creature."},
+  phylactery:{name:'Phylactery', text:"The first time he hits 0 HP he returns at 10 HP, unless heroes have exiled 2 of his creatures this fight."},
+  graveTide:{name:'Grave Tide', text:'When one of his creatures dies (not exiled), 50%: it returns as a 1/1 Zombie.'},
+  witheringAura:{name:'Withering Aura', text:"Hero creatures get -1 HP (minimum 1)."},
+  crown:{name:'Crown of Dominion', text:'His creatures get +1 ATK. From round 4 he plays 2 mana a turn.'},
+  warhost:{name:'Warhost Banner', text:'Start of his turn: if he has fewer than 2 creatures, he creates a 3/3 Orc Warrior (it enters tapped, like any new creature).'},
+  ironWill:{name:'Iron Will', text:'He has Shield 4 and regains 1 Shield each round (up to 4).'},
+  packHunt:{name:'Pack Hunt', text:'While he has 2 or more creatures, they get +1 ATK.'},
+  scaleLite:{name:'Thick Scales', text:'He has Shield 2.'},
+};
+
+// Commanders. hp/perHero = base HP and extra HP per extra hero in the GAME. atk = his own attack each turn. mana = his mana cap.
+const COMMANDERS = {
+  bandit: {name:'Brakka the Bandit Chief', icon:'🗡️', hp:26, perHero:12, atk:2, mana:6, relics:['ambusherHorn','stolenPurse','loadedDice'],
+    deck:{cutthroat:4,banditArcher:3,thug:3,lieutenant:1,dirtyTrick:3,shiv:3,smokeBomb:2,caltrops:1}, teach:'Tapping, Haste and choosing blockers.'},
+  drake:  {name:'Vyrnax the Drake Lord', icon:'🐉', hp:34, perHero:14, atk:3, mana:8, relics:['dragonscale','broodClutch','searingBreath'],
+    deck:{whelp:4,kobold:4,fireDrake:3,scaledGuard:3,elderDrake:1,fireBreath:3,wingBuffet:2,inferno:1,moltenHoard:1}, teach:'Flying, Reach and Shields.'},
+  lich:   {name:'Morvayne the Lich', icon:'💀', hp:42, perHero:16, atk:3, mana:9, relics:['phylactery','graveTide','witheringAura'],
+    deck:{zombie:4,skelArcher:4,ghast:3,banshee:3,boneGolem:2,deathKnight:1,soulDrain:3,raiseFallen:2,corpseExplode:1,exileCurse:1}, teach:'Recursion and exile. Save Banish and Soul Rend for him.'},
+  warlord:{name:'Malgrath the Iron Warlord', icon:'👑', hp:56, perHero:20, atk:4, mana:12, relics:['crown','warhost','ironWill'],
+    deck:{grunt:4,sapper:4,orcBerserker:3,wargRider:3,orcShield:3,trollChief:1,blackDragon:1,cleave:3,command:2,crushingBlow:2,decree:1,catapult:2,warDrums:1}, teach:'Everything at once. His big Shield needs many small hits.'},
+  // quest commanders
+  direAlpha:{name:'Dire Wolf Alpha', icon:'🐺', hp:12, perHero:6, atk:2, mana:4, relics:['packHunt'], deck:{direWolf:5,snarl:3}},
+  treeline:{name:'Pack of the Treeline', icon:'🐺', hp:16, perHero:7, atk:3, mana:5, relics:['packHunt'], deck:{direWolf:5,alphaFang:1,snarl:3}},
+  cryptKeeper:{name:'Crypt Keeper', icon:'⚰️', hp:14, perHero:6, atk:2, mana:5, relics:['graveTide'], deck:{skelArcher:4,zombie:3,ghast:1,soulDrain:1}},
+  youngDrake:{name:'Young Drake', icon:'🐲', hp:15, perHero:7, atk:3, mana:5, relics:['scaleLite'], deck:{whelp:4,kobold:3,fireBreath:2}},
+  banditBoss:{name:'Mine Bandit Boss', icon:'🪓', hp:14, perHero:6, atk:2, mana:5, relics:['stolenPurse'], deck:{cutthroat:4,thug:2,shiv:3}},
+  apprentice:{name:'Rogue Apprentice', icon:'🧙', hp:13, perHero:6, atk:2, mana:6, relics:['loadedDice'], deck:{kobold:4,shiv:2,fireBreath:3,wingBuffet:1}},
+};
+const STOPS = ['bandit','drake','lich'];
+const STOP_REWARD = {gold:5, mats:{iron:1,hide:1,rune:1,ash:1}, heal:5};
+
+// ===== Difficulty =====
+const DIFFS = {
+  easy:  {name:'Easy',   hp:0.8,  mana:0, relics:2, atk:-1, ai:'easy',   text:'Commanders have 80% HP, only their first 2 Relics, -1 ATK and play carelessly.'},
+  medium:{name:'Medium', hp:1.0,  mana:0, relics:3, atk:0,  ai:'normal', text:'The baseline game.'},
+  hard:  {name:'Hard',   hp:1.15, mana:1, relics:3, atk:0,  ai:'smart',  text:'Commanders have 115% HP, start with 1 extra mana and play sharply.'},
+};
+
+// ===== Quests (pay materials plus a little gold) =====
+const QUESTS = [
+  {id:'wolfDen',name:'Clear the Wolf Den',type:'fight',boss:'direAlpha',reward:{gold:2,mats:{hide:2}},text:'Fight the Dire Wolf Alpha. Every hero who fights gets 2 Hide and 2 gold.'},
+  {id:'wolfDen2',name:'Wolves at the Treeline',type:'fight',boss:'treeline',reward:{gold:2,mats:{hide:3}},text:'Fight the Pack of the Treeline. Every hero who fights gets 3 Hide and 2 gold.'},
+  {id:'crypt',name:'Cleanse the Crypt',type:'fight',boss:'cryptKeeper',reward:{gold:2,mats:{ash:2}},text:'Fight the Crypt Keeper. Every hero who fights gets 2 Soul Ash and 2 gold.'},
+  {id:'drake',name:"The Drake's Hoard",type:'fight',boss:'youngDrake',reward:{gold:3,mats:{rune:2}},text:'Fight a Young Drake. Every hero who fights gets 2 Rune Shards and 3 gold.'},
+  {id:'bandits',name:'Bandits in the Deep',type:'fight',boss:'banditBoss',reward:{gold:3,mats:{iron:2}},text:'Fight the Mine Bandit Boss. Every hero who fights gets 2 Iron and 3 gold.'},
+  {id:'apprentice',name:'The Rogue Apprentice',type:'fight',boss:'apprentice',reward:{gold:2,mats:{rune:2}},text:'Fight a Rogue Apprentice. Every hero who fights gets 2 Rune Shards and 2 gold.'},
+  {id:'courier',name:"Courier's Errand",type:'visit',loc:'beastden',reward:{gold:2,mats:{hide:1}},text:'Deliver a letter to the Beast Den: 1 Hide and 2 gold.'},
+  {id:'pilgrim',name:"Pilgrim's Escort",type:'visit',loc:'shrine',reward:{gold:2,mats:{rune:1}},text:'Escort a pilgrim to the Shrine: 1 Rune Shard and 2 gold.'},
+  {id:'herbs',name:'Herbs for the Abbey',type:'visit',loc:'abbey',reward:{gold:2,mats:{ash:1}},text:'Bring herbs to the Abbey: 1 Soul Ash and 2 gold.'},
+  {id:'ore',name:'Ore Delivery',type:'visit',loc:'forge',reward:{gold:2,mats:{iron:1}},text:'Haul ore to the Forge: 1 Iron and 2 gold.'},
+];
+// ===== Thornhold v3 — game logic (board) =====
+let G = null;
+let UI = {setup:{count:2, facs:['druid','dwarf','elf','warlock'], decks:['wildPack','ironHold','skyblade','bloodBone'], names:['Player 1','Player 2','Player 3','Player 4'], diff:'medium', drawOrder:'purchase'}, deckView:null, err:null, sel:null};
+
+function log(msg){ if(!G) return; G.log.unshift(msg); if(G.log.length>300) G.log.length=300; if(G.combat){ G.combat.log.unshift(msg); if(G.combat.log.length>80) G.combat.log.length=80; } }
+const P = () => G.players[G.cur];
+const NP = () => G.players.length;
+const alive = p => !p.dead;
+const hasRelic = (p,id) => p.relics.includes(id);
+const suddenDeath = () => G.round > ROUND_LIMIT;
+const nextUid = () => ++G.uid;
+const DIFF = () => DIFFS[G.diff];
+const escalation = () => ESCALATE_ROUNDS.filter(r=>G.round>=r).length;
+
+function mkInst(id){ return {u:nextUid(), id, up:[]}; }
+function buildSupply(deckId){
+  const D=DECKS[deckId], S={creature:[],spell:[],artifact:[]};
+  for(const s of ['creature','spell','artifact']) for(const id in D[s]) for(let i=0;i<D[s][id];i++) S[s].push(mkInst(id));
+  for(const s in S) shuffle(S[s]);
+  return S;
+}
+function returnToSupply(p, inst){
+  const c=HC[inst.id]; if(!c || c.junk || c.basic) return;
+  const st=p.supply[c.stack]; st.splice(ri(st.length+1),0,inst);
+}
+function addOwned(p, inst){ inst.b = ++p.buySeq; p.owned.push(inst); }
+function ownedSorted(p){ return p.owned.slice().sort((a,b)=>a.b-b.b); }
+function deckCounts(p){
+  const o={creature:0,spell:0,artifact:0}; for(const i of p.owned) o[HC[i.id].stack]++;
+  return {total:p.owned.length, ...o, mana:p.mana.length, supply:p.supply.creature.length+p.supply.spell.length+p.supply.artifact.length, exiled:p.exiled};
+}
+
+function dealSpaces(){
+  const bag=[]; for(const k of Object.keys(SPACE_MIX)) for(let i=0;i<SPACE_MIX[k];i++) bag.push(k);
+  shuffle(bag); const out={}; SPACE_IDS.forEach((id,i)=>out[id]=bag[i%bag.length]); return out;
+}
+function buildTavernStack(){ const a=[]; for(const k in TAVERN_SPECIALS) for(let i=0;i<TAVERN_SPECIALS[k];i++) a.push(k); return shuffle(a); }
+
+function newGame(count, facs, names, decks, diff, drawOrder){
+  G = {players:[], cur:0, round:0, cleared:[false,false,false], log:[], flags:{}, combat:null, modals:[], over:null, turn:null, uid:0,
+       diff: diff||'medium', drawOrder: drawOrder||'purchase', herald:0, lastEvent:null, stats:{fights:[]},
+       eventDeck:shuffle(ROUND_EVENTS.map(d=>d.id)), questDeck:shuffle(QUESTS.map(q=>q.id)), tavern:buildTavernStack(), spaces:dealSpaces()};
+  for(let i=0;i<count;i++){
+    const fac=facs[i], deckId=(decks&&decks[i])||DECK_IDS[i%4], solo=count===1;
+    const p={idx:i, name:(names&&names[i])||('Player '+(i+1)), fac, deckId, hp:START_HP+(solo?SOLO_HP:0), maxHp:START_HP+(solo?SOLO_HP:0), gold:START_GOLD,
+      mats:{iron:0,hide:0,rune:0,ash:0}, supply:buildSupply(deckId), owned:[], buySeq:0, mana:[], relics:FACTIONS[fac].relics.slice(), quests:[], loc:'cross',
+      lastUse:null, blessed:0, dead:false, kos:0, exiled:0, bought:0};
+    for(let k=0;k<START_MANA_CARDS;k++) p.mana.push('plain');
+    // starter kit: 2 creatures, 2 spells, 1 artifact (no strong/legendary cards)
+    for(const [s,n] of [['creature',2],['spell',2],['artifact',1]]){
+      let got=0, guard=0; while(got<n && guard++<40){ const inst=p.supply[s].shift(); if(!inst) break; const c=HC[inst.id];
+        if(c.strong||c.legend||c.type==='equipment'&&s==='artifact'&&false){ p.supply[s].push(inst); continue; } addOwned(p,inst); got++; }
+    }
+    G.players.push(p);
+  }
+  log(`A new game begins on ${DIFFS[G.diff].name}: ${G.players.map(p=>`${p.name} (${FACTIONS[p.fac].one}, ${DECKS[p.deckId].name} deck)`).join(', ')}. Defeat Malgrath within ${ROUND_LIMIT} rounds, or fight on with permanent death.`);
+  beginRound();
+  beginTurn();
+}
+
+function beginRound(){
+  G.round++; G.flags={};
+  log(`══ Round ${G.round}${G.round<=ROUND_LIMIT?' of '+ROUND_LIMIT:' (sudden death)'} ══`);
+  if(G.round===ROUND_LIMIT+1) log(`☠ Round ${ROUND_LIMIT} has passed. From now on a hero who falls is dead for good.`);
+  if(ESCALATE_ROUNDS.includes(G.round)) log(`⚠ Escalation ${escalation()}: every commander now has +${escalation()*10}% HP.`);
+  if(G.eventDeck.length===0) G.eventDeck=shuffle(ROUND_EVENTS.map(d=>d.id));
+  const eid=G.eventDeck.pop(); const d=ROUND_EVENTS.find(x=>x.id===eid); G.lastEvent=d.id;
+  log(`Event: ${d.name}. ${d.text}`); resolveEvent(d);
+  for(const p of G.players.filter(alive)) gainGold(p, INCOME+(NP()===1?SOLO_INCOME:0)+(G.flags.festival?1:0), 'round income');
+}
+function resolveEvent(d){
+  const live=G.players.filter(alive);
+  switch(d.id){
+    case 'raiders': G.flags.raiders=1; break;
+    case 'plague': G.flags.plague=1; break;
+    case 'dragon': live.forEach(p=>{ if(p.loc==='forge'||p.loc==='mine') boardDamage(p,4,'the dragon'); }); break;
+    case 'herald': G.herald+=5; break;
+    case 'storm': G.flags.storm=1; break;
+    case 'toll': live.forEach(p=>{ if(p.gold>=1){ p.gold--; log(`${p.name} pays the toll.`);} else boardDamage(p,3,'bandits'); }); break;
+    case 'merchant': G.flags.merchant=1; break;
+    case 'rally': live.forEach(p=>heal(p,4)); break;
+    case 'goldRush': G.flags.goldRush=1; break;
+    case 'festival': G.flags.festival=1; break;
+    case 'caravan': live.forEach(p=>p.mats.iron++); break;
+  }
+}
+function heal(p,n){ p.hp=Math.min(p.maxHp,p.hp+n); }
+function gainGold(p,n,why){ if(n<=0) return; p.gold+=n; log(`${p.name} gains ${n} gold${why?' ('+why+')':''}.`); }
+function gainMats(p,m){ const out=[]; for(const k in m){ if(!m[k]) continue; const n=Math.max(0,m[k]); p.mats[k]+=n; out.push(`${n} ${MATS[k].name}`);} if(out.length) log(`${p.name} gains ${out.join(', ')}.`); }
+function boardDamage(p,n,why){ p.hp-=n; log(`${p.name} takes ${n} damage from ${why}.`); if(p.hp<=0) heroFalls(p); }
+function endGame(won,msg){ if(G.over) return; G.over={won,msg,round:G.round}; G.combat=null; G.modals=[]; log(msg); }
+function checkAllDead(){ if(!G.over && G.players.every(p=>p.dead)) endGame(false,'Every hero has fallen for good. Malgrath rules Thornhold.'); }
+function heroFalls(p){
+  if(suddenDeath()){ p.dead=true; p.hp=0; log(`☠ ${p.name} has fallen for good.`); checkAllDead(); return; }
+  p.loc='cross'; p.hp=Math.min(10,p.maxHp); const lost=Math.ceil(p.gold/2); p.gold-=lost; p.kos++; p.lastUse=null;
+  log(`${p.name} is knocked out! Respawns at the Crossroads with 10 HP and loses ${lost} gold.`);
+}
+
+function autoAdvance(){ if(G&&!G.over&&!G.combat&&!G.modals.length&&P().dead) endTurn(); }
+function beginTurn(){ G.turn={roll:0, moved:false, acted:false, mud:false, flex:0}; log(`— ${P().name}'s turn —`); }
+function endTurn(){
+  if(G.over||G.combat||G.modals.length) return;
+  for(let k=0;k<=NP();k++){ G.cur++; if(G.cur>=NP()){ G.cur=0; beginRound(); if(G.over) return; } if(alive(P())) break; }
+  checkAllDead(); if(G.over) return; beginTurn();
+}
+
+// ===== Movement (one way) =====
+function moveSteps(){ return Math.max(1,(G.turn.roll||0)-(G.flags.storm?1:0)); }
+function walkFrom(start,n){ // destinations at exactly n steps forward, plus locations passed on the way (stop early)
+  const res={}; const walk=(u,d,path)=>{ if(d===n){ if(!res[u]) res[u]=path.slice(); return; }
+    if(d>0 && LOCS[u].kind!=='space' && !res[u]) res[u]=path.slice();
+    for(const v of (NEXT[u]||[])){ path.push(v); walk(v,d+1,path); path.pop(); } };
+  walk(start,0,[]); return res;
+}
+function reachable(p){
+  if(!G.turn.roll||G.turn.moved) return {dist:{},paths:{}};
+  const base=moveSteps(), flex=p.fac==='elf'?1:0, dist={}, paths={};
+  for(let n=base; n<=base+flex; n++){ const r=walkFrom(p.loc,n); for(const k in r) if(dist[k]===undefined){ dist[k]=r[k].length; paths[k]=r[k]; } }
+  delete dist[p.loc]; return {dist,paths};
+}
+function rollMove(){ const p=P(); if(G.turn.roll||G.turn.moved) return; G.turn.roll=1+ri(6);
+  log(`${p.name} rolls a ${G.turn.roll}: move ${moveSteps()}${p.fac==='elf'?' (or 1 more)':''} space(s) forward, or stop early on a location.`); }
+function stayPut(){ const p=P(); if(G.turn.moved) return; G.turn.moved=true; G.turn.roll=G.turn.roll||0; log(`${p.name} stays at ${LOCS[p.loc].name||'the road'}.`); }
+function moveTo(v){
+  const p=P(); if(!G.turn.roll||G.turn.moved) return false;
+  const {dist,paths}=reachable(p); if(dist[v]===undefined) return false;
+  const path=paths[v]; p.loc=v; G.turn.moved=true; const L=LOCS[v];
+  log(`${p.name} travels ${dist[v]} space(s) to ${L.kind==='space'?'a road space':L.name}.`);
+  if(path.includes('cross')) gainGold(p,1,'passing the Crossroads');
+  if(L.kind==='space') landOnSpace(p,v);
+  return true;
+}
+function landOnSpace(p,id){
+  const t=G.spaces[id]; if(!t||t==='plain') return;
+  const good = t==='good' || (t==='event' && rnd()<0.5);
+  const ev = good?pick(GOOD_EVENTS):pick(BAD_EVENTS);
+  let result='';
+  switch(ev.id){
+    case 'purse': gainGold(p,3,'lost purse'); result='+3 gold'; break;
+    case 'spring': { const h=Math.min(5,p.maxHp-p.hp); heal(p,5); result=`Healed ${h} HP`; break; }
+    case 'gift': { const st=pick(['creature','spell','artifact']); const inst=p.supply[st].shift(); if(inst){ addOwned(p,inst); result=`You gain ${HC[inst.id].name} (${st} stack).`; } else result='Your Supply stack was empty.'; break; }
+    case 'cache': { const m=pick(Object.keys(MATS)); p.mats[m]++; result=`+1 ${MATS[m].name}`; break; }
+    case 'tailwind': gainGold(p,1,'tailwind'); heal(p,2); result='+1 gold, healed 2'; break;
+    case 'ambush': boardDamage(p,3,'a roadside ambush'); result='-3 HP'; break;
+    case 'pickpocket': { const l=Math.min(2,p.gold); p.gold-=l; result=`-${l} gold`; break; }
+    case 'tornPack': { if(p.owned.length){ const i=ri(p.owned.length); const inst=p.owned.splice(i,1)[0]; returnToSupply(p,inst); result=`${HC[inst.id].name} went back into your Supply Deck.`; } else result='You had nothing to lose.'; break; }
+    case 'thorns': boardDamage(p,2,'thorns'); result='-2 HP'; break;
+    case 'mud': G.turn.mud=true; result='No location action or Call to Fight this turn.'; break;
+  }
+  log(`${good?'✨':'⚠️'} ${ev.name}: ${result}`);
+  G.modals.push({type:'event', pi:p.idx, good, ev, result, space:t});
+}
+
+// ===== Location actions =====
+function usedLastRound(p){ return p.lastUse && p.lastUse.loc===p.loc && p.lastUse.round===G.round-1; }
+function markUse(p){ p.lastUse={loc:p.loc, round:G.round}; G.turn.acted=true; }
+function mineGold(p){ return G.flags.raiders?0:4+(p.fac==='dwarf'?2:0)+(G.flags.goldRush?2:0); }
+function abbeyCost(p){ return p.fac==='warlock'?1:2; }
+function getActions(p){
+  const A=[]; const blocked=G.turn.acted||G.turn.mud||!G.turn.moved, rep=usedLastRound(p);
+  const add=(a,label,dis,v,why)=>A.push({a,label,dis:!!dis||blocked||rep,v,why:rep?'You used this location last round':why});
+  switch(p.loc){
+    case 'cross': add('campfire','Campfire: heal 4',p.hp>=p.maxHp,null,'Already at full HP'); break;
+    case 'tavern': add('tavern','Visit the Tavern (mana cards and quests)'); break;
+    case 'shrine': add('pray','Pray: start your next fight with +1 mana',p.blessed,null,'Already blessed'); break;
+    case 'forest': if(p.fac==='druid') add('forage','Forage (Druid): heal 5 and gain 2 gold',false,'both'); else { add('forage','Forage: heal 5',false,'heal'); add('forage','Forage: gain 2 gold',false,'gold'); } break;
+    case 'beastden': add('shop','Beast Den: creature shop',!p.supply.creature.length,'creature','Your Creature stack is empty'); break;
+    case 'lodge': add('shop',"Hunter's Lodge: creature shop",!p.supply.creature.length,'creature','Your Creature stack is empty'); break;
+    case 'tower': add('shop','Mage Tower: spell shop',!p.supply.spell.length,'spell','Your Spell stack is empty'); break;
+    case 'forge': add('forge','Mountain Forge: artifacts and upgrades'); break;
+    case 'abbey': add('abbey',`Pay ${abbeyCost(p)} gold: heal to full`,p.gold<abbeyCost(p)||p.hp>=p.maxHp,null,'Not needed or not enough gold'); break;
+    case 'mine': add('mine',G.flags.raiders?'Mine (raiders hold it this round)':`Mine for ${mineGold(p)} gold`,G.flags.raiders); break;
+    case 'ruins': add('ruins',`Forbidden cache: pay ${ruinsHp(p)} HP, take 1 of ${ruinsCount(p)} cards`,p.hp<=ruinsHp(p),null,'Not enough HP'); break;
+  }
+  return A;
+}
+function errandsHere(p){ return p.quests.map(id=>QUESTS.find(q=>q.id===id)).filter(q=>q.type==='visit'&&q.loc===p.loc); }
+function ruinsHp(p){ return p.fac==='warlock'?1:3; }
+function ruinsCount(p){ return p.fac==='warlock'?5:3; }
+function doAction(a,v){
+  const p=P(); const act=getActions(p).find(x=>x.a===a&&(v===undefined||v===null||x.v==v)); if(!act||act.dis) return false;
+  switch(a){
+    case 'campfire': markUse(p); heal(p,4); log(`${p.name} rests by the campfire and heals 4.`); break;
+    case 'pray': markUse(p); p.blessed=1; log(`${p.name} prays at the Shrine: +1 mana at the start of the next fight.`); break;
+    case 'forage': markUse(p); if(v==='heal'||v==='both'){ heal(p,5); log(`${p.name} forages and heals 5.`);} if(v==='gold'||v==='both') gainGold(p,2,'foraging'); break;
+    case 'abbey': markUse(p); p.gold-=abbeyCost(p); p.hp=p.maxHp; log(`${p.name} is healed to full at the Abbey.`); break;
+    case 'mine': { markUse(p); gainGold(p,mineGold(p),'mining'); const roll=1+ri(6); if(roll===1) boardDamage(p,3,'a cave-in (rolled 1)'); break; }
+    case 'shop': markUse(p); openShop(p,v); break;
+    case 'forge': markUse(p); openShop(p,'artifact',true); break;
+    case 'tavern': markUse(p); openTavern(p); break;
+    case 'ruins': markUse(p); p.hp-=ruinsHp(p); log(`${p.name} pays ${ruinsHp(p)} HP to open the forbidden cache.`); G.modals.push({type:'ruins',pi:p.idx,stack:null,cards:[]}); break;
+  }
+  return true;
+}
+function doErrand(qid){
+  const p=P(); const q=errandsHere(p).find(x=>x.id===qid); if(!q) return false;
+  p.quests=p.quests.filter(x=>x!==qid); G.questDeck.unshift(qid);
+  log(`${p.name} completes "${q.name}".`); gainGold(p,q.reward.gold,'errand'); gainMats(p,q.reward.mats); return true;
+}
+
+// ===== Shops: reveal 5 from the matching stack, buy up to 3, the rest are exiled =====
+function shopPrice(p,inst,stack){
+  const c=HC[inst.id]; let g=c.gold+(G.flags.plague?1:0);
+  if(stack==='creature'&&p.fac==='druid') g--; if(stack==='spell'&&p.fac==='elf') g--; if(stack==='artifact'&&p.fac==='dwarf') g--;
+  return Math.max(1,g);
+}
+function revealInto(m,p){
+  const n=SHOP_REVEAL+(G.flags.merchant?1:0);
+  for(let i=0;i<n && p.supply[m.stack].length;i++) m.cards.push(p.supply[m.stack].shift());
+  m.revealed=true; log(`${p.name} reveals ${m.cards.length} card(s) from their ${m.stack} stack.`);
+}
+function openShop(p,stack,forge){
+  const m={type:'shop',pi:p.idx,stack,cards:[],bought:0,max:SHOP_BUY,forge:!!forge,tab:'shop',revealed:false};
+  G.modals.push(m);
+  if(!forge) revealInto(m,p); // the Forge reveals only if you ask, so a visit just for upgrades exiles nothing
+}
+function forgeReveal(){ const m=G.modals[0]; if(!m||m.type!=='shop'||!m.forge||m.revealed) return false; revealInto(m,G.players[m.pi]); return true; }
+function shopBuy(i){
+  const m=G.modals[0]; if(!m||m.type!=='shop') return false; const p=G.players[m.pi], inst=m.cards[i]; if(!inst) return false;
+  if(m.bought>=m.max) return false; const g=shopPrice(p,inst,m.stack); if(p.gold<g) return false;
+  p.gold-=g; m.cards.splice(i,1); addOwned(p,inst); m.bought++; p.bought++;
+  log(`${p.name} buys ${HC[inst.id].name}${inst.up.length?' ('+inst.up.map(u=>UPGRADES[u].name).join(', ')+')':''} for ${g} gold.`); return true;
+}
+function closeShop(){
+  const m=G.modals[0]; if(!m||(m.type!=='shop'&&m.type!=='ruins')) return; const p=G.players[m.pi];
+  if(m.cards.length){ p.exiled+=m.cards.length; log(`${m.cards.length} unbought card(s) are exiled for good: ${m.cards.map(c=>HC[c.id].name).join(', ')}.`); }
+  m.cards=[]; G.modals.shift();
+}
+function ruinsPickStack(stack){
+  const m=G.modals[0]; if(!m||m.type!=='ruins'||m.stack) return; const p=G.players[m.pi]; m.stack=stack;
+  for(let i=0;i<ruinsCount(p)&&p.supply[stack].length;i++) m.cards.push(p.supply[stack].shift());
+}
+function ruinsTake(i){
+  const m=G.modals[0]; if(!m||m.type!=='ruins'||m.took) return; const p=G.players[m.pi]; const inst=m.cards[i]; if(!inst) return;
+  m.cards.splice(i,1); addOwned(p,inst); m.took=1; log(`${p.name} takes ${HC[inst.id].name} from the forbidden cache.`);
+}
+// Forge upgrades
+function upgradeCost(p,uid){ const c=Object.assign({},UPGRADES[uid].cost); if(p.fac==='dwarf'){ const k=Object.keys(c).sort((a,b)=>c[b]-c[a])[0]; if(c[k]>1) c[k]--; } return c; }
+function canAfford(p,cost){ return Object.keys(cost).every(k=>p.mats[k]>=cost[k]); }
+function upgradeTargetType(inst){ const c=HC[inst.id]; if(c.type==='creature') return 'creature'; if(c.type==='equipment') return 'equipment'; if(c.type==='artifact') return 'artifact'; return 'spell'; }
+function upgradeOk(p,inst,uid){
+  const U=UPGRADES[uid], c=HC[inst.id]; if(upgradeTargetType(inst)!==U.for) return 'Wrong card type';
+  if(inst.up.length>=MAX_UPGRADES) return 'Already has '+MAX_UPGRADES+' upgrades';
+  if(U.once && inst.up.includes(uid)) return 'Already has it';
+  if(uid==='keen' && c.c && c.c.kw && c.c.kw.first) return 'Already has First Strike';
+  if(uid==='quickened' && c.c && c.c.kw && c.c.kw.haste) return 'Already has Haste';
+  if(uid==='ashBlessed' && c.cost<=0) return 'Already free';
+  if(uid==='runed' && !(c.fx&&(c.fx.dmg||c.fx.heal||c.fx.block||c.fx.aoe))) return 'No number to improve';
+  if(!canAfford(p,upgradeCost(p,uid))) return 'Not enough materials';
+  return '';
+}
+function forgeUpgrade(u,uid){
+  const m=G.modals[0]; if(!m||m.type!=='shop'||!m.forge) return false; const p=G.players[m.pi];
+  const inst=p.owned.find(x=>x.u===u); if(!inst||upgradeOk(p,inst,uid)) return false;
+  const cost=upgradeCost(p,uid); for(const k in cost) p.mats[k]-=cost[k]; inst.up.push(uid);
+  log(`${p.name} upgrades ${HC[inst.id].name}: ${UPGRADES[uid].name}.`); return true;
+}
+function forgeMelt(u){
+  const m=G.modals[0]; if(!m||m.type!=='shop'||!m.forge) return false; const p=G.players[m.pi];
+  const i=p.owned.findIndex(x=>x.u===u&&x.id==='mithril'); if(i<0) return false;
+  const inst=p.owned.splice(i,1)[0]; returnToSupply(p,inst); p.mats.iron++; log(`${p.name} melts a Mithril Ingot into 1 Iron.`); return true;
+}
+// Tavern
+function openTavern(p){
+  const specials=[]; for(let i=0;i<2&&G.tavern.length;i++) specials.push(G.tavern.shift());
+  const quests=[]; if(p.quests.length<2){ for(let i=0;i<2;i++){ if(!G.questDeck.length) G.questDeck=shuffle(QUESTS.map(q=>q.id).filter(id=>!G.players.some(pp=>pp.quests.includes(id)))); const q=G.questDeck.pop(); if(q) quests.push(q);} }
+  G.modals.push({type:'tavern',pi:p.idx,specials,quests,bought:0,max:SHOP_BUY,took:false});
+}
+function manaPrice(p,id){ return MANA[id].gold+(G.flags.plague?1:0); }
+function tavernBuy(which){ // 'plain' or special index
+  const m=G.modals[0]; if(!m||m.type!=='tavern'||m.bought>=m.max) return false; const p=G.players[m.pi];
+  let id; if(which==='plain') id='plain'; else { id=m.specials[+which]; if(!id) return false; }
+  const g=manaPrice(p,id); if(p.gold<g) return false; p.gold-=g; p.mana.push(id); m.bought++;
+  if(which!=='plain') m.specials.splice(+which,1);
+  log(`${p.name} buys ${MANA[id].name} for ${g} gold.`); return true;
+}
+function tavernQuest(i){ const m=G.modals[0]; if(!m||m.type!=='tavern'||m.took) return; const p=G.players[m.pi]; const q=m.quests[i]; if(!q||p.quests.length>=2) return;
+  p.quests.push(q); m.quests.splice(i,1); m.took=true; log(`${p.name} takes the quest "${QUESTS.find(x=>x.id===q).name}".`); }
+function closeTavern(){ const m=G.modals[0]; if(!m||m.type!=='tavern') return; G.tavern.push(...m.specials); G.questDeck.unshift(...m.quests); G.modals.shift(); }
+function closeModal(){ const m=G.modals[0]; if(!m) return; if(m.type==='shop'||m.type==='ruins') closeShop(); else if(m.type==='tavern') closeTavern(); else G.modals.shift(); }
+
+// ===== Call to Fight (from anywhere, no die roll) =====
+function warlordUnlocked(){ return G.cleared.filter(x=>x).length>=WARLORD_UNLOCK; }
+function callTargets(p){
+  const T=[]; const i=G.cleared.indexOf(false);
+  if(i>=0) T.push({key:'stop:'+i, label:`⚔️ Stop ${i+1}: ${COMMANDERS[STOPS[i]].name}`});
+  for(const qid of p.quests){ const q=QUESTS.find(x=>x.id===qid); if(q.type==='fight') T.push({key:'quest:'+qid, label:`📜 Quest: ${q.name} (${COMMANDERS[q.boss].name})`}); }
+  T.push({key:'boss', label:'👑 Malgrath the Iron Warlord', dis:!warlordUnlocked(), why:`Clear ${WARLORD_UNLOCK} stops to unlock`});
+  return T;
+}
+function callLabel(key){ if(key==='boss') return COMMANDERS.warlord.name; const [k,v]=key.split(':'); if(k==='stop') return `Stop ${+v+1}: ${COMMANDERS[STOPS[+v]].name}`; return 'Quest: '+QUESTS.find(q=>q.id===v).name; }
+function canCall(){ return G && !G.over && !G.combat && !G.modals.length && G.turn && !G.turn.acted && !G.turn.mud && alive(P()) && P().hp>0; }
+function callFight(key){
+  if(!canCall()) return false; const p=P(); const t=callTargets(p).find(x=>x.key===key); if(!t||t.dis) return false;
+  const others=G.players.filter(q=>q!==p&&alive(q)&&q.hp>0);
+  G.modals.push({type:'call',pi:p.idx,key,resp:{},stage:others.length?'ask':'final',pass:1,ask:others.map(q=>q.idx),accepted:[],declined:[]});
+  log(`📯 ${p.name} calls to fight ${callLabel(key)}!`); return true;
+}
+function callRespond(pi,yes){
+  const m=G.modals[0]; if(!m||m.type!=='call'||!m.ask.includes(pi)||m.resp[pi]!==undefined) return;
+  m.resp[pi]=yes; const q=G.players[pi]; log(m.stage==='ask'?`${q.name} ${yes?'accepts':'declines'} the call.`:`${q.name} ${yes?'stays in':'backs out'}.`);
+  if(m.ask.some(i=>m.resp[i]===undefined)) return;
+  if(m.stage==='ask'){ m.accepted=m.ask.filter(i=>m.resp[i]); m.declined=m.ask.filter(i=>!m.resp[i]);
+    if(m.declined.length&&m.accepted.length){ m.stage='recon'; m.pass++; m.ask=m.accepted.slice(); m.resp={}; log('Someone declined, so everyone who accepted gets a chance to back out.'); } else m.stage='final'; }
+  else if(m.stage==='recon'){ const out=m.ask.filter(i=>!m.resp[i]); m.accepted=m.ask.filter(i=>m.resp[i]); m.declined=m.declined.concat(out);
+    if(out.length&&m.accepted.length){ m.pass++; m.ask=m.accepted.slice(); m.resp={}; log('Someone backed out, so the rest get another chance.'); } else m.stage='final'; }
+}
+function callGo(fight){
+  const m=G.modals[0]; if(!m||m.type!=='call'||m.stage!=='final') return; G.modals.shift();
+  const caller=G.players[m.pi]; if(!fight){ log(`${caller.name} backs out of the fight.`); return; }
+  const fighters=[caller].concat(m.accepted.map(i=>G.players[i])).filter(q=>alive(q)&&q.hp>0);
+  G.turn.acted=true;
+  const [k,v]=m.key.split(':');
+  if(k==='stop') startCombat({kind:'stop',stop:+v,cid:STOPS[+v]},fighters);
+  else if(k==='quest') startCombat({kind:'quest',qid:v,cid:QUESTS.find(q=>q.id===v).boss},fighters);
+  else startCombat({kind:'boss',cid:'warlord'},fighters);
+}
+// ===== Thornhold v3 — combat engine =====
+// Round = every fighting hero takes a turn (untap, upkeep, ATTACK with creatures, then play mana and cards), then the commander takes his turn
+// (untap, upkeep, ATTACK, heroes block, then he plays mana and cards). Attacking taps; new creatures enter tapped; blockers hit back.
+const HAND_MAX = 7;
+const SCALE = {1:{mana:1,draw:1,hand:3,start:0}, 2:{mana:1,draw:1,hand:4,start:1}, 3:{mana:1,draw:2,hand:4,start:1}, 4:{mana:2,draw:2,hand:5,start:2}};
+const C_ = () => G.combat;
+const FP = F => G.players[F.pi];
+const liveF = () => G.combat.fighters.filter(F=>!F.out);
+const activeF = () => { const C=G.combat; if(!C||C.phase!=='hero') return null; return C.fighters[C.active]; };
+const ups = (inst,u) => inst ? inst.up.filter(x=>x===u).length : 0;
+
+function startCombat(spec, players){
+  const N=NP(), d=DIFF(), def=COMMANDERS[spec.cid], sc=SCALE[Math.min(4,N)];
+  const isQuest=spec.kind==='quest';
+  let hp=Math.round((def.hp+def.perHero*(N-1))*d.hp*(PARTY_HP[N]||1)*(1+0.1*escalation())); if(!isQuest) hp+=G.herald;
+  const relics=isQuest?def.relics.slice():def.relics.slice(0,d.relics);
+  const deck=[]; for(const id in def.deck) for(let i=0;i<def.deck[id];i++) deck.push(id); shuffle(deck);
+  const B={cid:spec.cid, name:def.name, icon:def.icon, hp, maxHp:hp, shield:0, atk:Math.max(1,def.atk+(N-1)+d.atk), manaCap:def.mana+(N-1)*2,
+    manaPlayed:d.mana+sc.start, mana:0, deck, hand:[], used:[], field:[], arts:[], relics, flags:{}, dead:[], exiledN:0, curse:0, temp:0};
+  const C={...spec, fighters:[], boss:B, round:1, phase:'hero', active:0, step:'attack', pending:null, log:[], uidc:0, smoke:false, sel:null};
+  G.combat=C;
+  if(relics.includes('dragonscale')) B.shield=3; if(relics.includes('ironWill')) B.shield=4; if(relics.includes('scaleLite')) B.shield=2;
+  for(let i=0;i<sc.hand;i++) bossDraw();
+  for(const p of players){
+    const draw = G.drawOrder==='random' ? shuffle(p.owned.slice()) : ownedSorted(p);
+    const F={pi:p.idx, hand:[], draw, used:[], field:[], arts:[], dead:[], bench:[], manaHand:p.mana.map(id=>id), manaIn:[], mana:0, block:0,
+      target:null, ally:null, strikeUsed:false, flags:{}, out:false, retreated:false, startBonus:(p.blessed?1:0)+(N===1?SOLO_MANA:0), spells:0, atkSel:{}};
+    p.owned=[]; C.fighters.push(F);
+    if(hasRelic(p,'hawk')) summon(F,TOKENS.hawk,{token:true});
+    if(hasRelic(p,'impFamiliar')) summon(F,TOKENS.impTok,{token:true});
+    if(hasRelic(p,'golemCore')) summon(F,TOKENS.golem,{token:true});
+  }
+  log(`⚔️ Battle: ${players.map(p=>p.name).join(', ')} vs ${B.icon} ${B.name} (${hp} HP${B.shield?', Shield '+B.shield:''}, ATK ${B.atk}). Relics: ${relics.map(r=>ERELICS[r].name).join(', ')}.`);
+  if(relics.includes('ambusherHorn')){ for(let i=0;i<2;i++) summonBoss(EC.cutthroat,{untapped:true,noHasteAttack:true}); log('Ambush! Two Bandit Cutthroats leap out, ready to attack.'); }
+  startHeroTurn(0);
+}
+
+// ---------- creature helpers ----------
+function mkCreature(side, owner, def, o){
+  const c=def.c||def; const inst=o.inst||null;
+  const cr={uid:'c'+(++G.combat.uidc), side, owner, inst, id:o.id||null, name:o.name||def.name, baseAtk:c.atk, baseHp:c.hp, counters:0, dmg:0,
+    shield:(c.shield||0), armor:(c.armor||0), kw:Object.assign({},c.kw||{}), tapped:!o.untapped, frozen:false, temp:{atk:0,hp:0}, eq:[], token:!!o.token,
+    def:c, tags:(def.tags||c.tags||[]).slice(), curse:0, atkBonus:0, mist:false, sfUsed:false, exileAfter:false};
+  if(inst){ cr.shield+=ups(inst,'hardened'); cr.baseHp+=2*ups(inst,'thickHide'); if(ups(inst,'keen')) cr.kw.first=1; if(ups(inst,'quickened')) cr.kw.haste=1; }
+  if(cr.kw.haste) cr.tapped=false;
+  return cr;
+}
+function ownerF(cr){ return cr.side==='hero' ? G.combat.fighters.find(F=>F.pi===cr.owner) : null; }
+function allHeroCreatures(){ return G.combat?G.combat.fighters.flatMap(F=>F.out?[]:F.field):[]; }
+function has(cr,k){
+  if(cr.kw[k]) return true;
+  for(const e of cr.eq){ const q=HC[e.id].eq; if(q.kw&&q.kw[k]) return true; }
+  if(k==='haste'&&cr.side==='boss'&&G.combat.boss.arts.includes('warDrums')) return true;
+  return false;
+}
+function tryWard(cr, spellName){
+  if(!cr || !has(cr,'ward') || cr.wardUsed) return false;
+  cr.wardUsed = true;
+  log(`🛡 Ward: ${cr.name} cancels ${spellName}.`);
+  return true;
+}
+function effAtk(cr){
+  const C=G.combat; let a=cr.baseAtk+cr.counters+cr.temp.atk+cr.atkBonus-cr.curse;
+  if(cr.side==='hero'){
+    const F=ownerF(cr), p=F?FP(F):null;
+    for(const e of cr.eq){ const q=HC[e.id].eq; a+=(q.atk||0)+ups(e,'honed')+(p&&hasRelic(p,'anvil')?1:0); if(q.counterBonus&&cr.counters>0) a+=1; }
+    if(cr.def.eqAtk) a+=cr.eq.length;
+    if(F){ for(const o of F.field){ if(o===cr) continue; if(o.def.lord) a+=o.def.lord; if(o.def.flyLord&&has(cr,'fly')) a+=1; if(o.def.shieldLord&&cr.shield>0) a+=1; }
+      for(const art of F.arts){ const A=HC[art.id].art; if(A&&A.lord) a+=A.lord+ups(art,'masterwork'); } }
+  } else {
+    const B=C.boss; if(B.relics.includes('crown')) a+=1;
+    if(B.relics.includes('packHunt')&&B.field.length>=2) a+=1;
+    if(cr.tags.includes('whelp')&&B.arts.includes('moltenHoard')) a+=1;
+  }
+  return Math.max(0,a);
+}
+function effHp(cr){
+  let h=cr.baseHp+cr.counters+cr.temp.hp;
+  if(cr.side==='hero'){ for(const e of cr.eq) h+=HC[e.id].eq.hp||0; const F=ownerF(cr); if(F) for(const o of F.field) if(o!==cr&&o.def.flyLord&&has(cr,'fly')) h+=1;
+    if(G.combat.boss.relics.includes('witheringAura')) h-=1; }
+  return Math.max(1,h);
+}
+const hpLeft = cr => effHp(cr)-cr.dmg;
+const canBlock = (b,a) => !b.tapped && !has(b,'noblock') && (!has(a,'fly') || has(b,'fly') || has(b,'reach'));
+function crValue(cr){ return effAtk(cr)*2+hpLeft(cr)+cr.shield+(cr.token?-2:0)+(cr.inst?HC[cr.inst.id].cost:0); }
+
+function summon(F, def, o){
+  o=o||{}; const p=FP(F);
+  const cr=mkCreature('hero',F.pi,def,o); if(hasRelic(p,'helm')) cr.shield+=1;
+  F.field.push(cr);
+  const c=def.c||def;
+  log(`${p.name} ${o.token?'creates':'summons'} ${cr.name} (${effAtk(cr)}/${effHp(cr)}${cr.shield?', Shield '+cr.shield:''})${cr.tapped?', tapped':''}.`);
+  if(o.token) for(const art of F.arts) if(HC[art.id].art&&HC[art.id].art.tokenCounter) cr.counters+=1;
+  const e=c.etb; if(e && !o.noEtb){
+    if(e.counters==='others') F.field.forEach(x=>{ if(x!==cr) x.counters++; });
+    if(e.tokens) for(let i=0;i<e.tokens[0];i++) summon(F,TOKENS[e.tokens[1]],{token:true});
+    if(e.draw) drawCards(F,e.draw);
+    if(e.dmg) damageTarget(F,getTarget(F),e.dmg,{});
+    if(e.selfDmg) loseHp(F,e.selfDmg,cr.name);
+    if(e.freeEquip) F.flags.freeEquip=1;
+    if(e.scry) scry(F,e.scry);
+  }
+  if(cr.kw.haste && !o.noHasteAttack && !G.combat.over){ heroAttack(F,[cr],true); }
+  return cr;
+}
+function summonBoss(def,o){
+  o=o||{}; const C=G.combat, B=C.boss; const cr=mkCreature('boss',null,def,Object.assign({},o,{untapped:o.untapped})); B.field.push(cr);
+  if(has(cr,'haste')) cr.tapped=false;
+  log(`${B.name} ${o.token?'creates':'summons'} ${cr.name} (${effAtk(cr)}/${effHp(cr)})${cr.tapped?', tapped':''}.`);
+  const c=def.c||def; if(c.etb&&c.etb.hit) bossHit(c.etb.hit,'any',cr.name);
+  return cr;
+}
+function scry(F,n){ const top=F.draw.slice(0,n); if(top.length<2) return; const cheap=top.reduce((a,b)=>HC[a.id].cost<=HC[b.id].cost?a:b); F.draw.splice(F.draw.indexOf(cheap),1); F.draw.push(cheap); }
+
+// ---------- damage ----------
+function damageCreature(cr,n,o){
+  o=o||{}; if(n<=0||!crAlive(cr)) return 0;
+  if(!o.pierce){ n-=cr.armor; for(const e of cr.eq) n-=HC[e.id].eq.armor||0; if(n<=0) return 0;
+    if(cr.shield>0){ n-=cr.shield; cr.shield--; if(n<=0){ return 0; } } }
+  cr.dmg+=n;
+  if(o.dt || cr.dmg>=effHp(cr)) killCreature(cr,o.src);
+  return n;
+}
+function crAlive(cr){ const C=G.combat; return cr.side==='boss' ? C.boss.field.includes(cr) : C.fighters.some(F=>F.field.includes(cr)); }
+function damageBoss(n,o){
+  o=o||{}; const C=G.combat, B=C.boss; if(n<=0||C.over) return 0;
+  if(!o.pierce && B.shield>0){ n-=B.shield; B.shield--; if(n<=0) return 0; }
+  B.hp-=n; if(o.src) log(`${o.src} hits ${B.name} for ${n}.`);
+  if(B.relics.includes('searingBreath')&&!B.flags.breath&&B.hp>0&&B.hp<B.maxHp/2){ B.flags.breath=1; log(`🔥 Searing Breath! ${B.name} scorches every hero creature for 3.`); allHeroCreatures().forEach(c=>damageCreature(c,3,{})); }
+  checkBossDead(); return n;
+}
+function checkBossDead(){
+  const C=G.combat, B=C.boss; if(C.over||B.hp>0) return;
+  if(B.relics.includes('phylactery')&&!B.flags.phyl&&B.exiledN<2){ B.flags.phyl=1; B.hp=10; log(`💀 The Phylactery glows: ${B.name} rises again with 10 HP! (Exile 2 of his creatures to crack it.)`); return; }
+  endCombat(true);
+}
+function damageHero(F,n,src){
+  if(n<=0||F.out) return 0; const p=FP(F); const b=Math.min(F.block,n); F.block-=b; n-=b;
+  if(n>0){ p.hp-=n; log(`${src||'An attack'} hits ${p.name} for ${n}${b?` (${b} blocked)`:''}.`); if(p.hp<=0) heroDown(F); }
+  else if(b) log(`${p.name} blocks ${b} from ${src||'an attack'}.`);
+  return n;
+}
+function loseHp(F,n,why){ const p=FP(F); p.hp-=n; if(p.hp<=0) heroDown(F); }
+function healHero(F,n){ const p=FP(F); p.hp=Math.min(p.maxHp,p.hp+n); }
+function heroDown(F){
+  const p=FP(F), C=G.combat; if(F.out||C.over) return;
+  if(hasRelic(p,'shadowVeil')&&!F.flags.veil){ F.flags.veil=1; p.hp=1; log(`🌑 Shadow Veil: ${p.name} clings on at 1 HP.`); return; }
+  const ph=F.arts.findIndex(a=>a.id==='phylactery');
+  if(ph>=0&&F.field.length&&!F.flags.phyl){ F.flags.phyl=1; const v=F.field.slice().sort((a,b)=>crValue(a)-crValue(b))[0]; log(`Soulstone Phylactery: ${p.name} sacrifices ${v.name} and returns to 5 HP.`); killCreature(v,null); p.hp=5; return; }
+  F.out=true; p.hp=0; F.bench=F.field; F.field=[]; log(`💀 ${p.name} falls in battle!`);
+  if(liveF().length===0) endCombat(false);
+}
+function getTarget(F){
+  const B=G.combat.boss; const taunts=B.field.filter(c=>has(c,'taunt')&&!c.tapped);
+  let t=F.target; if(t&&t!=='boss'&&!B.field.some(c=>c.uid===t)) t=null;
+  if(taunts.length){ if(!t||t==='boss'||!taunts.some(c=>c.uid===t)) t=taunts[0].uid; }
+  if(!t) t='boss'; return t;
+}
+function damageTarget(F,t,n,o){
+  const B=G.combat.boss; if(t==='boss') return damageBoss(n,Object.assign({},o,{src:o.srcName}));
+  const cr=B.field.find(c=>c.uid===t); if(!cr) return damageBoss(n,o); return damageCreature(cr,n,o);
+}
+function getAlly(F,pref){
+  let cr=F.field.find(c=>c.uid===F.ally); if(cr) return cr; if(!F.field.length) return null;
+  const s=F.field.slice(); if(pref==='weak') s.sort((a,b)=>crValue(a)-crValue(b)); else if(pref==='sturdy') s.sort((a,b)=>(hpLeft(b)+b.shield)-(hpLeft(a)+a.shield)); else s.sort((a,b)=>effAtk(b)-effAtk(a)||hpLeft(b)-hpLeft(a));
+  return s[0];
+}
+
+function killCreature(cr,src){
+  const C=G.combat; if(!crAlive(cr)) return;
+  if(cr.side==='hero'){
+    const F=ownerF(cr), p=FP(F); F.field.splice(F.field.indexOf(cr),1); log(`☠ ${cr.name} (${p.name}) dies.`);
+    for(const e of cr.eq) F.used.push(e); cr.eq=[];
+    let back=false;
+    if(cr.inst && hasRelic(p,'verdantHeart') && !F.flags.verdant){ F.flags.verdant=1; back=true; const n=summon(F,HC[cr.inst.id],{inst:cr.inst,noEtb:true,noHasteAttack:true}); n.tapped=true; n.counters=1; log('Verdant Heart returns it to play.'); }
+    else if(cr.inst && ups(cr.inst,'soulforged') && !cr.inst.sf){ cr.inst.sf=1; back=true; F.hand.push(cr.inst); log(`Soulforged: ${cr.name} returns to ${p.name}'s hand.`); }
+    else if(cr.inst){ F.dead.push(cr.inst); }
+    const d=cr.def.death; if(d){ if(d.healAll) liveF().forEach(f=>healHero(f,d.healAll)); if(d.heal) healHero(F,d.heal);
+      if(d.token) summon(F,TOKENS[d.token],{token:true}); if(d.dmgBoss) damageBoss(d.dmgBoss,{src:cr.name}); if(d.shieldAlly){ const a=getAlly(F,'sturdy'); if(a){ a.shield++; } } }
+    for(const art of F.arts){ const A=HC[art.id].art; if(A&&A.altar&&(F.flags.altar||0)<A.altar+ups(art,'masterwork')){ F.flags.altar=(F.flags.altar||0)+1; F.mana++; log('Bone Altar: +1 mana.'); } }
+  } else {
+    const B=C.boss; B.field.splice(B.field.indexOf(cr),1); log(`☠ ${B.name}'s ${cr.name} dies.`);
+    if(!cr.token) B.dead.push(cr.id);
+    const d=cr.def.death; if(d){ if(d.hurtHeroes) liveF().forEach(f=>loseHp(f,d.hurtHeroes,cr.name)); if(d.hit) bossHit(d.hit,'creature',cr.name); }
+    if(B.relics.includes('graveTide')&&rnd()<0.5&&!C.over){ summonBoss(TOKENS.zombie,{token:true,name:'Risen Zombie'}); B.field[B.field.length-1].baseAtk=1; B.field[B.field.length-1].baseHp=1; }
+  }
+  if(C.over) return;
+  for(const o of [...allHeroCreatures(),...C.boss.field]) if(o.def.harvest&&o!==cr) o.counters++;
+  for(const F of liveF()) for(const o of F.field) if(o.def.vex&&o!==cr){ healHero(F,1); damageBoss(1,{pierce:true}); }
+}
+function exileCreature(cr){
+  const C=G.combat; if(!crAlive(cr)) return;
+  if(cr.side==='boss'){ C.boss.field.splice(C.boss.field.indexOf(cr),1); C.boss.exiledN++; log(`✖ ${cr.name} is exiled.`); }
+  else { const F=ownerF(cr); F.field.splice(F.field.indexOf(cr),1); for(const e of cr.eq) F.used.push(e); if(cr.inst){ FP(F).exiled++; } log(`✖ ${cr.name} is exiled.`); }
+}
+
+// ---------- hero turn ----------
+function manaProduce(F){ let m=0; for(const x of F.manaIn){ if(x.sick) continue; const M=MANA[x.id]; m+= M.mana||(M.primal&&F.field.length>=3?2:1); } return m; }
+function startHeroTurn(i){
+  const C=G.combat; if(C.over) return;
+  while(i<C.fighters.length && C.fighters[i].out) i++;
+  if(i>=C.fighters.length){ bossTurn(); return; }
+  C.phase='hero'; C.active=i; const F=C.fighters[i], p=FP(F);
+  F.field.forEach(c=>{ c.tapped=false; }); F.block=0; F.strikeUsed=false; F.spells=0; F.flags.pact=false; F.flags.altar=0; F.flags.swift=false; F.flags.sylvan=false; F.flags.quiver=false; F.flags.junk=false; F.manaThisTurn=false; F.atkSel={};
+  F.manaIn.forEach(x=>x.sick=false);
+  F.mana=manaProduce(F)+F.startBonus;
+  log(`— ${p.name}'s turn (round ${C.round}) · ${F.mana} mana —`);
+  // upkeep
+  for(const cr of F.field.slice()){
+    if(cr.kw.overgrow){ cr.kw.overgrow=0; cr.baseAtk=Math.max(cr.baseAtk,2); cr.baseHp=Math.max(cr.baseHp,2); }
+    const u=cr.def.upkeep; if(u){ if(u.counterSelf) cr.counters+=u.counterSelf; if(u.countersOthers) F.field.forEach(x=>{ if(x!==cr) x.counters++; }); if(u.block) F.block+=u.block; if(u.selfDmg) loseHp(F,u.selfDmg,cr.name); if(u.token) summon(F,TOKENS[u.token],{token:true}); }
+    for(const e of cr.eq){ const q=HC[e.id].eq; if(q.refill) cr.shield=Math.max(cr.shield,q.refill); if(q.upkeepSelfDmg) loseHp(F,q.upkeepSelfDmg,'Cursed Dagger'); }
+    if(C.over) return; if(F.out){ startHeroTurn(i+1); return; }
+  }
+  for(const art of F.arts){ const A=HC[art.id].art; if(!A) continue; const mw=ups(art,'masterwork');
+    if(A.bulwark) F.block+=A.bulwark+mw;
+    if(A.ballista){ const t=C.boss.field.filter(c=>c.tapped).sort((a,b)=>crValue(b)-crValue(a))[0]; if(t) damageCreature(t,A.ballista+mw,{}); else damageBoss(A.ballista+mw,{src:'Steam Ballista'}); }
+    if(C.over) return; }
+  if(hasRelic(p,'wolfTotem')&&C.round%2===0&&F.field.filter(c=>c.name==='Wolf Pup').length<2) summon(F,TOKENS.wolfPup,{token:true});
+  if(hasRelic(p,'circleThorns')) F.field.forEach(c=>{ if(c.counters>0&&c.shield===0) c.shield=1; });
+  refillHand(F);
+  C.step = F.field.some(c=>!c.tapped&&effAtk(c)>0) ? 'attack' : 'main';
+  if(C.step==='main') clearHeroTemps(F);
+}
+function handBought(F){ return F.hand.length; }
+function drawOne(F){
+  if(F.hand.length>=HAND_MAX) return false;
+  if(F.draw.length){ F.hand.push(F.draw.shift()); return true; }
+  if(!F.flags.junk){ F.flags.junk=true; F.hand.push({u:nextUid(), id:rnd()<0.5?'rustyDagger':'stumble', up:[], junk:1}); log(`${FP(F).name}'s deck is dry: they draw a junk card.`); return true; }
+  return false;
+}
+function drawCards(F,n){ for(let i=0;i<n;i++) if(!drawOne(F)) break; }
+function refillHand(F){ while(F.hand.length<HAND_BOUGHT){ if(!drawOne(F)) break; } }
+function clearHeroTemps(F){ F.field.forEach(c=>{ c.temp={atk:0,hp:0}; c.mist=false; }); F.field.slice().forEach(c=>{ if(c.dmg>=effHp(c)) killCreature(c,null); }); }
+
+function toggleAttacker(uid){ const F=activeF(); if(!F||G.combat.step!=='attack') return; const c=F.field.find(x=>x.uid===uid); if(!c||c.tapped) return; F.atkSel[uid]=!F.atkSel[uid]; }
+function declareAttack(uids){
+  const C=G.combat, F=activeF(); if(!F||C.step!=='attack') return false;
+  const list=(uids||Object.keys(F.atkSel).filter(k=>F.atkSel[k])).map(u=>F.field.find(c=>c.uid===u)).filter(c=>c&&!c.tapped&&effAtk(c)>0);
+  if(list.length) heroAttack(F,list,false); else log(`${FP(F).name} holds their creatures back.`);
+  if(C.over) return true;
+  clearHeroTemps(F); C.step='main'; return true;
+}
+function heroAttack(F,list,haste){
+  const C=G.combat, B=C.boss, p=FP(F);
+  const items=list.map(a=>({a, blk:null, cancel:false, bonus:0}));
+  for(const it of items){ if(!has(it.a,'vig')&&!it.a.mist) it.a.tapped=true; }
+  const rallies=items.filter(it=>has(it.a,'rally')).length; items.forEach(it=>{ it.bonus=rallies-(has(it.a,'rally')?1:0); });
+  log(`${p.name} attacks with ${items.map(it=>it.a.name+' ('+(effAtk(it.a)+it.bonus)+')').join(', ')}${haste?' (Haste)':''}.`);
+  for(const it of items){ const a=it.a;
+    if(a.def.onAttack&&a.def.onAttack.untapOther){ const o=items.filter(x=>x.a!==a&&x.a.tapped).sort((x,y)=>effAtk(y.a)-effAtk(x.a))[0]; if(o){ o.a.tapped=false; log(`Windcaller untaps ${o.a.name}.`);} }
+    for(const e of a.eq) if(HC[e.id].eq.pingBoss) damageBoss(1,{src:'Elvish Longbow'});
+    if(B.arts.includes('caltrops')) damageCreature(a,1,{});
+    if(C.over) return; }
+  // commander blocks
+  bossBlocks(items);
+  // smoke bomb
+  const sb=B.hand.indexOf('smokeBomb'); const big=items.filter(it=>!it.blk&&crAlive(it.a)).sort((x,y)=>effAtk(y.a)-effAtk(x.a))[0];
+  if(sb>=0&&B.mana>=2&&big&&effAtk(big.a)>=3&&DIFF().ai!=='easy'){ B.mana-=2; B.hand.splice(sb,1); B.used.push('smokeBomb'); if(!luckyCancel()){ big.cancel=true; log(`${B.name} throws a Smoke Bomb: ${big.a.name}'s attack is canceled.`);} }
+  resolveAttacks(items,'boss');
+  if(C.over) return;
+  if(hasRelic(p,'swiftwind')&&!F.flags.swift){ const t=items.map(it=>it.a).filter(c=>crAlive(c)&&c.tapped).sort((x,y)=>effAtk(y)-effAtk(x))[0]; if(t){ F.flags.swift=1; t.tapped=false; log(`Swiftwind Boots untap ${t.name}.`);} }
+}
+function bossBlocks(items){
+  const B=G.combat.boss, ai=DIFF().ai; const avail=B.field.filter(c=>!c.tapped&&!has(c,'noblock'));
+  const sorted=items.slice().sort((x,y)=>effAtk(y.a)-effAtk(x.a)); let incoming=sum(items.map(it=>effAtk(it.a)+it.bonus));
+  for(const it of sorted){ const a=it.a; if(a.mist||!crAlive(a)) continue;
+    const cand=avail.filter(b=>canBlock(b,a)); if(!cand.length) continue; let pick=null; const atk=effAtk(a)+it.bonus;
+    const taunt=cand.filter(b=>has(b,'taunt'));
+    const kills=b=>effAtk(b)>=hpLeft(a)+a.shield||has(b,'dt'); const survives=b=>atk<hpLeft(b)+b.shield+b.armor&&!has(a,'dt')||(has(b,'first')&&kills(b)&&!has(a,'first'));
+    if(taunt.length) pick=taunt.sort((x,y)=>(survives(y)-survives(x))||(hpLeft(y)-hpLeft(x)))[0];
+    else if(ai==='easy'){ if(rnd()<0.35) pick=pick||cand[ri(cand.length)]; }
+    else { pick=cand.find(b=>kills(b)&&survives(b))||cand.find(b=>survives(b))||cand.find(b=>kills(b)&&crValue(b)<=crValue(a)+2);
+      if(!pick&&(incoming>=B.hp*(ai==='smart'?0.6:0.9))) pick=cand.sort((x,y)=>crValue(x)-crValue(y))[0]; }
+    if(pick){ it.blk=pick; avail.splice(avail.indexOf(pick),1); incoming-=atk; }
+  }
+}
+function luckyCancel(){ // a hero's Lucky Charm cancels the commander's spell
+  for(const F of liveF()){ const i=F.arts.findIndex(a=>a.id==='luckyCharm'); if(i>=0){ const inst=F.arts.splice(i,1)[0]; F.used.push(inst); log(`🍀 ${FP(F).name}'s Lucky Charm cancels the spell!`); return true; } }
+  return false;
+}
+
+// generic attack resolution. side = who is being attacked ('boss' or 'heroes')
+function atkOf(it){ return it.a.cmd ? Math.max(0,G.combat.boss.atk-G.combat.boss.curse+G.combat.boss.temp) : effAtk(it.a)+(it.bonus||0); }
+function resolveAttacks(items,side){
+  const C=G.combat;
+  for(const it of items){
+    if(C.over) return; const a=it.a; if(!a.cmd&&!crAlive(a)) continue;
+    if(it.cancel){ continue; }
+    const blk=it.blk && crAlive(it.blk) ? it.blk : null;
+    if(blk) fightPair(it,blk,side); else hitDefender(it,atkOf(it),side);
+  }
+  C.smoke=false;
+}
+function srcName(it){ return it.a.cmd ? G.combat.boss.name : it.a.name; }
+function strike(it,from,to,n,side){ // from deals n to creature 'to'; returns actual
+  const dt=!from.cmd&&has(from,'dt'), pierce=!from.cmd&&has(from,'pierce');
+  const before=hpLeft(to); const dealt=damageCreature(to,n,{dt,pierce,src:from.name});
+  if(!from.cmd&&has(from,'life')&&dealt>0) lifelink(from,dealt);
+  return {dealt,before};
+}
+function lifelink(cr,n){ if(cr.side==='hero'){ const F=ownerF(cr); if(F) healHero(F,n); } else { const B=G.combat.boss; B.hp=Math.min(B.maxHp,B.hp+n); } }
+function fightPair(it,b,side){
+  const a=it.a, C=G.combat; const n=atkOf(it);
+  if(has(b,'fortify')) b.shield++;
+  log(`${b.name} blocks ${srcName(it)}.`);
+  const aF=!a.cmd&&(has(a,'first')||has(a,'twice')), bF=has(b,'first')||has(b,'twice');
+  const aN=a.cmd||!has(a,'first')||has(a,'twice'), bN=!has(b,'first')||has(b,'twice');
+  const hitBack=(m)=>{ if(m<=0) return; if(a.cmd){ damageBoss(m,{src:b.name,pierce:has(b,'pierce')}); if(has(b,'life')) lifelink(b,m); } else if(crAlive(a)) strike(it,b,a,m,side); };
+  let trampled=0;
+  const hitBlk=()=>{ if(!crAlive(b)){ if(!a.cmd&&has(a,'trample')) trampled+=n; return; } const r=strike(it,a,b,n,side); if(!a.cmd&&has(a,'trample')&&!crAlive(b)) trampled+=Math.max(0,n-r.before); };
+  if(aF||bF){ if(aF) hitBlk(); if(bF&&crAlive(b)&&(a.cmd||crAlive(a))) hitBack(effAtk(b)); }
+  if(C.over) return;
+  if(aN&&(a.cmd||crAlive(a))) hitBlk();
+  if(bN&&crAlive(b)&&(a.cmd||crAlive(a))) hitBack(effAtk(b));
+  if(b.def.onBlock&&crAlive(b)){ if(b.def.onBlock.counterSelf) b.counters++; }
+  if(b.def.onBlock&&b.def.onBlock.pingAttackers&&!a.cmd&&crAlive(a)) damageCreature(a,1,{});
+  if(trampled>0&&!C.over) hitDefender(it,trampled,side);
+}
+function hitDefender(it,n,side){
+  const C=G.combat, a=it.a; if(n<=0) return;
+  if(side==='boss'){ const d=damageBoss(n,{pierce:has(a,'pierce'),src:a.name}); if(has(a,'life')&&d>0) lifelink(a,d); }
+  else { const F=it.tgt; if(!F||F.out) return; if(C.smoke){ log(`Smoke Screen: ${srcName(it)} can't find ${FP(F).name}.`); return; }
+    const d=damageHero(F,n,srcName(it)); if(!a.cmd&&has(a,'life')&&d>0) lifelink(a,d);
+    if(d>0&&!a.cmd&&C.boss.relics.includes('stolenPurse')){ const p=FP(F); if(p.gold>0){ p.gold--; log(`Stolen Purse: ${p.name} loses 1 gold.`);} } }
+}
+
+// ---------- playing hero cards ----------
+function cardCost(F,inst){
+  const c=HC[inst.id], p=FP(F); let k=c.cost-ups(inst,'ashBlessed');
+  if(c.type==='equipment'){ if(F.flags.freeEquip||F.field.some(x=>x.def.brokk)) return 0; k-=ups(inst,'bonded')+(hasRelic(p,'anvil')?1:0)+(F.flags.eqDiscount||0); }
+  if(c.type==='instant'&&!F.flags.sylvan&&F.manaIn.some(x=>MANA[x.id].sylvan&&!x.sick)) k-=1;
+  return Math.max(0,k);
+}
+function whyNot(F,inst,inBlock){
+  const c=HC[inst.id]; const C=G.combat;
+  if(cardCost(F,inst)>F.mana) return 'Not enough mana';
+  if(inBlock && c.type!=='instant') return 'Only instants now';
+  const fx=c.fx||{};
+  if((c.type==='equipment'||fx.pump||fx.mistwalk||fx.offering||fx.hammer||fx.untapOne||(c.art&&c.art.shieldNow)) && !F.field.length) return 'Needs a creature';
+  if(fx.raise && !F.dead.length) return 'No creature of yours has died';
+  if(fx.destroy){ const t=pickDestroy(F,fx.destroy); if(!t) return 'No valid enemy creature'; }
+  if(fx.cancelAttack && !inBlock) return 'Use it when the commander attacks';
+  if(fx.smoke && !inBlock) return 'Use it when the commander attacks';
+  if(fx.recall && !F.used.some(u=>u.id!=='recall'&&!HC[u.id].junk)) return 'Nothing to recall';
+  return '';
+}
+function pickDestroy(F,d){
+  const B=G.combat.boss; const t=getTarget(F); let cr=B.field.find(c=>c.uid===t);
+  const ok=c=>!d.maxAtk||effAtk(c)<=d.maxAtk;
+  if(cr&&ok(cr)) return cr; return B.field.filter(ok).sort((a,b)=>crValue(b)-crValue(a))[0]||null;
+}
+function playCard(i,fi){
+  const C=G.combat; if(!C||C.over) return false;
+  const inBlock=C.phase==='block'; let F;
+  if(inBlock){ F=C.fighters[fi===undefined?0:fi]; if(!F||F.out) return false; } else { F=activeF(); if(!F||C.step!=='main') return false; }
+  const inst=F.hand[i]; if(!inst) return false; const c=HC[inst.id];
+  if(whyNot(F,inst,inBlock)) return false;
+  if(inBlock&&C.pending){ const it=C.pending.items[C.sel||0]; if(it&&it.blk&&F.field.includes(it.blk)) F.ally=it.blk.uid; }
+  const cost=cardCost(F,inst); F.mana-=cost; F.hand.splice(i,1); const p=FP(F);
+  if(c.type==='instant'&&F.manaIn.some(x=>MANA[x.id].sylvan&&!x.sick)) F.flags.sylvan=true;
+  if(c.type==='equipment'&&F.flags.freeEquip) F.flags.freeEquip=0;
+  log(`${p.name} plays ${c.name}${inst.up.length?' ★':''} (${cost} mana).`);
+  const B=C.boss;
+  if(c.type==='instant'&&B.relics.includes('loadedDice')&&!B.flags.dice){ B.flags.dice=1; log(`🎲 Loaded Dice: ${B.name} cancels ${c.name}!`); F.used.push(inst); return true; }
+  if(c.type==='creature'){ summon(F,c,{inst}); }
+  else if(c.type==='equipment'){ const cr=getAlly(F); cr.eq.push(inst); const q=c.eq; if(q.shield) cr.shield+=q.shield; log(`${c.name} is attached to ${cr.name}.`); }
+  else if(c.type==='artifact'){ const A=c.art, mw=ups(inst,'masterwork');
+    if(A.drawNow){ drawCards(F,A.drawNow+mw); F.used.push(inst); }
+    else if(A.shieldNow){ const cr=getAlly(F,'sturdy'); cr.shield+=A.shieldNow+mw; log(`${cr.name} gains Shield ${A.shieldNow+mw}.`); F.used.push(inst); }
+    else F.arts.push(inst); }
+  else { F.spells++; resolveFx(F,inst,c.fx||{},inBlock); F.used.push(inst);
+    if(F.spells===2) F.field.forEach(x=>{ if(x.def.sage){ drawCards(F,1); log('Starweaver Sage: draw a card.'); } }); }
+  return true;
+}
+function playStrike(){ const C=G.combat, F=activeF(); if(!F||C.step!=='main'||F.strikeUsed) return false; F.strikeUsed=true; F.block+=1; log(`${FP(F).name} uses Basic Strike.`); damageTarget(F,getTarget(F),2,{}); return true; }
+function playMana(i){ const C=G.combat, F=activeF(); if(!F||C.step!=='main'||F.manaThisTurn) return false; const id=F.manaHand[i]; if(!id) return false; const M=MANA[id], p=FP(F);
+  F.manaHand.splice(i,1); F.manaThisTurn=true; F.manaIn.push({id,sick:!!M.sick});
+  if(!M.sick) F.mana+= M.mana||(M.primal&&F.field.length>=3?2:1);
+  const o=M.onPlay||{}; if(o.heal) healHero(F,o.heal); if(o.draw) drawCards(F,o.draw); if(o.eqDiscount) F.flags.eqDiscount=(F.flags.eqDiscount||0)+1; if(o.shieldAlly){ const a=getAlly(F,'sturdy'); if(a) a.shield++; }
+  if(o.recall){ recallBest(F); }
+  if(M.bloodwell&&p.hp>4){ loseHp(F,1,'Bloodwell'); F.mana++; }
+  log(`${p.name} plays ${M.name}${M.sick?' (enters sick)':''}.`); return true; }
+function recallBest(F){ const s=F.used.filter(u=>u.id!=='recall'&&!HC[u.id].junk).sort((a,b)=>HC[b.id].cost-HC[a.id].cost)[0];
+  if(s&&F.hand.length<HAND_MAX){ F.used.splice(F.used.indexOf(s),1); F.hand.push(s); log(`${HC[s.id].name} returns to hand.`); } }
+function bloodPact(){ const F=activeF(); if(!F||G.combat.step!=='main') return false; const p=FP(F); if(!hasRelic(p,'bloodPact')||F.flags.pact||p.hp<=2) return false; F.flags.pact=1; loseHp(F,2,'Blood Pact'); F.mana++; log(`${p.name} pays 2 HP for 1 mana (Blood Pact).`); return true; }
+function sacThrall(uid){ const F=activeF(); if(!F||G.combat.step!=='main') return false; const cr=F.field.find(c=>c.uid===uid&&c.def.sacMana); if(!cr) return false; log(`${FP(F).name} sacrifices ${cr.name} for 1 mana.`); F.mana+=1; killCreature(cr,null); return true; }
+function setTarget(t){ const C=G.combat; if(!C) return; const F=C.phase==='hero'?activeF():C.fighters[C.blockFi||0]; if(F) F.target=t; }
+function setAlly(uid){ const C=G.combat; if(!C) return; const F=C.phase==='hero'?activeF():null; if(F) F.ally=(F.ally===uid?null:uid); }
+
+function resolveFx(F,inst,fx,inBlock){
+  const C=G.combat, B=C.boss, p=FP(F), R=ups(inst,'runed');
+  const qb=()=>{ if(hasRelic(p,'quiver')&&!F.flags.quiver){ F.flags.quiver=true; return 1; } return 0; };
+  const t=getTarget(F);
+  if(fx.dmg) damageTarget(F,t,fx.dmg+R+qb(),{pierce:fx.pierce,srcName:HC[inst.id].name});
+  if(fx.block) F.block+=fx.block+R;
+  if(fx.heal) healHero(F,fx.heal+R);
+  if(fx.selfDmg) loseHp(F,fx.selfDmg,HC[inst.id].name);
+  if(fx.aoe){ const n=fx.aoe+R+qb(); B.field.slice().forEach(c=>damageCreature(c,n,{})); damageBoss(n,{src:HC[inst.id].name}); }
+  if(C.over) return;
+  if(fx.volley){ B.field.slice().forEach(c=>damageCreature(c,has(c,'fly')?2:1,{})); damageBoss(1,{}); }
+  if(fx.tokens) for(let i=0;i<fx.tokens[0];i++) summon(F,TOKENS[fx.tokens[1]],{token:true});
+  if(fx.pump){ const cr=getAlly(F); if(cr){ const b=fx.pump.token&&cr.token?1:0; cr.temp.atk+=fx.pump.atk+b; cr.temp.hp+=fx.pump.hp+b; log(`${cr.name} gets +${fx.pump.atk+b}/+${fx.pump.hp+b}.`);} }
+  if(fx.untapOne){ const cr=getAlly(F); if(cr) cr.tapped=false; }
+  if(fx.packHowl){ const w=Math.min(fx.packHowl,F.field.filter(c=>c.tags.includes('wolf')||/Wolf/.test(c.name)).length); F.field.forEach(c=>c.temp.atk+=w); log(`Pack Howl: +${w} ATK to every creature.`); }
+  if(fx.countersAll) F.field.forEach(c=>c.counters+=fx.countersAll);
+  if(fx.untapAll) F.field.forEach(c=>c.tapped=false);
+  if(fx.pumpAll) F.field.forEach(c=>c.temp.atk+=fx.pumpAll);
+  if(fx.raise){ for(let i=0;i<fx.raise.n&&F.dead.length;i++){ const di=F.dead.pop(); const cr=summon(F,HC[di.id],{inst:di,noEtb:false,noHasteAttack:true}); cr.tapped=true; if(fx.raise.counter) cr.counters++; if(fx.raise.atk) cr.atkBonus+=fx.raise.atk; if(fx.raise.exile) cr.exileAfter=true; } }
+  if(fx.freeze){ B.field.filter(c=>!c.tapped).sort((a,b)=>crValue(b)-crValue(a)).slice(0,fx.freeze).forEach(c=>{ c.tapped=true; c.frozen=true; log(`${c.name} is pinned down.`); }); }
+  if(fx.counterShot){ let tc=null; if(inBlock&&C.pending){ const it=C.pending.items[C.sel||0]; if(it&&!it.a.cmd) tc=it.a; }
+    if(tc) damageCreature(tc,fx.counterShot+R,{pierce:true}); else damageTarget(F,t,fx.counterShot+R,{pierce:true}); }
+  if(fx.cancelAttack&&inBlock&&C.pending){ const it=C.pending.items[C.sel||0]||C.pending.items.find(x=>!x.cancel); if(it){ it.cancel=true; log(`${srcName(it)}'s attack is canceled.`);} }
+  if(fx.smoke) { C.smoke=true; log('Smoke Screen: this turn, attacks deal no damage to heroes.'); }
+  if(fx.twin){ let kills=0; for(let k=0;k<2;k++){ const tt=k===0?t:getTarget(F); const target=B.field.find(c=>c.uid===tt); const before=target?1:0; damageTarget(F,tt,1+R,{}); if(target&&!crAlive(target)) kills++; if(C.over) return; } if(kills===2) drawCards(F,1); }
+  if(fx.mistwalk){ const cr=getAlly(F); if(cr){ cr.mist=true; log(`${cr.name} slips into the mist.`);} }
+  if(fx.offering){ const cr=getAlly(F,'weak'); if(cr){ const n=effAtk(cr); log(`${p.name} sacrifices ${cr.name}.`); killCreature(cr,null); damageTarget(F,getTarget(F),n,{}); } }
+  if(fx.bloodprice){ const k=Math.max(0,Math.min(fx.bloodprice,p.hp-3,HAND_MAX-F.hand.length,F.draw.length)); if(k){ loseHp(F,k,'Bloodprice'); drawCards(F,k);} }
+  if(fx.curse){ const tc=B.field.find(c=>c.uid===t); if(tc) tc.curse+=fx.curse; else B.curse+=fx.curse; }
+  if(fx.destroy){ const tc=pickDestroy(F,fx.destroy); if(tc){ if(fx.destroy.exile) exileCreature(tc); else killCreature(tc,null);} }
+  if(fx.shieldAll) F.field.forEach(c=>c.shield+=fx.shieldAll);
+  if(fx.hammer){ const cr=getAlly(F); if(cr) damageTarget(F,t,effAtk(cr)+cr.shield+R,{}); }
+  if(fx.delve){ const j=F.draw.findIndex(x=>{ const ty=HC[x.id].type; return ty==='artifact'||ty==='equipment'; }); if(j>=0&&F.hand.length<HAND_MAX){ F.hand.push(F.draw.splice(j,1)[0]); } else drawCards(F,1); }
+  if(fx.draw) drawCards(F,fx.draw);
+  if(fx.recall){ recallBest(F); }
+}
+
+function endHeroTurn(){
+  const C=G.combat, F=activeF(); if(!F) return false; if(C.step==='attack') declareAttack([]); if(C.over) return true;
+  for(const cr of F.field.slice()){ const e=cr.def.eot; if(!e||cr.tapped) continue;
+    if(e.wolfIfUntapped&&F.field.filter(c=>c.name==='Wolf').length<e.wolfIfUntapped) summon(F,TOKENS.wolf,{token:true});
+    if(e.pingIfUntapped){ const t=C.boss.field.slice().sort((a,b)=>hpLeft(a)-hpLeft(b))[0]; if(t) damageCreature(t,1,{pierce:true}); else damageBoss(1,{pierce:true,src:cr.name}); }
+    if(e.healIfUntapped){ const w=liveF().sort((a,b)=>FP(a).hp-FP(b).hp)[0]; if(w) healHero(w,e.healIfUntapped); }
+    if(C.over) return true; }
+  startHeroTurn(C.active+1); return true;
+}
+function retreat(){
+  const C=G.combat, F=activeF(); if(!F) return false; const p=FP(F);
+  F.out=true; F.retreated=true; F.bench=F.field; F.field=[]; const l=Math.min(2,p.gold); p.gold-=l; log(`🏃 ${p.name} retreats (−${l} gold).`);
+  if(liveF().length===0){ endCombat(null); return true; }
+  startHeroTurn(C.active+1); return true;
+}
+
+// ---------- commander turn ----------
+function bossDraw(){ const B=G.combat.boss; if(!B.deck.length){ if(!B.used.length) return; B.deck=shuffle(B.used); B.used=[]; } B.hand.push(B.deck.pop()); }
+function bossTurn(){
+  const C=G.combat, B=C.boss; if(C.over) return; C.phase='bossMain'; const sc=SCALE[Math.min(4,NP())];
+  B.field.forEach(c=>{ if(c.frozen){ c.frozen=false; } else c.tapped=false; if(c.def.regen) c.dmg=0; });
+  B.temp=0;
+  const add=sc.mana+(B.relics.includes('crown')&&C.round>=4?1:0); B.manaPlayed=Math.min(B.manaCap,B.manaPlayed+add); B.mana=B.manaPlayed;
+  for(let i=0;i<sc.draw;i++) bossDraw();
+  log(`— ${B.name}'s turn · ${B.mana} mana · ${B.hand.length} cards in hand —`);
+  if(B.relics.includes('dragonscale')&&C.round%3===0){ B.shield=Math.max(B.shield,3); log('Dragonscale refills.'); }
+  if(B.relics.includes('ironWill')) B.shield=Math.min(4,B.shield+1);
+  if(B.relics.includes('broodClutch')&&C.round%3===0) summonBoss(EC.whelp,{token:true,name:'Brood Whelp'});
+  if(B.relics.includes('warhost')&&B.field.length<2) summonBoss({name:'Orc Warrior',c:{atk:3,hp:3,kw:{}}},{token:true,name:'Orc Warrior'});
+  for(const a of B.arts){ if(a==='catapult') bossHit(2,'hero','Siege Catapult'); if(C.over) return; }
+  for(const cr of B.field.slice()){ const u=cr.def.upkeep; if(u&&u.ping) bossHit(u.ping,'creatureFirst',cr.name); if(C.over) return; }
+  // pre-combat tricks (normal/smart): tap blockers, untap/pump
+  if(DIFF().ai!=='easy') bossCast(true);
+  if(C.over) return;
+  // declare attacks
+  const items=[]; const targets=liveF(); if(!targets.length) return;
+  items.push({a:cmdObj(), tgt:pickHeroTarget(0), blk:null, cancel:false});
+  bossChooseAttackers().forEach((cr,i)=>{ cr.tapped=true; items.push({a:cr,tgt:pickHeroTarget(i+1),blk:null,cancel:false,bonus:0}); });
+  const rallies=items.filter(it=>!it.a.cmd&&has(it.a,'rally')).length; items.forEach(it=>{ if(!it.a.cmd) it.bonus=rallies-(has(it.a,'rally')?1:0); });
+  log(`${B.name} attacks: ${items.map(it=>`${srcName(it)} (${atkOf(it)}) → ${FP(it.tgt).name}`).join(', ')}.`);
+  openBlockStep(items,'main');
+}
+function cmdObj(){ return {cmd:true, name:G.combat.boss.name, kw:{}, eq:[], side:'boss', tags:[]}; }
+function pickHeroTarget(i){
+  const L=liveF(), ai=DIFF().ai; if(ai==='easy') return L[ri(L.length)];
+  const s=L.slice().sort((a,b)=>(FP(a).hp+a.block)-(FP(b).hp+b.block));
+  if(ai==='smart') return s[0];
+  return s[i%s.length];
+}
+function bossChooseAttackers(){
+  const B=G.combat.boss, ai=DIFF().ai; const blockers=allHeroCreatures().filter(b=>!b.tapped&&!has(b,'noblock'));
+  const out=[];
+  for(const a of B.field){ if(a.tapped||effAtk(a)<=0) continue;
+    if(ai==='easy'){ out.push(a); continue; }
+    if(has(a,'taunt')&&blockers.length&&ai==='smart') continue;
+    const could=blockers.filter(b=>canBlock(b,a));
+    const dies=could.some(b=>(effAtk(b)>=hpLeft(a)+a.shield||has(b,'dt'))&&!(has(a,'first')&&effAtk(a)>=hpLeft(b)+b.shield));
+    if(!dies||could.every(b=>effAtk(a)>=hpLeft(b)+b.shield)||(ai==='normal'&&rnd()<0.25)) out.push(a);
+  }
+  return out;
+}
+function openBlockStep(items,resume){
+  const C=G.combat; C.pending={items,resume}; C.phase='block'; C.sel=0; C.blockFi=0;
+  const anyBlock=items.some(it=>allHeroCreatures().some(b=>canBlock(b,it.a)));
+  const anyInstant=liveF().some(F=>F.hand.some(h=>HC[h.id].type==='instant'&&!whyNot(F,h,true)));
+  if(!anyBlock&&!anyInstant) confirmBlocks();
+}
+function assignBlock(ai,uid){ // attacker index, hero creature uid (or '' to clear)
+  const C=G.combat; if(!C||C.phase!=='block') return false; const it=C.pending.items[ai]; if(!it) return false;
+  if(!uid){ it.blk=null; return true; }
+  const b=allHeroCreatures().find(c=>c.uid===uid); if(!b) return false;
+  if(!canBlock(b,it.a)) return false;
+  C.pending.items.forEach(x=>{ if(x.blk===b) x.blk=null; }); it.blk=b; return true;
+}
+function confirmBlocks(){
+  const C=G.combat; if(!C||C.phase!=='block') return false; const P_=C.pending; C.pending=null;
+  // (each block is logged as it resolves in fightPair)
+  C.phase='resolving';
+  resolveAttacks(P_.items,'heroes');
+  if(C.over) return true;
+  C.phase='bossMain';
+  if(P_.resume==='main'){ bossCast(false); }
+  else if(P_.resume==='cont'){ bossCast(false); }
+  return true;
+}
+function bossCastable(id,pre){
+  const C=G.combat, B=C.boss, e=EC[id]; if(e.cost>B.mana) return false; if(e.type==='instant') return false;
+  const hc=allHeroCreatures(); const fx=e.fx||{};
+  if(pre){ return (fx.tap&&hc.some(c=>!c.tapped))||(fx.untapPump&&B.field.length>=2); }
+  if(fx.untapPump) return false;
+  if(fx.tap) return false; // tap tricks are used before combat
+  if(fx.hitCre&&!hc.length&&false) return false;
+  if(fx.raise) return B.dead.length>0;
+  if(fx.corpse) return B.field.length>0&&hc.length>=2;
+  if(fx.destroyTapped) return hc.some(c=>c.tapped);
+  if(fx.exileHand||fx.decree) return liveF().some(F=>F.hand.length);
+  if(e.type==='artifact') return !B.arts.includes(id)||id==='catapult';
+  return true;
+}
+function bossCast(pre){
+  const C=G.combat, B=C.boss, ai=DIFF().ai; let guard=0;
+  while(!C.over && guard++<20){
+    const opts=B.hand.map((id,i)=>({id,i})).filter(o=>bossCastable(o.id,pre)); if(!opts.length) break;
+    let ch;
+    if(ai==='easy'){ if(rnd()<0.25) break; ch=opts[ri(opts.length)]; }
+    else ch=opts.sort((x,y)=>bossScore(y.id)-bossScore(x.id))[0];
+    const id=ch.id, e=EC[id]; B.hand.splice(B.hand.indexOf(id),1); B.mana-=e.cost;
+    log(`${B.name} plays ${e.name}.`);
+    if(e.type!=='creature'&&e.type!=='artifact'&&luckyCancel()){ B.used.push(id); continue; }
+    if(e.type==='creature'){ const cr=summonBoss(e,{id}); if(has(cr,'haste')&&!pre&&liveF().length){ cr.tapped=true; const it={a:cr,tgt:pickHeroTarget(0),blk:null,cancel:false,bonus:0}; log(`${cr.name} has Haste and attacks ${FP(it.tgt).name}!`); openBlockStep([it],'cont'); return; } }
+    else if(e.type==='artifact'){ B.arts.push(id); }
+    else { bossFx(e); B.used.push(id); }
+  }
+  if(!pre && !C.over && C.phase!=='block') endBossTurn();
+}
+function bossScore(id){
+  const e=EC[id], fx=e.fx||{}, hc=allHeroCreatures(); let s=e.cost*2;
+  if(e.type==='creature') s+=3;
+  if(fx.hitHero){ if(liveF().some(F=>FP(F).hp+F.block<=fx.hitHero)) s+=50; }
+  if(fx.hit||fx.hitCre){ const n=fx.hit||fx.hitCre; if(hc.some(c=>hpLeft(c)+c.shield<=n&&crValue(c)>=4)) s+=6; else if(!hc.length&&fx.hitCre) s-=2; }
+  if(fx.destroyTapped) s+=8; if(fx.aoeHeroes) s+=hc.length*2; if(fx.tap) s+=hc.filter(c=>!c.tapped).length*2;
+  return s;
+}
+function bossHit(n,mode,src){ // mode: any | creature | creatureFirst | hero
+  const C=G.combat, ai=DIFF().ai; const L=liveF(); if(!L.length) return;
+  const hc=allHeroCreatures(); const taunts=hc.filter(c=>has(c,'taunt')&&!c.tapped);
+  if(mode!=='hero'){
+    let pool=taunts.length?taunts:hc;
+    if(pool.length&&(mode!=='any'||taunts.length||ai==='easy'&&rnd()<0.5||pool.some(c=>hpLeft(c)+c.shield<=n&&crValue(c)>=4))){
+      const kill=pool.filter(c=>hpLeft(c)+c.shield+c.armor<=n).sort((a,b)=>crValue(b)-crValue(a))[0];
+      const t=kill||pool.slice().sort((a,b)=>crValue(b)-crValue(a))[0]; log(`${src} hits ${t.name} for ${n}.`); damageCreature(t,n,{}); return; }
+  }
+  const h=pickHeroTarget(0); damageHero(h,n,src);
+}
+function pickSpellCreature(mode,n){
+  const hc=allHeroCreatures(); const taunts=hc.filter(c=>has(c,'taunt')&&!c.tapped);
+  if(mode==='hero') return null;
+  let pool=taunts.length?taunts:hc;
+  if(!pool.length) return null;
+  const ai=DIFF().ai;
+  if(!(mode!=='any'||taunts.length||ai==='easy'&&rnd()<0.5||pool.some(c=>hpLeft(c)+c.shield<=n&&crValue(c)>=4))) return null;
+  const kill=pool.filter(c=>hpLeft(c)+c.shield+c.armor<=n).sort((a,b)=>crValue(b)-crValue(a))[0];
+  return kill||pool.slice().sort((a,b)=>crValue(b)-crValue(a))[0];
+}
+function bossFx(e){
+  const C=G.combat, B=C.boss, fx=e.fx, hc=allHeroCreatures();
+  // Targeted enemy spells can be canceled by Ward (first time each fight). AOE and untargeted effects are not "targeting."
+  if(fx.hit || fx.hitCre){
+    const mode=fx.hit?'any':(hc.length?'creature':'hero');
+    const n=fx.hit||fx.hitCre;
+    const t=pickSpellCreature(mode,n);
+    if(t && tryWard(t,e.name)) return;
+    if(t){ log(`${e.name} hits ${t.name} for ${n}.`); damageCreature(t,n,{}); }
+    else { const h=pickHeroTarget(0); damageHero(h,n,e.name); }
+  }
+  if(fx.hitHero){ const h=pickHeroTarget(0); damageHero(h,fx.hitHero,e.name); }
+  if(fx.heal) B.hp=Math.min(B.maxHp,B.hp+fx.heal);
+  if(fx.tap){
+    const picks=hc.filter(c=>!c.tapped).sort((a,b)=>crValue(b)-crValue(a)).slice(0,fx.tap);
+    const w=picks.find(c=>has(c,'ward')&&!c.wardUsed);
+    if(w){ tryWard(w,e.name); return; }
+    picks.forEach(c=>{ c.tapped=true; log(`${c.name} is tapped.`); });
+  }
+  if(fx.aoeHeroes){ hc.slice().forEach(c=>damageCreature(c,fx.aoeHeroes,{})); liveF().forEach(F=>damageHero(F,fx.aoeHeroes,e.name)); }
+  if(fx.raise){ for(let i=0;i<fx.raise&&B.dead.length;i++){ const id=B.dead.pop(); summonBoss(EC[id],{id}); } }
+  if(fx.corpse){ const v=B.field.slice().sort((a,b)=>effAtk(b)-effAtk(a))[0]; const n=effAtk(v); log(`${B.name} explodes ${v.name}!`); killCreature(v,null); hc.slice().forEach(c=>damageCreature(c,n,{})); }
+  if(fx.exileHand){ const fs=liveF().filter(F=>F.hand.length); if(fs.length){ const F=pick(fs); const inst=F.hand.splice(ri(F.hand.length),1)[0]; if(!HC[inst.id].junk) FP(F).exiled++; log(`✖ ${HC[inst.id].name} is exiled from ${FP(F).name}'s hand.`);} }
+  if(fx.decree){ liveF().forEach(F=>{ if(F.hand.length){ const inst=F.hand.splice(ri(F.hand.length),1)[0]; if(!HC[inst.id].junk) FP(F).exiled++; log(`✖ Decree: ${HC[inst.id].name} is exiled from ${FP(F).name}'s hand.`);} }); }
+  if(fx.untapPump){ B.field.forEach(c=>{ c.tapped=false; c.temp.atk+=1; }); B.temp+=1; }
+  if(fx.destroyTapped){ const t=hc.filter(c=>c.tapped).sort((a,b)=>crValue(b)-crValue(a))[0]; if(t){ if(tryWard(t,e.name)) return; log(`Crushing Blow destroys ${t.name}.`); killCreature(t,null);} }
+  if(fx.cleave){
+    const s=hc.slice().sort((a,b)=>crValue(b)-crValue(a));
+    const w=(s[0]&&has(s[0],'ward')&&!s[0].wardUsed)?s[0]:(s[1]&&has(s[1],'ward')&&!s[1].wardUsed)?s[1]:null;
+    if(w){ tryWard(w,e.name); return; }
+    if(s[0]) damageCreature(s[0],fx.cleave[0],{}); else bossHit(fx.cleave[0],'hero',e.name); if(s[1]) damageCreature(s[1],fx.cleave[1],{}); else bossHit(fx.cleave[1],'hero',e.name);
+  }
+}
+function endBossTurn(){
+  const C=G.combat, B=C.boss; if(C.over) return;
+  B.field.forEach(c=>{ c.temp={atk:0,hp:0}; }); B.temp=0; B.curse=Math.max(0,B.curse);
+  B.field.slice().forEach(c=>{ if(c.dmg>=effHp(c)) killCreature(c,null); });
+  C.round++;
+  startHeroTurn(0);
+}
+
+// ---------- end of fight ----------
+function cleanupFighter(F){
+  const p=FP(F); const keep=[];
+  for(const inst of F.hand) if(!inst.junk&&!HC[inst.id].junk) keep.push(inst);
+  keep.push(...F.draw);
+  for(const cr of F.field.concat(F.bench)){ if(cr.token||!cr.inst) { for(const e of cr.eq) keep.push(e); continue; }
+    if(cr.exileAfter){ p.exiled++; for(const e of cr.eq) returnToSupply(p,e); continue; }
+    keep.push(cr.inst); keep.push(...cr.eq); }
+  keep.push(...F.arts);
+  for(const inst of F.used.concat(F.dead)) if(!HC[inst.id].junk) returnToSupply(p,inst);
+  p.owned=keep.filter(x=>!x.junk);
+  p.mana=p.mana.filter((id,i)=>true); // mana cards are kept; Wild Crystals played this fight are exiled
+  for(const x of F.manaIn) if(MANA[x.id].exileAfter){ const k=p.mana.indexOf(x.id); if(k>=0) p.mana.splice(k,1); }
+  p.blessed=0;
+}
+function endCombat(won){
+  const C=G.combat; if(!C||C.over) return; C.over=true; C.won=won; C.phase='over';
+  const B=C.boss;
+  if(won===true) log(`🏆 ${B.name} is defeated!`); else if(won===false) log(`💀 The heroes are defeated by ${B.name}.`); else log('The heroes withdraw from the fight.');
+}
+function leaveCombat(){
+  const C=G.combat; if(!C||!C.over) return false; const B=C.boss, won=C.won;
+  G.stats.fights.push({cid:C.cid, kind:C.kind, won:won===true, round:G.round, rounds:C.round, n:C.fighters.length});
+  for(const F of C.fighters) cleanupFighter(F);
+  if(won===true){
+    const winners=C.fighters.filter(F=>!F.out).map(FP);
+    if(C.kind==='stop'){ G.cleared[C.stop]=true; G.herald=0; winners.forEach(p=>{ gainGold(p,STOP_REWARD.gold,'victory'); gainMats(p,STOP_REWARD.mats); heal(p,STOP_REWARD.heal); }); }
+    else if(C.kind==='quest'){ const q=QUESTS.find(x=>x.id===C.qid); G.players.forEach(p=>{ p.quests=p.quests.filter(x=>x!==C.qid); }); G.questDeck.unshift(C.qid); winners.forEach(p=>{ gainGold(p,q.reward.gold,'quest'); gainMats(p,q.reward.mats); }); }
+  }
+  for(const F of C.fighters){ const p=FP(F); if(F.out&&!F.retreated) heroFalls(p); }
+  G.combat=null;
+  if(won===true&&C.kind==='boss'){ endGame(true,`Malgrath the Iron Warlord falls! Thornhold is free (round ${G.round}).`); return true; }
+  checkAllDead(); return true;
+}
+// keep the fight moving if the active hero fell on their own turn
+function combatTick(){
+  const C=G.combat; if(!C||C.over) return;
+  if(C.phase==='hero'){ const F=C.fighters[C.active]; if(F&&F.out) startHeroTurn(C.active+1); }
+}
+// ===== Thornhold v3 — rendering & input =====
+const TYPE_ICON={creature:'🐾', spell:'✨', instant:'⚡', artifact:'⚙️', equipment:'🗡️'};
+const kwText = kw => Object.keys(kw||{}).filter(k=>kw[k]&&KW[k]).map(k=>KW[k]).join(', ');
+function priceTag(g){ return `<div class="cost">${g}🪙</div>`; }
+function artPath(kind, id){
+  if(typeof CARD_ART==='undefined' || !id) return '';
+  return CARD_ART[kind+':'+id] || CARD_ART['hc:'+id] || '';
+}
+function artForInst(inst){ const id=typeof inst==='string'?inst:(inst&&inst.id); return artPath('hc', id); }
+function artForMana(id){ return artPath('mana', id); }
+function artForRelic(id){ return artPath('relic', id); }
+function artForBossRelic(id){ return artPath('boss_relic', id); }
+function artForEnemy(id){ return artPath('enemy', id); }
+function artForBoss(id){ return artPath('boss', id); }
+function artForHeroFac(f){ return (typeof HERO_ART_FAC!=='undefined' && HERO_ART_FAC[f]) || artPath('hero', f); }
+function artForCreature(cr){
+  if(!cr) return '';
+  if(cr.inst) return artForInst(cr.inst);
+  if(cr.id) return artForEnemy(cr.id) || artPath('hc', cr.id) || artPath('token', cr.id);
+  if(typeof TOKENS!=='undefined'){
+    for(const k of Object.keys(TOKENS)){ if(TOKENS[k].name===cr.name) return artPath('token', k); }
+  }
+  if(/zombie/i.test(cr.name||'')) return artPath('token','zombie');
+  return '';
+}
+function zoomBtn(src){ return src?`<button type="button" class="zoom-btn" data-a="zoom" data-v="${esc(src)}" title="Zoom card" aria-label="Zoom card">🔍</button>`:''; }
+function faceImg(src, alt){ return src?`<img class="cardface" src="${esc(src)}" alt="${esc(alt||'')}" draggable="false">`:''; }
+function relicChip(id, boss){
+  const R=boss?ERELICS[id]:RELICS[id]; if(!R) return '';
+  const src=boss?artForBossRelic(id):artForRelic(id);
+  const zoom=src?` data-zoom="${esc(src)}" data-a="zoom" data-v="${esc(src)}"`:'';
+  const img=src?`<img src="${esc(src)}" alt="">`:'';
+  return `<span class="chip ${boss?'eperk':'relic'}${src?' artchip':''}" title="${esc(R.name+': '+R.text)}"${zoom}>${img}${esc(R.name)}</span>`;
+}
+
+function showCardZoom(src, pinned){
+  if(!src) return;
+  ensureZoom();
+  const z=document.getElementById('cardzoom');
+  const img=z.querySelector('img');
+  img.src=src; img.alt='Card preview';
+  z.classList.add('show');
+  z.classList.toggle('pinned', !!pinned);
+  UI.zoomSrc=src; UI.zoomPinned=!!pinned;
+}
+function hideCardZoom(force){
+  const z=document.getElementById('cardzoom'); if(!z) return;
+  if(UI.zoomPinned && !force) return;
+  z.classList.remove('show','pinned'); UI.zoomPinned=false; UI.zoomSrc=null;
+}
+function ensureZoom(){
+  if(document.getElementById('cardzoom')) return;
+  const z=document.createElement('div');
+  z.id='cardzoom';
+  z.innerHTML='<button type="button" class="cardzoom-close" data-a="closeZoom" title="Close">×</button><img alt="">';
+  document.body.appendChild(z);
+  z.addEventListener('click', ev=>{ if(ev.target===z) hideCardZoom(true); });
+  document.addEventListener('keydown', ev=>{ if(ev.key==='Escape') hideCardZoom(true); });
+  document.addEventListener('mouseover', ev=>{
+    const el=ev.target.closest && ev.target.closest('[data-zoom]');
+    if(!el || UI.zoomPinned) return;
+    showCardZoom(el.getAttribute('data-zoom'), false);
+  });
+  document.addEventListener('mouseout', ev=>{
+    if(UI.zoomPinned) return;
+    const from=ev.target.closest && ev.target.closest('[data-zoom]');
+    const to=ev.relatedTarget && ev.relatedTarget.closest && ev.relatedTarget.closest('[data-zoom]');
+    if(from && !to) hideCardZoom(false);
+  });
+}
+
+function cardHTML(inst,o){
+  o=o||{}; const id=typeof inst==='string'?inst:inst.id; const c=HC[id]; const up=(inst&&inst.up)||[];
+  const cls=['card',c.type]; if(c.junk) cls.push('junk'); if(o.play) cls.push('play'); if(o.cant) cls.push('cant'); if(o.sel) cls.push('sel');
+  let cost=c.cost; if(o.F && inst.u) cost=cardCost(o.F,inst);
+  const stats=c.c?`<div class="pt">${c.c.atk}/${c.c.hp+2*up.filter(u=>u==='thickHide').length}${c.c.shield||up.includes('hardened')?' 🛡'+((c.c.shield||0)+up.filter(u=>u==='hardened').length):''}</div>`:'';
+  const upTxt=up.length?`<div class="muted up-tag">★ ${up.map(u=>UPGRADES[u].name).join(', ')}</div>`:'';
+  const src=artForInst(inst);
+  const title=esc(c.name+': '+c.text+(o.why?' — '+o.why:''));
+  if(src){
+    cls.push('artcard');
+    return `<div class="${cls.join(' ')}" ${o.attrs||''} data-zoom="${esc(src)}" title="${title}">
+      ${faceImg(src,c.name)}${zoomBtn(src)}
+      ${up.length?`<div class="stars">${'★'.repeat(up.length)}</div>`:''}${upTxt}
+      ${o.why?`<div class="why">${esc(o.why)}</div>`:''}
+      ${o.price!==undefined?priceTag(o.price):''}${o.foot||''}</div>`;
+  }
+  return `<div class="${cls.join(' ')}" ${o.attrs||''} title="${title}">
+    <div class="mana">${cost}</div>${up.length?`<div class="stars">${'★'.repeat(up.length)}</div>`:''}
+    <div class="cname">${esc(c.name)}</div><div class="ctype">${TYPE_ICON[c.type]||''} ${c.type}${c.legend?' · legendary':''}</div>
+    <div class="ctext">${esc(c.text)}</div>${upTxt}${stats}${o.price!==undefined?priceTag(o.price):''}${o.foot||''}</div>`;
+}
+function manaCardHTML(id,o){ o=o||{}; const M=MANA[id]; const src=artForMana(id); const title=esc(M.name+': '+M.text);
+  if(src) return `<div class="card manac artcard ${o.play?'play':''} ${o.cant?'cant':''}" ${o.attrs||''} data-zoom="${esc(src)}" title="${title}">${faceImg(src,M.name)}${zoomBtn(src)}${o.price!==undefined?priceTag(o.price):''}${o.foot||''}</div>`;
+  return `<div class="card manac ${o.play?'play':''} ${o.cant?'cant':''}" ${o.attrs||''} title="${title}"><div class="mana">💧</div><div class="cname">${esc(M.name)}</div><div class="ctype">mana${M.sick?' · enters sick':''}</div><div class="ctext">${esc(M.text)}</div>${o.price!==undefined?priceTag(o.price):''}${o.foot||''}</div>`; }
+function matsHTML(m){ return `<span class="mats">${Object.keys(MATS).map(k=>`<span title="${MATS[k].name}">${MATS[k].icon}${m[k]}</span>`).join('')}</span>`; }
+
+function helpHTML(){
+  return `<details class="help panel" style="margin-top:10px"><summary><b>How to play (v3 rules)</b></summary>
+  <p><b>Goal:</b> co-op. Beat the 3 Gauntlet commanders in order (Bandit Chief, Drake Lord, Lich) and then Malgrath the Iron Warlord (unlocked after ${WARLORD_UNLOCK} stops). You have ${ROUND_LIMIT} rounds; after round ${ROUND_LIMIT} a hero who falls is dead for good, and you lose if every hero is dead. Escalation at rounds ${ESCALATE_ROUNDS.join(', ')} gives commanders +10% HP each.</p>
+  <p><b>Decks:</b> pick any of the 4 prebuilt decks. Each is one 100-card deck split into 3 stacks (Creatures, Spells, Artifacts). Your faction only sets your 3 Relics and your location perks. You start with 5 free cards, 3 Plain Mana and ${START_GOLD} gold, and earn ${INCOME} gold per round.</p>
+  <p><b>Board:</b> roll a d6 and move forward exactly that many spaces, or stop early on a location (one way only). From the Crossroads the road runs down the middle to the Tavern and Mage Tower, then to the Shrine, where you choose the left loop (Forest, Beast Den, Abbey) or the right loop (Mine, Forge, Hunter's Lodge, Ruins). Both lead back to the Crossroads. You may also stay put. You can't use the same location two rounds in a row. Colored road spaces flip an event card.</p>
+  <p><b>Shops:</b> the Beast Den and Hunter's Lodge reveal 5 cards from your Creature stack, the Mage Tower from your Spell stack, and the Forge from your Artifact stack. Buy up to 3; every card you don't buy is <b>exiled</b> for good. The Tavern sells mana cards (Plain Mana always in stock, plus 2 special mana from a shared Tavern stack) and quests. The Forge also spends materials on permanent upgrades.</p>
+  <p><b>Cards are spent:</b> a card you play (and a creature that dies, with its equipment) goes back into your Supply Deck, and you must buy it again. Creatures and artifacts still in play when the fight ends, and unplayed cards, stay yours. If your deck runs dry in a fight you draw one junk card per turn.</p>
+  <p><b>Quests</b> pay materials (${Object.values(MATS).map(m=>m.icon+' '+m.name).join(', ')}) plus a little gold. Fight quests are called like any fight; errands complete for free when you reach their location.</p>
+  <p><b>Call to Fight:</b> instead of a location action, call the next Gauntlet commander, one of your fight quests, or Malgrath, from anywhere. Others accept or decline; if anyone declines, the ones who accepted get another chance to back out, until nobody changes their mind. Then the caller fights or backs out.</p>
+  <p><b>Cards:</b> hover a card (or tap the 🔍) to see the full painted card.</p>
+  <p><b>Combat:</b> each fight starts at 0 mana. Your mana cards are a separate mana hand: play 1 per turn; it stays in play and gives mana every turn (special mana may enter <i>sick</i> and give nothing on the turn you play it). Mana and cards can be played the same turn. Your hand is the free Basic Strike (once per turn) plus up to ${HAND_BOUGHT} bought cards, refilled each turn ${G&&G.drawOrder==='random'?'at random':'in the order you bought them'}.</p>
+  <p><b>Turn order:</b> each hero's turn starts with <b>combat</b>: untap, then choose which creatures attack the commander (attacking taps them, so they can't block his next attack). Then play mana and cards. New creatures enter <b>tapped</b>. On the commander's turn he untaps, attacks with himself and his creatures, and you choose blockers from your untapped creatures; blockers deal their ATK back. Then he plays mana and cards from his own deck. You can cast instants while blocking.</p>
+  <p><b>Shields:</b> a hit is reduced by the Shield count, then the creature (or commander) loses 1 Shield, whatever the hit size. <b>Keywords:</b> ${Object.keys(KW).map(k=>`<b>${KW[k]}</b>: ${KW_HELP[k]}`).join(' ')} <b>Armor</b>: ${KW_HELP.armor}</p>
+  <p><b>Difficulty:</b> ${Object.values(DIFFS).map(d=>`<b>${d.name}</b>: ${d.text}`).join(' ')} Commanders scale with the number of heroes in the game. Lone Hero (solo): +${SOLO_HP} max HP, +${SOLO_INCOME} income, +${SOLO_MANA} mana every turn in fights.</p></details>`;
+}
+
+function render(){
+  const app=typeof document!=='undefined'&&document.getElementById('app'); if(!app) return;
+  let h='';
+  if(!G) h=renderSetup();
+  else if(G.over) h=renderEnd();
+  else { h=`<div class="wrap">${renderTop()}${UI.err?`<div class="err">Error: ${esc(UI.err)}</div>`:''}<div class="main"><div>${renderGauntlet()}<div class="boardwrap">${renderBoard()}</div>${renderLocPanel()}${helpHTML()}</div><div>${renderPlayers()}<div class="panel"><b>Log</b><div class="log">${G.log.slice(0,80).map(l=>`<div>${esc(l)}</div>`).join('')}</div></div></div></div></div>`;
+    if(G.combat) h+=renderCombat(); else if(G.modals.length) h+=renderModal(G.modals[0]);
+    if(UI.deckView!==null) h+=renderDeckView(); }
+  app.innerHTML=h;
+}
+function renderSetup(){
+  const S=UI.setup; let h=`<div class="wrap setup"><div class="panel"><h1 style="color:#e8c46a">Thornhold: Relics of the Warlord</h1><p class="muted">Prototype v3 · co-op deck-building board game · hover or tap 🔍 to zoom a card</p>
+  <h3>Heroes</h3><div class="row">${[1,2,3,4].map(n=>`<button class="btn ${S.count===n?'primary':''}" data-a="setCount" data-v="${n}">${n} player${n>1?'s':''}</button>`).join('')}</div>`;
+  for(let i=0;i<S.count;i++){
+    h+=`<div class="panel" style="margin:8px 0"><div class="row"><b>Hero ${i+1}</b> <input data-name="${i}" value="${esc(S.names[i])}" style="font-size:14px;padding:4px"></div>
+    <div class="muted">Faction (sets your 3 Relics and location perks):</div>
+    ${Object.keys(FACTIONS).map(f=>{ const hs=artForHeroFac(f); return `<div class="fac ${S.facs[i]===f?'sel':''}" data-a="setFac" data-v="${i}:${f}">${hs?`<img class="hero-art" src="${esc(hs)}" alt="${esc(FACTIONS[f].name)}" data-zoom="${esc(hs)}">`: `<div class="ic">${FACTIONS[f].icon}</div>`}<b>${FACTIONS[f].name}</b><div class="muted">${esc(FACTIONS[f].perk)}</div><div class="muted">Relics: ${FACTIONS[f].relics.map(r=>RELICS[r].name).join(', ')}</div></div>`; }).join('')}
+    <div class="muted">Deck (any hero can pick any deck):</div>
+    ${DECK_IDS.map(d=>`<div class="fac ${S.decks[i]===d?'sel':''}" data-a="setDeck" data-v="${i}:${d}"><b>${DECKS[d].name}</b> <span class="muted">(${FACTIONS[DECKS[d].fac].one} flavor)</span><div class="muted">${esc(DECKS[d].blurb)}</div></div>`).join('')}</div>`;
+  }
+  h+=`<h3>Difficulty</h3><div class="diffsel">${Object.keys(DIFFS).map(d=>`<div class="fac ${S.diff===d?'sel':''}" data-a="setDiff" data-v="${d}"><b>${DIFFS[d].name}</b><div class="muted">${esc(DIFFS[d].text)}</div></div>`).join('')}</div>
+  <h3>Draw order</h3><div class="row"><button class="btn ${S.drawOrder==='purchase'?'primary':''}" data-a="setOrder" data-v="purchase">Bought cards come in purchase order</button><button class="btn ${S.drawOrder==='random'?'primary':''}" data-a="setOrder" data-v="random">Random</button></div>
+  <p><button class="btn primary" data-a="start" style="font-size:18px">Begin the adventure</button></p></div></div>`;
+  return h;
+}
+function renderEnd(){
+  const w=G.over.won;
+  return `<div class="wrap"><div class="panel endscreen"><h1 style="color:${w?'#e8c46a':'#d26a5a'}">${w?'Victory!':'Defeat'}</h1><p style="font-size:18px">${esc(G.over.msg)}</p>
+  <p>Difficulty: ${DIFFS[G.diff].name} · Rounds played: ${G.round} · Gauntlet stops cleared: ${G.cleared.filter(x=>x).length}/3 · Fights: ${G.stats.fights.length} (${G.stats.fights.filter(f=>f.won).length} won)</p>
+  ${G.players.map(p=>{ const c=deckCounts(p); return `<p>${esc(p.name)} (${FACTIONS[p.fac].one}, ${DECKS[p.deckId].name}): bought ${p.bought} cards · owns ${c.total} · exiled ${c.exiled} · ${c.mana} mana · knocked out ${p.kos}×${p.dead?' · ☠ dead':''}</p>`; }).join('')}
+  <button class="btn primary" data-a="restart">Play again</button></div></div>`;
+}
+function renderTop(){
+  const d=ROUND_EVENTS.find(x=>x.id===G.lastEvent);
+  let track=''; for(let i=1;i<=ROUND_LIMIT;i++) track+=`<span class="${i<=G.round?'on':''} ${ESCALATE_ROUNDS.includes(i)?'mile':''}" title="Round ${i}${ESCALATE_ROUNDS.includes(i)?': escalation (commanders +10% HP)':''}"></span>`;
+  return `<div class="topbar"><h1>Thornhold</h1>
+   <div class="doom">${suddenDeath()?`<b style="color:#ff7b6b">☠ Sudden death · round ${G.round}</b>`:`Round <b>${G.round}</b>/${ROUND_LIMIT}`} <div class="doomtrack">${track}</div></div>
+   <div class="chip">${DIFFS[G.diff].name}</div>
+   ${d?`<div class="chip eperk" title="${esc(d.text)}">Event: ${esc(d.name)}</div>`:''}
+   <button class="btn small" data-a="restart">New game</button></div>`;
+}
+function renderGauntlet(){
+  const next=G.cleared.indexOf(false);
+  return `<div class="gauntlet"><b>THE GAUNTLET</b> <span class="muted">(fought with 📯 Call to Fight, from anywhere)</span>
+   ${STOPS.map((s,i)=>{ const c=COMMANDERS[s]; return `<span class="gstop ${G.cleared[i]?'done':''} ${i===next?'next':''}" title="${esc(c.relics.map(r=>ERELICS[r].name+': '+ERELICS[r].text).join(' | '))}">${c.icon} ${i+1}. ${esc(c.name)}</span>`; }).join('→')}
+   → <span class="gstop ${warlordUnlocked()?'next':'lock'}" title="${esc(COMMANDERS.warlord.relics.map(r=>ERELICS[r].name+': '+ERELICS[r].text).join(' | '))}">👑 ${esc(COMMANDERS.warlord.name)}${warlordUnlocked()?'':' 🔒'}</span>
+   ${G.herald?`<span class="chip eperk">Herald: next commander +${G.herald} HP</span>`:''}</div>`;
+}
+const SPACE_FILL={plain:'#d8c49a',event:'#e0b84a',good:'#7fbf6a',bad:'#c8645a'};
+const SPACE_ICON={plain:'',event:'?',good:'+',bad:'−'};
+function renderBoard(){
+  const p=P(); const {dist}=(G.combat||G.modals.length)?{dist:{}}:reachable(p);
+  let svg=`<svg class="board" viewBox="0 0 1180 760" xmlns="http://www.w3.org/2000/svg"><defs><filter id="sh"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity=".5"/></filter>
+   <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6b4a22"/></marker></defs>
+   <text x="590" y="372" text-anchor="middle" font-size="12" fill="#5a3a12" font-family="Georgia">↓ down the middle</text>
+   <text x="150" y="720" font-size="15" fill="#3b2a12" font-family="Georgia" font-weight="bold">◀ LEFT LOOP</text><text x="980" y="740" font-size="15" fill="#3b2a12" font-family="Georgia" font-weight="bold">RIGHT LOOP ▶</text>`;
+  for(const r of Object.values(ROUTE)) for(let i=0;i<r.length-1;i++){ const A=LOCS[r[i]],B=LOCS[r[i+1]]; const dx=B.x-A.x, dy=B.y-A.y, L=Math.hypot(dx,dy)||1; const ra=A.kind==='space'?14:34, rb=B.kind==='space'?16:36;
+    svg+=`<line x1="${A.x+dx/L*ra}" y1="${A.y+dy/L*ra}" x2="${B.x-dx/L*rb}" y2="${B.y-dy/L*rb}" stroke="#6b4a22" stroke-width="4" stroke-dasharray="3 7" stroke-linecap="round" marker-end="url(#arr)"/>`; }
+  for(const id in LOCS){ const L=LOCS[id]; const re=dist[id]!==undefined;
+    if(L.kind==='space'){ const t=G.spaces[id];
+      svg+=`<g class="node ${re?'reach':''}" ${re?`data-a="move" data-v="${id}"`:''}><title>${esc(SPACE_INFO[t])}</title><circle class="ring" cx="${L.x}" cy="${L.y}" r="14" fill="${SPACE_FILL[t]}" stroke="#5a3d1c" stroke-width="2"/><text x="${L.x}" y="${L.y+5}" text-anchor="middle" font-size="15" font-weight="bold" fill="#2a1a08">${SPACE_ICON[t]}</text></g>`;
+    } else {
+      svg+=`<g class="node ${re?'reach':''}" ${re?`data-a="move" data-v="${id}"`:''} filter="url(#sh)"><title>${esc(L.name+': '+L.desc)}</title><circle class="ring" cx="${L.x}" cy="${L.y}" r="34" fill="#f3e2b8" stroke="#5a3d1c" stroke-width="3"/><text x="${L.x}" y="${L.y+10}" text-anchor="middle" font-size="28">${L.icon}</text><text x="${L.x}" y="${L.y+52}" text-anchor="middle" font-size="13" font-weight="bold" fill="#2a1a08" font-family="Georgia">${esc(L.name.replace('The Prancing Boar ',''))}</text></g>`;
+    }
+    if(re) svg+=`<text x="${L.x}" y="${L.y-(L.kind==='space'?20:40)}" text-anchor="middle" font-size="12" fill="#7a4a00" font-weight="bold">${dist[id]}</text>`;
+  }
+  G.players.forEach((q,i)=>{ if(q.dead) return; const L=LOCS[q.loc]; const ox=(i-1.5)*13; svg+=`<circle cx="${L.x+ox}" cy="${L.y-(L.kind==='space'?22:44)}" r="9" fill="${PCOLORS[i]}" stroke="${i===G.cur?'#fff':'#000'}" stroke-width="${i===G.cur?3:1.5}"><title>${esc(q.name)}</title></circle>`; });
+  return svg+'</svg>';
+}
+function readyHTML(p){ const c=deckCounts(p); return `<div class="ready">Ready to fight: <b>${c.total}</b> cards in hand-deck (${c.creature} creatures, ${c.spell} spells, ${c.artifact} artifacts) · <b>${c.mana}</b> mana · ${p.hp}/${p.maxHp} HP${c.total<6?' <span style="color:#ff9a7a">— low on cards!</span>':''}</div>`; }
+function renderLocPanel(){
+  const p=P(), L=LOCS[p.loc]; if(p.dead) return '';
+  let h=`<div class="panel locpanel"><h3 style="color:${PCOLORS[G.cur]}">${esc(p.name)}'s turn — ${L.kind==='space'?'on the road':esc(L.name)}</h3>`;
+  if(L.kind==='space'){ h+=`<div class="desc">${esc(SPACE_INFO[G.spaces[p.loc]])}</div>`; } else h+=`<div class="desc">${esc(L.desc)}</div>`;
+  if(G.turn.mud) h+=`<div class="desc" style="color:#ff9a7a">Stuck in deep mud: no action or Call to Fight this turn.</div>`;
+  if(!G.turn.moved){
+    if(!G.turn.roll) h+=`<button class="btn primary" data-a="roll">🎲 Roll to move</button> <button class="btn" data-a="stay">Stay here</button>`;
+    else h+=`<div class="desc">Rolled <b>${G.turn.roll}</b>: click a highlighted space on the board (move exactly ${moveSteps()}${p.fac==='elf'?' or '+(moveSteps()+1):''}, or stop early on a location; one way only).</div>`;
+  } else {
+    const A=getActions(p);
+    if(A.length) h+=`<div class="row">${A.map(a=>`<button class="btn" data-a="action" data-v="${a.a}|${a.v===undefined||a.v===null?'':a.v}" ${a.dis?'disabled':''} title="${esc(a.dis?(a.why||''):'')}">${esc(a.label)}</button>`).join('')}</div>`;
+    if(usedLastRound(p)) h+=`<div class="muted">You used this location last round, so you can't use it again yet.</div>`;
+    for(const q of errandsHere(p)) h+=`<button class="btn primary" data-a="errand" data-v="${q.id}">✔ Complete errand: ${esc(q.name)}</button>`;
+  }
+  h+=readyHTML(p);
+  const T=callTargets(p);
+  h+=`<div class="row" style="margin-top:6px"><b>📯 Call to Fight:</b> ${T.map(t=>`<button class="btn small ${t.dis?'':'danger'}" data-a="call" data-v="${t.key}" ${(!canCall()||t.dis)?'disabled':''} title="${esc(t.dis?t.why:'')}">${esc(t.label)}</button>`).join('')}</div>`;
+  h+=`<div style="margin-top:8px"><button class="btn primary" data-a="endTurn" ${G.turn.moved?'':'disabled'}>End turn ▶</button></div></div>`;
+  return h;
+}
+function renderPlayers(){
+  return G.players.map((p,i)=>{ const c=deckCounts(p);
+    const hs=artForHeroFac(p.fac);
+    return `<div class="player ${i===G.cur?'active':''}" style="${p.dead?'opacity:.5':''}">${hs?`<img class="hero-mini" src="${esc(hs)}" alt="" data-zoom="${esc(hs)}" data-a="zoom" data-v="${esc(hs)}">`:''}<div class="pname" style="color:${PCOLORS[i]}">${FACTIONS[p.fac].icon} ${esc(p.name)} ${p.dead?'☠':''}</div>
+    <div class="muted">${FACTIONS[p.fac].one} · ${DECKS[p.deckId].name} deck</div>
+    <div class="bar"><i style="width:${Math.max(0,p.hp)/p.maxHp*100}%"></i></div><div>${p.hp}/${p.maxHp} HP · 🪙 ${p.gold} · 💧 ${c.mana} mana ${matsHTML(p.mats)}</div>
+    <div class="muted">Owned ${c.total} (${c.creature}🐾 ${c.spell}✨ ${c.artifact}⚙️) · Supply ${p.supply.creature.length}/${p.supply.spell.length}/${p.supply.artifact.length} · Exiled ${c.exiled}</div>
+    <div class="chips">${p.relics.map(r=>relicChip(r,false)).join('')}${p.blessed?'<span class="chip perk">Blessed +1 mana</span>':''}${p.quests.map(q=>{ const Q=QUESTS.find(x=>x.id===q); return `<span class="chip quest" title="${esc(Q.text)}">📜 ${esc(Q.name)}</span>`; }).join('')}</div>
+    <button class="btn small" data-a="viewDeck" data-v="${i}">View cards</button></div>`; }).join('');
+}
+function renderDeckView(){
+  const p=G.players[UI.deckView];
+  return `<div class="overlay" style="z-index:30"><div class="modal"><h2>${esc(p.name)}'s cards</h2><button class="btn" data-a="closeDeck">Close</button>
+  <h3>Owned (in purchase order: this is the order they come into your hand)</h3><div class="cards">${ownedSorted(p).map(x=>cardHTML(x)).join('')||'<i>None. Visit a shop!</i>'}</div>
+  <h3>Mana cards (${p.mana.length})</h3><div class="cards">${p.mana.map(id=>manaCardHTML(id)).join('')}</div>
+  <p class="muted">Supply Deck left: ${p.supply.creature.length} creatures, ${p.supply.spell.length} spells, ${p.supply.artifact.length} artifacts. Exiled for good: ${p.exiled}.</p></div></div>`;
+}
+function renderModal(m){
+  const p=G.players[m.pi];
+  if(m.type==='event'){ return `<div class="overlay" style="align-items:center"><div class="eventcard ${m.good?'good':'bad'}"><div class="muted" style="color:#5a3a12">${esc(p.name)} lands on a ${m.space==='event'?'? event':m.good?'blessing':'peril'} space</div><div class="big">${m.ev.icon}</div><h2>${esc(m.ev.name)}</h2><p>${esc(m.ev.text)}</p><div class="res">${esc(m.result)}</div><button class="btn primary" data-a="closeModal">OK</button></div></div>`; }
+  if(m.type==='shop'){
+    const tab=m.tab||'shop'; const L=m.forge?'Mountain Forge':m.stack==='creature'?'Creature shop':'Mage Tower';
+    let h=`<div class="overlay"><div class="modal"><h2>${L}</h2><div class="muted">${esc(p.name)} · 🪙 ${p.gold} · ${matsHTML(p.mats)}</div>`;
+    if(m.forge) h+=`<div class="tabs"><button class="btn ${tab==='shop'?'primary':''}" data-a="forgeTab" data-v="shop">Artifact shop</button><button class="btn ${tab==='up'?'primary':''}" data-a="forgeTab" data-v="up">Upgrades (materials)</button></div>`;
+    if(tab==='shop'&&m.forge&&!m.revealed){
+      h+=`<p>Reveal ${SHOP_REVEAL} cards from your <b>artifact</b> stack (${p.supply.artifact.length} left)? You may buy up to ${m.max}; <b>every card you don't buy is exiled</b> when you leave. Skip this if you only came for upgrades.</p><button class="btn primary" data-a="forgeReveal" ${p.supply.artifact.length?'':'disabled'}>Reveal artifacts</button>`;
+    } else if(tab==='shop'){
+      h+=`<p>Revealed from your <b>${m.stack}</b> stack. Buy up to <b>${m.max}</b> (bought ${m.bought}). When you leave, <b>every card you didn't buy is exiled for good</b>.</p><div class="cards">`;
+      m.cards.forEach((inst,i)=>{ const g=shopPrice(p,inst,m.stack); const ok=p.gold>=g&&m.bought<m.max; h+=cardHTML(inst,{price:g,cant:!ok,foot:`<div class="buy"><button class="btn small primary" data-a="buy" data-v="${i}" ${ok?'':'disabled'}>Buy</button></div>`}); });
+      h+=`</div>${!m.cards.length?'<p class="muted">Nothing left.</p>':''}`;
+    } else {
+      h+=`<p>Spend materials to permanently upgrade a card you own. Upgrades stay on that card even after it is spent and rebought. Max ${MAX_UPGRADES} per card.${p.fac==='dwarf'?' Dwarves pay 1 less material.':''}</p>`;
+      const own=ownedSorted(p); if(!own.length) h+='<p class="muted">You own no cards to upgrade.</p>';
+      for(const inst of own){ const opts=Object.keys(UPGRADES).filter(u=>UPGRADES[u].for===upgradeTargetType(inst));
+        h+=`<div class="uprow"><b style="min-width:170px">${esc(HC[inst.id].name)}</b>${inst.up.length?`<span class="muted">★ ${inst.up.map(u=>UPGRADES[u].name).join(', ')}</span>`:''}
+         ${opts.map(u=>{ const w=upgradeOk(p,inst,u); const c=upgradeCost(p,u); return `<button class="btn small" data-a="upgrade" data-v="${inst.u}:${u}" ${w?'disabled':''} title="${esc(UPGRADES[u].text+(w?' — '+w:''))}">${UPGRADES[u].name} (${Object.keys(c).map(k=>c[k]+MATS[k].icon).join(' ')})</button>`; }).join('')}
+         ${inst.id==='mithril'?`<button class="btn small" data-a="melt" data-v="${inst.u}">Melt into 1 ⛓️</button>`:''}</div>`; }
+    }
+    return h+`<p><button class="btn primary" data-a="closeModal">Done${m.cards.length?` (exile ${m.cards.length} unbought)`:''}</button></p></div></div>`;
+  }
+  if(m.type==='ruins'){
+    let h=`<div class="overlay"><div class="modal"><h2>Cursed Ruins: Forbidden cache</h2>`;
+    if(!m.stack) h+=`<p>Choose a stack to search. You'll see ${ruinsCount(p)} cards and take 1 for free; the rest are exiled.</p><div class="row">${['creature','spell','artifact'].map(s=>`<button class="btn" data-a="ruinsStack" data-v="${s}" ${p.supply[s].length?'':'disabled'}>${s} (${p.supply[s].length})</button>`).join('')}</div>`;
+    else { h+=`<p>${m.took?'You took your card.':'Take 1 card for free.'}</p><div class="cards">${m.cards.map((c,i)=>cardHTML(c,{foot:m.took?'':`<div class="buy"><button class="btn small primary" data-a="ruinsTake" data-v="${i}">Take</button></div>`})).join('')}</div>`; }
+    return h+`<p><button class="btn primary" data-a="closeModal">Leave${m.cards.length?` (exile ${m.cards.length})`:''}</button></p></div></div>`;
+  }
+  if(m.type==='tavern'){
+    let h=`<div class="overlay"><div class="modal"><h2>The Prancing Boar Tavern</h2><div class="muted">${esc(p.name)} · 🪙 ${p.gold} · you own ${p.mana.length} mana cards</div>
+    <p>Buy up to <b>${m.max}</b> mana cards (bought ${m.bought}). Mana cards are yours for good: each fight you play 1 per turn and it keeps giving mana. Unbought special mana goes back under the shared Tavern stack.</p><div class="cards">`;
+    const okP=p.gold>=manaPrice(p,'plain')&&m.bought<m.max; h+=manaCardHTML('plain',{price:manaPrice(p,'plain'),cant:!okP,foot:`<div class="buy"><button class="btn small primary" data-a="tbuy" data-v="plain" ${okP?'':'disabled'}>Buy</button></div>`});
+    m.specials.forEach((id,i)=>{ const ok=p.gold>=manaPrice(p,id)&&m.bought<m.max; h+=manaCardHTML(id,{price:manaPrice(p,id),cant:!ok,foot:`<div class="buy"><button class="btn small primary" data-a="tbuy" data-v="${i}" ${ok?'':'disabled'}>Buy</button></div>`}); });
+    h+=`</div>`;
+    if(m.quests.length&&!m.took&&p.quests.length<2){ h+=`<h3>Quest board (take 1, hold up to 2)</h3>${m.quests.map((q,i)=>{ const Q=QUESTS.find(x=>x.id===q); return `<div class="row"><button class="btn small" data-a="tquest" data-v="${i}">Take</button> <b>${esc(Q.name)}</b> <span class="muted">${esc(Q.text)}</span></div>`; }).join('')}`; }
+    else if(p.quests.length>=2) h+='<p class="muted">You already hold 2 quests.</p>';
+    return h+`<p><button class="btn primary" data-a="closeModal">Leave the Tavern</button></p></div></div>`;
+  }
+  if(m.type==='call'){
+    const caller=G.players[m.pi]; let h=`<div class="overlay"><div class="modal"><h2>📯 ${esc(caller.name)} calls to fight ${esc(callLabel(m.key))}</h2>${readyHTML(caller)}`;
+    if(m.stage!=='final'){
+      h+=`<p>${m.stage==='ask'?'Will you join the fight?':`Someone declined. Pass ${m.pass}: do you still want to fight?`}</p>`;
+      for(const i of m.ask){ const q=G.players[i]; const r=m.resp[i];
+        h+=`<div class="panel" style="margin:6px 0"><b style="color:${PCOLORS[i]}">${esc(q.name)}</b> ${readyHTML(q)} ${r===undefined?`<button class="btn primary" data-a="callResp" data-v="${i}:1">${m.stage==='ask'?'Accept':'Stay in'}</button><button class="btn" data-a="callResp" data-v="${i}:0">${m.stage==='ask'?'Decline':'Back out'}</button>`:`<i>${r?'In':'Out'}</i>`}</div>`; }
+    } else {
+      h+=`<p>Joining: ${m.accepted.length?m.accepted.map(i=>esc(G.players[i].name)).join(', '):'nobody'}. ${esc(caller.name)}, fight or back out?</p><button class="btn danger" data-a="callGo" data-v="1">⚔️ Fight!</button> <button class="btn" data-a="callGo" data-v="0">Back out</button>`;
+    }
+    return h+'</div></div>';
+  }
+  return '';
+}
+
+// ===== Combat screen =====
+function crHTML(cr,o){ o=o||{};
+  const cls=['cr']; if(cr.side==='boss') cls.push('boss'); if(cr.token) cls.push('token'); if(cr.tapped) cls.push('tapped'); if(o.atk) cls.push('atk'); if(o.ally) cls.push('ally'); if(o.tgt) cls.push('tgt');
+  const kws=Object.keys(KW).filter(k=>has(cr,k)).map(k=>KW[k]); if(cr.armor) kws.push('Armor '+cr.armor);
+  const eq=cr.eq.map(e=>HC[e.id].name).join(', ');
+  const src=artForCreature(cr);
+  const title=esc((cr.inst?HC[cr.inst.id].name+': '+HC[cr.inst.id].text:cr.name)+(kws.length? ' · '+kws.join(', '):'')+(eq? ' · '+eq:''));
+  if(src){
+    cls.push('artcr');
+    return `<div class="${cls.join(' ')}" ${o.attrs||''} data-zoom="${esc(src)}" title="${title}">${cr.shield?`<div class="sh">🛡${cr.shield}</div>`:''}${faceImg(src,cr.name)}${zoomBtn(src)}<div class="pt">${effAtk(cr)}/${hpLeft(cr)}${cr.counters?` +${cr.counters}`:''}${eq?' 🗡':''}</div>${cr.tapped?'<div class="muted">tapped</div>':''}</div>`;
+  }
+  return `<div class="${cls.join(' ')}" ${o.attrs||''} title="${title}">${cr.shield?`<div class="sh">🛡${cr.shield}</div>`:''}<div class="mn">${esc(cr.name)}</div><div class="kw">${esc(kws.join(', '))}${cr.counters?` <span class="ctr">+${cr.counters}</span>`:''}</div>${eq?`<div class="eq">🗡 ${esc(eq)}</div>`:''}<div class="pt">${effAtk(cr)}/${hpLeft(cr)}</div>${cr.tapped?'<div class="muted">tapped</div>':''}</div>`;
+}
+function renderCombat(){
+  const C=G.combat, B=C.boss; const F=activeF();
+  const tg=F?getTarget(F):null;
+  let h=`<div class="overlay" style="align-items:flex-start"><div class="modal" style="max-width:1300px">`;
+  const bsrc=artForBoss(B.cid);
+  h+=`<div class="bosspanel"><div class="bossbox ${tg==='boss'?'tgt':''}" data-a="cTarget" data-v="boss">${bsrc?`<img class="boss-art" src="${esc(bsrc)}" alt="${esc(B.name)}" data-zoom="${esc(bsrc)}">`:''}<div><div class="bname">${B.icon} ${esc(B.name)}</div>
+   <div class="bar" style="width:260px"><i style="width:${Math.max(0,B.hp)/B.maxHp*100}%"></i></div><div>❤ ${Math.max(0,B.hp)}/${B.maxHp} ${B.shield?`· 🛡 Shield ${B.shield}`:''} · ⚔ ATK ${Math.max(0,B.atk-B.curse+B.temp)} · 💧 ${B.manaPlayed} mana in play (max ${B.manaCap}) · ✋ ${B.hand.length} · deck ${B.deck.length}</div>
+   <div class="chips">${B.relics.map(r=>relicChip(r,true)).join('')}${B.arts.map(a=>{ const asrc=artForEnemy(a); return `<span class="chip${asrc?' artchip':''}" title="${esc(EC[a].text)}"${asrc?` data-zoom="${esc(asrc)}" data-a="zoom" data-v="${esc(asrc)}"`:''}>${asrc?`<img src="${esc(asrc)}" alt="">`:''}⚙️ ${esc(EC[a].name)}</span>`; }).join('')}</div></div></div>
+   <div><div class="muted">His battlefield (click to target)</div><div class="field">${B.field.map(c=>crHTML(c,{tgt:tg===c.uid,attrs:`data-a="cTarget" data-v="${c.uid}"`})).join('')||'<i class="muted">no creatures</i>'}</div></div></div>`;
+  // phase banner
+  let ph='';
+  if(C.over) ph=`<b>${C.won===true?'🏆 Victory!':C.won===false?'💀 Defeat':'Withdrawn'}</b> <button class="btn primary" data-a="leave">Continue</button>`;
+  else if(C.phase==='block') ph=`<b>${esc(B.name)} attacks!</b> Pick an attack, then click one of your untapped creatures to block it (blockers deal their ATK back). You can cast ⚡ instants now. Then confirm.`;
+  else if(F&&C.step==='attack') ph=`<b>${esc(FP(F).name)}: combat.</b> Click your untapped creatures to choose attackers (they tap and can't block his next attack), then attack or skip.`;
+  else if(F) ph=`<b>${esc(FP(F).name)}: play mana and cards.</b> Click an enemy to target it; click your creature to choose it for cards that need one.`;
+  h+=`<div class="phase">Round ${C.round} · ${ph}</div>`;
+  if(C.phase==='block'&&C.pending){
+    h+=`<div class="panel respond">${C.pending.items.map((it,i)=>{ const cands=allHeroCreatures().filter(b=>canBlock(b,it.a));
+      return `<div class="atkrow ${C.sel===i?'sel':''} ${it.cancel?'cancel':''}" data-a="bSel" data-v="${i}"><b>${esc(srcName(it))}</b> (${atkOf(it)} ATK${!it.a.cmd&&has(it.a,'fly')?', Flying':''}${!it.a.cmd&&has(it.a,'trample')?', Trample':''}) → ${esc(FP(it.tgt).name)} ·
+       ${it.blk?`blocked by <b>${esc(it.blk.name)}</b> <button class="btn small" data-a="bAssign" data-v="${i}:">unblock</button>`:'unblocked'}
+       ${cands.filter(b=>b!==it.blk).map(b=>`<button class="btn small" data-a="bAssign" data-v="${i}:${b.uid}">Block with ${esc(b.name)} (${effAtk(b)}/${hpLeft(b)})</button>`).join('')}</div>`; }).join('')}
+      <button class="btn primary" data-a="bConfirm">Confirm blocks</button></div>`;
+  }
+  // fighters
+  h+=`<div class="fighters">`;
+  C.fighters.forEach((Fx,fi)=>{ const p=FP(Fx); const isA=F===Fx;
+    h+=`<div class="fighter ${isA?'act':''}" style="flex:1;min-width:280px;${Fx.out?'opacity:.45':''}"><b style="color:${PCOLORS[Fx.pi]}">${esc(p.name)}</b> ${Fx.out?(Fx.retreated?'(retreated)':'(fallen)'):''} · ❤ ${p.hp}/${p.maxHp} · 🛡 Block ${Fx.block} · 💧 ${Fx.mana} mana · draw ${Fx.draw.length}
+      <div class="chips">${p.relics.map(r=>relicChip(r,false)).join('')}${Fx.arts.map(a=>{ const asrc=artForInst(a); return `<span class="chip${asrc?' artchip':''}" title="${esc(HC[a.id].text)}"${asrc?` data-zoom="${esc(asrc)}" data-a="zoom" data-v="${esc(asrc)}"`:''}>${asrc?`<img src="${esc(asrc)}" alt="">`:''}⚙️ ${esc(HC[a.id].name)}</span>`; }).join('')}${Fx.manaIn.map(x=>{ const msrc=artForMana(x.id); return `<span class="chip${msrc?' artchip':''}" title="${esc(MANA[x.id].text)}"${msrc?` data-zoom="${esc(msrc)}" data-a="zoom" data-v="${esc(msrc)}"`:''}>${msrc?`<img src="${esc(msrc)}" alt="">`:''}💧${esc(MANA[x.id].name)}${x.sick?' (sick)':''}</span>`; }).join('')}</div>
+      <div class="field">${Fx.field.map(c=>{ let attrs='';
+        if(C.phase==='block'&&C.pending){ attrs=`data-a="bAssign" data-v="${C.sel||0}:${c.uid}"`; }
+        else if(isA&&C.step==='attack'&&!c.tapped) attrs=`data-a="cToggleAtk" data-v="${c.uid}"`;
+        else if(isA) attrs=`data-a="cAlly" data-v="${c.uid}"`;
+        return crHTML(c,{atk:isA&&Fx.atkSel[c.uid],ally:isA&&Fx.ally===c.uid,attrs}); }).join('')||'<i class="muted">no creatures</i>'}</div>`;
+    if(C.phase==='block'&&!Fx.out){ const inst=Fx.hand.map((x,i)=>({x,i})).filter(o=>HC[o.x.id].type==='instant');
+      if(inst.length) h+=`<div class="muted">Instants (${Fx.mana} mana left):</div><div class="cards">${inst.map(o=>{ const w=whyNot(Fx,o.x,true); return cardHTML(o.x,{F:Fx,play:!w,cant:!!w,why:w,attrs:w?'':`data-a="bInstant" data-v="${fi}:${o.i}"`}); }).join('')}</div>`; }
+    h+=`</div>`; });
+  h+=`</div>`;
+  if(F&&!C.over){
+    const p=FP(F);
+    if(C.step==='attack'){ const n=Object.values(F.atkSel).filter(x=>x).length; h+=`<div class="row"><button class="btn danger" data-a="cDeclare">⚔️ Attack with ${n} creature${n===1?'':'s'}</button><button class="btn" data-a="cSkip">Don't attack</button></div>`; }
+    else {
+      h+=`<div class="muted">Your hand (Basic Strike + ${F.hand.length}/${HAND_BOUGHT} bought cards):</div><div class="cards">`;
+      { const ssrc=artPath('hc','strike'); const scls=`card spell ${ssrc?'artcard':''} ${F.strikeUsed?'cant':'play'}`; const sattrs=F.strikeUsed?'':`data-a="cStrike"`;
+        h+= ssrc
+          ? `<div class="${scls}" ${sattrs} data-zoom="${esc(ssrc)}" title="Basic Strike: Deal 2 damage to your target. Gain 1 Block. Never spent.">${faceImg(ssrc,'Basic Strike')}${zoomBtn(ssrc)}</div>`
+          : `<div class="${scls}" ${sattrs}><div class="mana">0</div><div class="cname">Basic Strike</div><div class="ctype">✨ free · once per turn</div><div class="ctext">Deal 2 damage to your target. Gain 1 Block. Never spent.</div></div>`; }
+      F.hand.forEach((x,i)=>{ const w=whyNot(F,x,false); h+=cardHTML(x,{F,play:!w,cant:!!w,why:w,attrs:w?'':`data-a="cPlay" data-v="${i}"`}); });
+      h+=`</div><div class="muted">Mana hand (play 1 per turn${F.manaThisTurn?' — already played this turn':''}):</div><div class="cards">${F.manaHand.map((id,i)=>manaCardHTML(id,{play:!F.manaThisTurn,cant:F.manaThisTurn,attrs:F.manaThisTurn?'':`data-a="cMana" data-v="${i}"`})).join('')||'<i class="muted">all mana in play</i>'}</div>`;
+      h+=`<div class="row"><button class="btn primary" data-a="cEnd">End turn ▶</button>${hasRelic(p,'bloodPact')?`<button class="btn" data-a="cPact" ${F.flags.pact||p.hp<=2?'disabled':''}>Blood Pact: 2 HP → 1 mana</button>`:''}${F.field.filter(c=>c.def.sacMana).map(c=>`<button class="btn small" data-a="cSac" data-v="${c.uid}">Sacrifice ${esc(c.name)} for 1 mana</button>`).join('')}<button class="btn small" data-a="cRetreat">Retreat (−2 gold)</button></div>`;
+    }
+  }
+  h+=`<div class="clog" style="max-height:200px;margin-top:8px">${C.log.slice(0,40).map(l=>`<div>${esc(l)}</div>`).join('')}</div>`;
+  return h+`</div></div>`;
+}
+
+// ===== Input =====
+function act(a,v){
+  UI.err=null;
+  try{
+    switch(a){
+      case 'restart': if(!G||G.over||confirmRestart()){ G=null; UI.deckView=null; } break;
+      case 'setCount': UI.setup.count=+v; break;
+      case 'setFac': { const [i,f]=v.split(':'); UI.setup.facs[+i]=f; break; }
+      case 'setDeck': { const [i,d]=v.split(':'); UI.setup.decks[+i]=d; break; }
+      case 'setDiff': UI.setup.diff=v; break;
+      case 'setOrder': UI.setup.drawOrder=v; break;
+      case 'start': { const S=UI.setup; newGame(S.count,S.facs.slice(0,S.count),S.names.slice(0,S.count),S.decks.slice(0,S.count),S.diff,S.drawOrder); break; }
+      case 'roll': rollMove(); break;
+      case 'stay': stayPut(); break;
+      case 'move': moveTo(v); break;
+      case 'action': { const [x,y]=v.split('|'); doAction(x,y===''?null:y); break; }
+      case 'errand': doErrand(v); break;
+      case 'endTurn': endTurn(); break;
+      case 'closeModal': closeModal(); break;
+      case 'buy': shopBuy(+v); break;
+      case 'forgeTab': { const m=G.modals[0]; if(m) m.tab=v; break; }
+      case 'forgeReveal': forgeReveal(); break;
+      case 'upgrade': { const [u,uid]=v.split(':'); forgeUpgrade(+u,uid); break; }
+      case 'melt': forgeMelt(+v); break;
+      case 'tbuy': tavernBuy(v); break;
+      case 'tquest': tavernQuest(+v); break;
+      case 'ruinsStack': ruinsPickStack(v); break;
+      case 'ruinsTake': ruinsTake(+v); break;
+      case 'call': callFight(v); break;
+      case 'callResp': { const [i,y]=v.split(':'); callRespond(+i,y==='1'); break; }
+      case 'callGo': callGo(v==='1'); break;
+      case 'viewDeck': UI.deckView=+v; break;
+      case 'closeDeck': UI.deckView=null; break;
+      case 'cTarget': setTarget(v); break;
+      case 'cAlly': setAlly(v); break;
+      case 'cToggleAtk': toggleAttacker(v); break;
+      case 'cDeclare': declareAttack(); break;
+      case 'cSkip': declareAttack([]); break;
+      case 'cStrike': playStrike(); break;
+      case 'cPlay': playCard(+v); break;
+      case 'cMana': playMana(+v); break;
+      case 'cEnd': endHeroTurn(); break;
+      case 'cRetreat': retreat(); break;
+      case 'cPact': bloodPact(); break;
+      case 'cSac': sacThrall(v); break;
+      case 'bSel': if(G.combat) G.combat.sel=+v; break;
+      case 'bAssign': { const [i,u]=v.split(':'); if(G.combat){ G.combat.sel=+i; assignBlock(+i,u); } break; }
+      case 'bInstant': { const [fi,i]=v.split(':'); playCard(+i,+fi); break; }
+      case 'bConfirm': confirmBlocks(); break;
+      case 'leave': leaveCombat(); break;
+      case 'zoom': showCardZoom(v, true); return;
+      case 'closeZoom': hideCardZoom(true); return;
+    }
+    if(G&&G.combat) combatTick();
+    autoAdvance();
+  }catch(e){ UI.err=(e&&e.stack)||String(e); if(typeof console!=='undefined') console.error(e); }
+  render();
+}
+function confirmRestart(){ try{ return window.confirm('Abandon this game and start over?'); }catch(e){ return true; } }
+if(typeof document!=='undefined'){
+  document.addEventListener('click',e=>{ const el=e.target.closest('[data-a]'); if(!el) return; e.stopPropagation(); act(el.dataset.a, el.dataset.v); });
+  document.addEventListener('input',e=>{ const t=e.target; if(t&&t.dataset&&t.dataset.name!==undefined) UI.setup.names[+t.dataset.name]=t.value||('Player '+(+t.dataset.name+1)); });
+  window.TH={get G(){return G;}, forgeReveal, act, newGame, setSeed, render, reachable, getActions, activeF, HC, P, callTargets, showCardZoom, hideCardZoom};
+  document.addEventListener('DOMContentLoaded', ()=>{ ensureZoom(); render(); });
+  if(document.readyState!=='loading'){ ensureZoom(); render(); }
+}
+</script></body></html>
