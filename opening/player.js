@@ -1,121 +1,78 @@
 (function () {
   "use strict";
 
+  var AFTER_LINE_PAUSE = 1200;
+
   var PANELS = [
     {
       src: "art/panel_01.webp",
       ken: "kb-in-up",
       glow: "dust",
-      beats: [
-        {
-          speaker: "",
-          text: "Before the warlocks of Thornhold forgot my name, there were two of us. Born on the same night. Born with more power than a village should ever hold."
-        }
-      ]
+      audio: "audio/line_01",
+      text: "Before the warlocks of Thornhold forgot their names, there were two boys. Born on the same night. Born with more power than a village should ever hold."
     },
     {
       src: "art/panel_02.webp",
       ken: "kb-pan-right",
       glow: "dust",
-      beats: [
-        {
-          speaker: "",
-          text: "They said a gift like ours would ruin a house. Mother only smiled."
-        },
-        {
-          speaker: "Mother",
-          text: "Come inside, you two. It's nearly dark.",
-          remembered: true
-        }
-      ]
+      audio: "audio/line_02",
+      text: "They said a gift like theirs would ruin a house. Their mother only smiled. Come inside, you two, she would say. It's nearly dark."
     },
     {
       src: "art/panel_03.webp",
       ken: "kb-in-right",
       glow: "violet",
-      beats: [
-        {
-          speaker: "",
-          text: "My brother was the wild one. He took what he wanted. I told myself I was nothing like him."
-        }
-      ]
+      audio: "audio/line_03",
+      text: "One brother was the wild one. He took what he wanted. The other told himself he was nothing like him."
     },
     {
       src: "art/panel_04.webp",
       ken: "kb-in-left",
       glow: "gold",
-      beats: [
-        {
-          speaker: "",
-          text: "But the temptation lived in me, too. I thought of using the gift for greed. For a glance from a girl who had never looked my way. I hated that I could."
-        }
-      ]
+      audio: "audio/line_04",
+      text: "But the temptation lived in the quieter boy, too. He thought of using the gift for greed. For a glance from a girl who had never looked his way. He hated that he could."
     },
     {
       src: "art/panel_05.webp",
       ken: "kb-in-center",
       glow: "dust",
-      beats: [
-        {
-          speaker: "",
-          text: "I could not live with a heart that wanted such things. So I found a way to cut the darkness out of me. A ritual older than Thornhold itself."
-        }
-      ]
+      audio: "audio/line_05",
+      text: "He could not live with a heart that wanted such things. So he found a way to cut the darkness out of himself. A ritual older than Thornhold itself."
     },
     {
       src: "art/panel_06.webp",
       ken: "kb-in-up",
       glow: "ritual",
-      beats: [
-        {
-          speaker: "",
-          text: "I succeeded. The darkness left me. But when the light returned, my brother was not the same."
-        }
-      ]
+      audio: "audio/line_06",
+      text: "He succeeded. The darkness left him. But when the light returned, his brother was not the same."
     },
     {
       src: "art/panel_07.webp",
       ken: "kb-in-center",
       glow: "ash",
-      beats: [
-        {
-          speaker: "",
-          text: "All the good in him was gone. As if I had stolen it. He became a storm the valley could not weather."
-        }
-      ]
+      audio: "audio/line_07",
+      text: "All the good in him was gone. As if his brother had stolen it. He became a storm the valley could not weather."
     },
     {
       src: "art/panel_08.webp",
       ken: "kb-pan-right",
       glow: "gold",
-      beats: [
-        {
-          speaker: "",
-          text: "I should have ended it. I could not. He is my brother. How do you raise a hand against your own blood?"
-        }
-      ]
+      audio: "audio/line_08",
+      text: "He should have ended it. He could not. This was his brother. How do you raise a hand against your own blood?"
     },
     {
       src: "art/panel_09.webp",
       ken: "kb-in-right",
       glow: "dust",
-      beats: [
-        {
-          speaker: "",
-          text: "So I went looking for someone stronger than my love for him. Someone who could do what I cannot."
-        }
-      ]
+      audio: "audio/line_09",
+      text: "So he went looking for someone stronger than his love for his brother. Someone who could do what he could not."
     },
     {
       src: "art/panel_10.webp",
       ken: "kb-in-center",
       glow: "gold",
-      beats: [
-        {
-          speaker: "",
-          text: "If you can hear me, I need a hero. Help me find my brother. Help me stop him. I will walk with you as far as I can. The rest, I must leave to you."
-        }
-      ]
+      audio: "audio/line_10",
+      text: "And so he searched, until he found you. He needs a hero. Help him find his brother. Help him stop him. He will walk with you as far as he can. The rest, he must leave to you."
     }
   ];
 
@@ -132,30 +89,44 @@
   var overlayBody = document.getElementById("overlay-body");
   var canvas = document.getElementById("particles");
   var ctx = canvas.getContext("2d");
+  var voiceEl = document.getElementById("voice");
 
   var front = layerA;
   var back = layerB;
   var panelIndex = 0;
-  var beatIndex = 0;
   var typing = false;
+  var playingLine = false;
   var typed = "";
   var fullText = "";
   var typeTimer = null;
-  var mode = "intro"; // intro | playing | finale | ended
+  var autoTimer = null;
+  var mode = "intro";
   var glow = "dust";
   var particles = [];
   var muted = false;
   var audio = null;
   var reducedMotion = false;
+  var preferOgg = false;
 
   try {
     reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   } catch (e) {}
 
+  if (voiceEl) {
+    preferOgg = !voiceEl.canPlayType("audio/mpeg") && !!voiceEl.canPlayType("audio/ogg");
+  }
+
+  function audioSrc(base) {
+    return base + (preferOgg ? ".ogg" : ".mp3");
+  }
+
   function preload() {
     PANELS.forEach(function (p) {
       var img = new Image();
       img.src = p.src;
+      var a = new Audio();
+      a.preload = "auto";
+      a.src = audioSrc(p.audio);
     });
   }
 
@@ -263,22 +234,19 @@
     var low = tone(55, "sine", 0.22, 140);
     var mid = tone(82.4, "triangle", 0.07, 280);
     var high = tone(329.6, "sine", 0.02, 1200);
-    // slow drift
     var t0 = ac.currentTime;
-    if (low.osc.frequency.linearRampToValueAtTime) {
-      try {
-        low.osc.frequency.setValueAtTime(55, t0);
-        low.osc.frequency.linearRampToValueAtTime(58, t0 + 8);
-        mid.osc.frequency.setValueAtTime(82.4, t0);
-        mid.osc.frequency.linearRampToValueAtTime(78, t0 + 11);
-      } catch (e) {}
-    }
+    try {
+      low.osc.frequency.setValueAtTime(55, t0);
+      low.osc.frequency.linearRampToValueAtTime(58, t0 + 8);
+      mid.osc.frequency.setValueAtTime(82.4, t0);
+      mid.osc.frequency.linearRampToValueAtTime(78, t0 + 11);
+    } catch (e) {}
 
     audio = { ac: ac, master: master, voices: [low, mid, high] };
-    fadeAudio(muted ? 0 : 0.085, 1.6);
+    fadeDrone(muted ? 0 : 0.05, 1.6);
   }
 
-  function fadeAudio(to, seconds) {
+  function fadeDrone(to, seconds) {
     if (!audio) return;
     var now = audio.ac.currentTime;
     audio.master.gain.cancelScheduledValues(now);
@@ -289,7 +257,13 @@
   function setMute(next) {
     muted = next;
     muteBtn.textContent = muted ? "Sound off" : "Sound on";
-    fadeAudio(muted ? 0 : 0.085, 0.4);
+    fadeDrone(muted ? 0 : 0.05, 0.4);
+    if (voiceEl) {
+      voiceEl.muted = muted;
+      if (muted) {
+        voiceEl.pause();
+      }
+    }
   }
 
   function clearType() {
@@ -300,11 +274,30 @@
     typing = false;
   }
 
-  function typeSpeed(ch, prev) {
-    if (ch === "…" || ch === "—" || ch === ".") return 280;
-    if (ch === "," || ch === ";") return 140;
-    if (prev === "." || prev === "…") return 80;
-    return 28;
+  function clearAuto() {
+    if (autoTimer) {
+      clearTimeout(autoTimer);
+      autoTimer = null;
+    }
+  }
+
+  function stopVoice() {
+    if (!voiceEl) return;
+    try {
+      voiceEl.pause();
+      voiceEl.onended = null;
+      voiceEl.onerror = null;
+      voiceEl.currentTime = 0;
+    } catch (e) {}
+    playingLine = false;
+  }
+
+  function typeSpeed(ch, prev, perChar) {
+    var base = perChar || 28;
+    if (ch === "…" || ch === "—" || ch === ".") return Math.max(180, base * 4);
+    if (ch === "," || ch === ";") return Math.max(90, base * 2.5);
+    if (prev === "." || prev === "…") return Math.max(50, base * 1.8);
+    return base;
   }
 
   function showHint(on) {
@@ -312,25 +305,16 @@
     else hintEl.classList.remove("show");
   }
 
-  function setLine(beat, text) {
-    if (beat.speaker) {
-      speakerEl.hidden = false;
-      speakerEl.textContent = beat.speaker;
-    } else {
-      speakerEl.hidden = true;
-      speakerEl.textContent = "";
-    }
-    if (beat.remembered) lineEl.classList.add("remembered");
-    else lineEl.classList.remove("remembered");
+  function setLine(text) {
+    speakerEl.hidden = true;
+    speakerEl.textContent = "";
+    lineEl.classList.remove("remembered");
     lineEl.textContent = text;
   }
 
-  function startBeat() {
-    var panel = PANELS[panelIndex];
-    var beat = panel.beats[beatIndex];
-    fullText = beat.text;
+  function startTyping(perChar) {
     typed = "";
-    setLine(beat, "");
+    setLine("");
     caption.classList.add("show");
     showHint(false);
     typing = true;
@@ -339,39 +323,127 @@
       if (typed.length >= fullText.length) {
         typing = false;
         typeTimer = null;
-        showHint(true);
         return;
       }
       var ch = fullText.charAt(typed.length);
       var prev = typed.charAt(typed.length - 1);
       typed += ch;
       lineEl.textContent = typed;
-      typeTimer = setTimeout(step, typeSpeed(ch, prev));
+      typeTimer = setTimeout(step, typeSpeed(ch, prev, perChar));
     }
-    typeTimer = setTimeout(step, 220);
+    typeTimer = setTimeout(step, 180);
   }
 
-  function finishBeat() {
+  function finishText() {
     clearType();
-    var panel = PANELS[panelIndex];
-    var beat = panel.beats[beatIndex];
     typed = fullText;
-    setLine(beat, fullText);
+    setLine(fullText);
+  }
+
+  function scheduleAdvance() {
+    clearAuto();
     showHint(true);
+    autoTimer = setTimeout(function () {
+      autoTimer = null;
+      if (mode === "playing") goNext();
+    }, AFTER_LINE_PAUSE);
+  }
+
+  function onLineEnded() {
+    playingLine = false;
+    finishText();
+    scheduleAdvance();
+  }
+
+  function playVoice(panel, onReady) {
+    if (!voiceEl) {
+      onReady(0);
+      return;
+    }
+    stopVoice();
+    voiceEl.muted = muted;
+    voiceEl.src = audioSrc(panel.audio);
+    voiceEl.onended = function () {
+      onLineEnded();
+    };
+    voiceEl.onerror = function () {
+      playingLine = false;
+      if (typing) return; // typewriter will finish on its own timing
+      onLineEnded();
+    };
+    var started = false;
+    function ready() {
+      if (started) return;
+      started = true;
+      var dur = 0;
+      try { dur = voiceEl.duration || 0; } catch (e) {}
+      if (!isFinite(dur)) dur = 0;
+      onReady(dur);
+    }
+    voiceEl.onloadedmetadata = ready;
+    var playAttempt = voiceEl.play();
+    if (playAttempt && playAttempt.then) {
+      playAttempt.then(function () {
+        playingLine = !muted && !voiceEl.paused;
+        if (voiceEl.readyState >= 1) ready();
+      }).catch(function () {
+        playingLine = false;
+        onReady(0);
+      });
+    } else {
+      playingLine = !muted;
+      setTimeout(ready, 80);
+    }
+    // fallback if metadata never arrives
+    setTimeout(function () { ready(); }, 800);
+  }
+
+  function startBeat() {
+    var panel = PANELS[panelIndex];
+    fullText = panel.text;
+    clearAuto();
+    clearType();
+    caption.classList.add("show");
+    showHint(false);
+
+    function beginType(durationSec) {
+      var perChar = 28;
+      if (durationSec && durationSec > 0.5 && fullText.length > 0) {
+        perChar = Math.max(16, Math.min(60, (durationSec * 0.92 * 1000) / fullText.length));
+      }
+      startTyping(perChar);
+      if (!durationSec || muted || !playingLine) {
+        // no voice playing: when typing finishes, pause then auto-advance
+        var check = function () {
+          if (mode !== "playing") return;
+          if (typing) {
+            setTimeout(check, 120);
+            return;
+          }
+          if (!playingLine) scheduleAdvance();
+        };
+        setTimeout(check, 400);
+      }
+    }
+
+    if (muted || !voiceEl) {
+      playingLine = false;
+      beginType(0);
+      return;
+    }
+    playVoice(panel, beginType);
   }
 
   function swapLayers(panel) {
     var incoming = back;
     incoming.className = "layer";
     incoming.style.backgroundImage = "url('" + panel.src + "')";
-    // restart ken burns
     void incoming.offsetWidth;
     incoming.classList.add(reducedMotion ? "" : panel.ken);
     incoming.classList.add("visible");
     front.classList.remove("visible");
     back = front;
     front = incoming;
-    // after fade, clear old ken class from the hidden layer
     setTimeout(function () {
       if (back !== front) {
         back.className = "layer";
@@ -382,7 +454,6 @@
 
   function showPanel(index, withFade) {
     panelIndex = index;
-    beatIndex = 0;
     glow = PANELS[index].glow;
     particles = [];
     var panel = PANELS[index];
@@ -399,6 +470,9 @@
 
   function showIntro() {
     mode = "intro";
+    clearAuto();
+    clearType();
+    stopVoice();
     caption.classList.remove("show");
     showHint(false);
     skipBtn.classList.remove("show");
@@ -426,8 +500,9 @@
 
   function showFinale() {
     mode = "finale";
+    clearAuto();
     clearType();
-    // land on the last panel if we skipped
+    stopVoice();
     if (panelIndex !== PANELS.length - 1 || !front.classList.contains("visible")) {
       panelIndex = PANELS.length - 1;
       glow = PANELS[panelIndex].glow;
@@ -435,9 +510,7 @@
       front.style.backgroundImage = "url('" + PANELS[panelIndex].src + "')";
       back.className = "layer";
     }
-    var last = PANELS[PANELS.length - 1];
-    var lastBeat = last.beats[last.beats.length - 1];
-    setLine(lastBeat, lastBeat.text);
+    setLine(PANELS[PANELS.length - 1].text);
     caption.classList.add("show");
     showHint(false);
     skipBtn.classList.remove("show");
@@ -456,6 +529,8 @@
 
   function beginJourney() {
     mode = "ended";
+    clearAuto();
+    stopVoice();
     caption.classList.remove("show");
     overlayBody.innerHTML =
       "<h1>Thornhold</h1>" +
@@ -472,27 +547,29 @@
     });
   }
 
+  function goNext() {
+    clearAuto();
+    stopVoice();
+    if (panelIndex < PANELS.length - 1) {
+      showPanel(panelIndex + 1, true);
+      return;
+    }
+    showFinale();
+  }
+
   function advance() {
     if (mode === "intro") {
       startStory();
       return;
     }
     if (mode === "finale" || mode === "ended") return;
-    if (typing) {
-      finishBeat();
+    // Click skips ahead: if a line is still playing or typing, jump to the next panel.
+    if (typing || playingLine || autoTimer) {
+      finishText();
+      goNext();
       return;
     }
-    var panel = PANELS[panelIndex];
-    if (beatIndex < panel.beats.length - 1) {
-      beatIndex += 1;
-      startBeat();
-      return;
-    }
-    if (panelIndex < PANELS.length - 1) {
-      showPanel(panelIndex + 1, true);
-      return;
-    }
-    showFinale();
+    goNext();
   }
 
   stage.addEventListener("click", function (e) {
@@ -528,7 +605,6 @@
   requestAnimationFrame(tickParticles);
   showIntro();
 
-  // Expose a tiny hook for headless tests.
   window.__thornholdCutscene = {
     advance: advance,
     skip: showFinale,
@@ -536,9 +612,11 @@
     start: startStory,
     get mode() { return mode; },
     get panel() { return panelIndex; },
-    get beat() { return beatIndex; },
     get typing() { return typing; },
+    get playing() { return playingLine; },
     get text() { return lineEl.textContent; },
-    panels: PANELS.length
+    get muted() { return muted; },
+    panels: PANELS.length,
+    audioFor: function (i) { return audioSrc(PANELS[i].audio); }
   };
 })();

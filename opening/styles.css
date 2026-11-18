@@ -51,11 +51,11 @@ html, body {
 
 .layer {
   position: absolute;
-  inset: -6%;
+  inset: 0;
   background-color: #000;
   background-repeat: no-repeat;
   background-position: center;
-  background-size: cover;
+  background-size: contain; /* show the full painted panel; letterbox if needed */
   opacity: 0;
   transition: opacity 1.15s ease;
   will-change: transform, opacity;
@@ -65,37 +65,37 @@ html, body {
   opacity: 1;
 }
 
-/* Ken Burns variants — slow, subtle, so 1280 art stays sharp enough */
-.kb-in-center { animation: kbInCenter 22s ease-out forwards; }
-.kb-in-left   { animation: kbInLeft   22s ease-out forwards; }
-.kb-in-right  { animation: kbInRight  22s ease-out forwards; }
-.kb-in-up     { animation: kbInUp     22s ease-out forwards; }
-.kb-pan-right { animation: kbPanRight 24s linear forwards; }
-.kb-pan-left  { animation: kbPanLeft  24s linear forwards; }
+/* Ken Burns — start at 1.0 so the whole panel is visible, drift at most to 1.04 */
+.kb-in-center { animation: kbInCenter 28s ease-out forwards; }
+.kb-in-left   { animation: kbInLeft   28s ease-out forwards; }
+.kb-in-right  { animation: kbInRight  28s ease-out forwards; }
+.kb-in-up     { animation: kbInUp     28s ease-out forwards; }
+.kb-pan-right { animation: kbPanRight 30s linear forwards; }
+.kb-pan-left  { animation: kbPanLeft  30s linear forwards; }
 
 @keyframes kbInCenter {
-  from { transform: scale(1.04); }
-  to   { transform: scale(1.12); }
+  from { transform: scale(1.0); }
+  to   { transform: scale(1.04); }
 }
 @keyframes kbInLeft {
-  from { transform: scale(1.05) translate(1.6%, 0); }
-  to   { transform: scale(1.13) translate(-1.2%, -0.6%); }
+  from { transform: scale(1.0) translate(0.6%, 0); }
+  to   { transform: scale(1.04) translate(-0.6%, -0.3%); }
 }
 @keyframes kbInRight {
-  from { transform: scale(1.05) translate(-1.6%, 0); }
-  to   { transform: scale(1.13) translate(1.2%, -0.5%); }
+  from { transform: scale(1.0) translate(-0.6%, 0); }
+  to   { transform: scale(1.04) translate(0.6%, -0.3%); }
 }
 @keyframes kbInUp {
-  from { transform: scale(1.04) translateY(2%); }
-  to   { transform: scale(1.12) translateY(-1.2%); }
+  from { transform: scale(1.0) translateY(0.5%); }
+  to   { transform: scale(1.04) translateY(-0.4%); }
 }
 @keyframes kbPanRight {
-  from { transform: scale(1.1) translate(-2%, 0); }
-  to   { transform: scale(1.1) translate(2%, -0.8%); }
+  from { transform: scale(1.0) translate(-0.7%, 0); }
+  to   { transform: scale(1.03) translate(0.7%, -0.2%); }
 }
 @keyframes kbPanLeft {
-  from { transform: scale(1.1) translate(2%, 0); }
-  to   { transform: scale(1.1) translate(-2%, -0.6%); }
+  from { transform: scale(1.0) translate(0.7%, 0); }
+  to   { transform: scale(1.03) translate(-0.7%, -0.2%); }
 }
 
 #particles {
@@ -113,8 +113,8 @@ html, body {
   z-index: 3;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at center, transparent 42%, rgba(0,0,0,0.45) 100%),
-    linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.18) 34%, transparent 52%);
+    radial-gradient(ellipse at center, transparent 62%, rgba(0,0,0,0.28) 100%),
+    linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.12) 28%, transparent 48%);
 }
 
 #caption {
