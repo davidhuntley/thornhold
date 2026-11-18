@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Thornhold — Opening</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="stage">
+    <div id="layers">
+      <div class="layer" id="layer-a"></div>
+      <div class="layer" id="layer-b"></div>
+    </div>
+    <canvas id="particles"></canvas>
+    <div id="vignette"></div>
+    <div id="caption">
+      <div class="caption-inner">
+        <p id="speaker" hidden></p>
+        <p id="line"></p>
+      </div>
+      <div id="continue-hint">Click or press Space</div>
+    </div>
+    <button id="btn-mute" type="button">Sound on</button>
+    <button id="btn-skip" type="button">Skip</button>
+    <div id="overlay">
+      <div id="overlay-body"></div>
+    </div>
+  </div>
+  <script src="player.js"></script>
+</body>
+</html>
