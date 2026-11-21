@@ -9,12 +9,14 @@
 <body>
   <audio id="voice" preload="auto"></audio>
   <div id="stage">
-    <div id="layers">
-      <div class="layer" id="layer-a"></div>
-      <div class="layer" id="layer-b"></div>
+    <div id="frame">
+      <div id="layers">
+        <div class="layer" id="layer-a"></div>
+        <div class="layer" id="layer-b"></div>
+      </div>
+      <canvas id="particles"></canvas>
+      <div id="vignette"></div>
     </div>
-    <canvas id="particles"></canvas>
-    <div id="vignette"></div>
     <div id="caption">
       <div class="caption-inner">
         <p id="speaker" hidden></p>

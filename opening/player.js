@@ -9,70 +9,63 @@
       ken: "kb-in-up",
       glow: "dust",
       audio: "audio/line_01",
-      text: "Before the warlocks of Thornhold forgot their names, there were two boys. Born on the same night. Born with more power than a village should ever hold."
+      text: "Two brothers were born on the same night, in a valley at the edge of the old forest. With a power no village should hold."
     },
     {
       src: "art/panel_02.webp",
       ken: "kb-pan-right",
       glow: "dust",
       audio: "audio/line_02",
-      text: "They said a gift like theirs would ruin a house. Their mother only smiled. Come inside, you two, she would say. It's nearly dark."
+      text: "One was quiet. The other was wild."
     },
     {
       src: "art/panel_03.webp",
       ken: "kb-in-right",
       glow: "violet",
       audio: "audio/line_03",
-      text: "One brother was the wild one. He took what he wanted. The other told himself he was nothing like him."
+      text: "The wild one took what he wanted."
     },
     {
       src: "art/panel_04.webp",
       ken: "kb-in-left",
       glow: "gold",
       audio: "audio/line_04",
-      text: "But the temptation lived in the quieter boy, too. He thought of using the gift for greed. For a glance from a girl who had never looked his way. He hated that he could."
+      text: "The quieter one bound a girl's heart."
     },
     {
       src: "art/panel_05.webp",
       ken: "kb-in-center",
-      glow: "dust",
+      glow: "gold",
       audio: "audio/line_05",
-      text: "He could not live with a heart that wanted such things. So he found a way to cut the darkness out of himself. A ritual older than Thornhold itself."
+      text: "He saw what he had done. And he let her go."
     },
     {
       src: "art/panel_06.webp",
       ken: "kb-in-up",
-      glow: "ritual",
+      glow: "dust",
       audio: "audio/line_06",
-      text: "He succeeded. The darkness left him. But when the light returned, his brother was not the same."
+      text: "He sought a way to cut the darkness from himself."
     },
     {
       src: "art/panel_07.webp",
       ken: "kb-in-center",
-      glow: "ash",
+      glow: "ritual",
       audio: "audio/line_07",
-      text: "All the good in him was gone. As if his brother had stolen it. He became a storm the valley could not weather."
+      text: "The darkness left him. What remained was only good."
     },
     {
       src: "art/panel_08.webp",
-      ken: "kb-pan-right",
-      glow: "gold",
+      ken: "kb-in-center",
+      glow: "ash",
       audio: "audio/line_08",
-      text: "He should have ended it. He could not. This was his brother. How do you raise a hand against your own blood?"
+      text: "But his brother was not the same."
     },
     {
       src: "art/panel_09.webp",
-      ken: "kb-in-right",
-      glow: "dust",
-      audio: "audio/line_09",
-      text: "So he went looking for someone stronger than his love for his brother. Someone who could do what he could not."
-    },
-    {
-      src: "art/panel_10.webp",
-      ken: "kb-in-center",
+      ken: "kb-pan-right",
       glow: "gold",
-      audio: "audio/line_10",
-      text: "And so he searched, until he found you. He needs a hero. Help him find his brother. Help him stop him. He will walk with you as far as he can. The rest, he must leave to you."
+      audio: "audio/line_09",
+      text: "And so they were divided. Brother from brother."
     }
   ];
 
@@ -130,18 +123,25 @@
     });
   }
 
+  function frameSize() {
+    var frame = document.getElementById("frame") || stage;
+    return { w: frame.clientWidth || window.innerWidth, h: frame.clientHeight || window.innerHeight };
+  }
+
   function resizeCanvas() {
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = Math.floor(window.innerWidth * dpr);
-    canvas.height = Math.floor(window.innerHeight * dpr);
-    canvas.style.width = window.innerWidth + "px";
-    canvas.style.height = window.innerHeight + "px";
+    var size = frameSize();
+    canvas.width = Math.floor(size.w * dpr);
+    canvas.height = Math.floor(size.h * dpr);
+    canvas.style.width = size.w + "px";
+    canvas.style.height = size.h + "px";
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
   function spawnParticles(kind, count) {
-    var w = window.innerWidth;
-    var h = window.innerHeight;
+    var size = frameSize();
+    var w = size.w;
+    var h = size.h;
     for (var i = 0; i < count; i++) {
       var p = {
         x: Math.random() * w,
@@ -510,41 +510,19 @@
       front.style.backgroundImage = "url('" + PANELS[panelIndex].src + "')";
       back.className = "layer";
     }
-    setLine(PANELS[PANELS.length - 1].text);
-    caption.classList.add("show");
+    caption.classList.remove("show");
     showHint(false);
     skipBtn.classList.remove("show");
     overlayBody.innerHTML =
       "<h1>Thornhold</h1>" +
       "<h2>Relics of the Warlord</h2>" +
       '<div class="gold-rule"></div>' +
-      '<button class="btn-begin" id="btn-begin" type="button">Begin your journey</button>';
+      '<a class="btn-begin" id="btn-begin" href="../">Begin your journey</a>';
     overlay.classList.add("show");
-    var btn = document.getElementById("btn-begin");
-    if (btn) btn.addEventListener("click", function (e) {
-      e.stopPropagation();
-      beginJourney();
-    });
   }
 
   function beginJourney() {
-    mode = "ended";
-    clearAuto();
-    stopVoice();
-    caption.classList.remove("show");
-    overlayBody.innerHTML =
-      "<h1>Thornhold</h1>" +
-      '<div class="gold-rule"></div>' +
-      '<p class="closing">The journey would begin here.</p>' +
-      '<p class="closing" style="margin-top:0.7rem;font-size:0.95rem;">This is a sample of the opening cut scene.</p>' +
-      '<div class="gold-rule"></div>' +
-      '<button class="btn-begin" id="btn-again" type="button">Play again</button>';
-    overlay.classList.add("show");
-    var btn = document.getElementById("btn-again");
-    if (btn) btn.addEventListener("click", function (e) {
-      e.stopPropagation();
-      showIntro();
-    });
+    window.location.href = "../";
   }
 
   function goNext() {
