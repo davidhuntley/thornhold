@@ -226,7 +226,7 @@ svg.board{width:100%;height:auto;display:block}
   padding:6px 8px;
   flex:0 0 auto;
 }
-.combat-modal .bossbox{display:flex;gap:8px;align-items:flex-start;flex:1;min-width:0}
+.combat-modal .bossbox{display:flex;gap:8px;align-items:flex-start;flex:0 1 auto;min-width:0;max-width:52%}
 .combat-modal .bossbox .boss-art{width:72px;height:auto;border-radius:6px;flex:none}
 .combat-modal .bosspanel .bname{font-size:16px;line-height:1.2}
 .combat-modal .bstats{font-size:12px;color:#e6d9a8}
@@ -423,6 +423,60 @@ svg.board{width:100%;height:auto;display:block}
 .battle-row.is-foe .cr > .muted{transform:rotate(180deg)}
 
 
+
+/* Boss relics as full card pics, to the right of his name/info */
+.combat-modal .bosspanel{align-items:center}
+.boss-relics{
+  display:flex;
+  flex-direction:row;
+  flex-wrap:nowrap;
+  align-items:flex-end;
+  gap:6px;
+  flex:0 0 auto;
+  transform:none;
+}
+/* Relics in the top panel always face the player; only battlefield creatures flip. */
+.boss-relics .chip,
+.boss-relics .chip img{
+  transform:none;
+}
+.boss-relics .chip{
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+  padding:3px;
+  margin:0;
+  background:rgba(20,10,4,.55);
+  border:1px solid #8a6230;
+  border-radius:6px;
+  font-size:9px;
+  line-height:1.2;
+  text-align:center;
+  color:#e6d0a8;
+  width:58px;
+  max-width:58px;
+  box-sizing:border-box;
+  flex:0 0 58px;
+  cursor:pointer;
+}
+.boss-relics .chip.artchip img{
+  width:52px;
+  height:80px;
+  object-fit:cover;
+  border-radius:4px;
+  box-shadow:0 3px 8px #000;
+  flex:none;
+}
+.boss-relics .chip-name{
+  display:block;
+  width:100%;
+  height:1.2em;
+  line-height:1.2em;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.combat-modal .clog{min-width:120px;flex:1 1 140px}
 /* Relic / bonus cards sit in the empty lower-left of the hand tray */
 .combat-hand{display:flex;align-items:flex-end;gap:10px}
 .tray-bonuses{
@@ -474,8 +528,11 @@ svg.board{width:100%;height:auto;display:block}
   .tray-bonuses .chip.artchip img{width:48px;height:76px}
   .tray-bonuses{padding-bottom:6px}
   .combat-modal .bossbox .boss-art{width:44px}
-  .combat-modal .bosspanel{padding:3px 6px;gap:8px}
-  .combat-modal .clog{max-height:40px;font-size:10px}
+  .combat-modal .bosspanel{padding:3px 6px;gap:8px;align-items:center}
+  .boss-relics{gap:4px}
+  .boss-relics .chip{width:52px;max-width:52px;flex-basis:52px;padding:2px;font-size:8px}
+  .boss-relics .chip.artchip img{width:36px;height:56px}
+  .combat-modal .clog{max-height:56px;font-size:10px;min-width:100px}
   .combat-modal .phase{font-size:12px;padding:3px 8px}
   .combat-modal .bstats{font-size:11px}
   .combat-modal .bosspanel .bname{font-size:15px}
@@ -513,6 +570,9 @@ svg.board{width:100%;height:auto;display:block}
   .combat-modal .bstats{display:block;font-size:11px}
   .combat-modal .clog{display:none}
   .combat-modal .chips{display:none}
+  .boss-relics{gap:3px}
+  .boss-relics .chip{width:40px;max-width:40px;flex-basis:40px;padding:1px;font-size:7px}
+  .boss-relics .chip.artchip img{width:28px;height:44px}
   .field-stats{display:inline}
   .combat-modal .phase{font-size:11px;padding:3px 8px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;flex:0 0 auto;margin:0 0 6px;background:#2a1c0e;z-index:1}
   .phase-hint,.wide-hint{display:none}
@@ -2219,7 +2279,7 @@ function relicChip(id, boss){
   const src=boss?artForBossRelic(id):artForRelic(id);
   const zoom=src?` data-zoom="${esc(src)}" data-a="zoom" data-v="${esc(src)}"`:'';
   const img=src?`<img src="${esc(src)}" alt="">`:'';
-  return `<span class="chip ${boss?'eperk':'relic'}${src?' artchip':''}" title="${esc(R.name+': '+R.text)}"${zoom}>${img}${esc(R.name)}</span>`;
+  return `<span class="chip ${boss?'eperk':'relic'}${src?' artchip':''}" title="${esc(R.name+': '+R.text)}"${zoom}>${img}<span class="chip-name">${esc(R.name)}</span></span>`;
 }
 
 function showCardZoom(src, pinned){
@@ -2502,9 +2562,10 @@ function renderCombat(){
   const tg=F?getTarget(F):null;
   let h=`<div class="overlay combat-ov"><div class="modal combat-modal"><div class="combat-table">`;
   const bsrc=artForBoss(B.cid);
+  const bossBonus=B.relics.map(r=>relicChip(r,true)).join('')+B.arts.map(a=>{ const asrc=artForEnemy(a); return `<span class="chip${asrc?' artchip':''}" title="${esc(EC[a].text)}"${asrc?` data-zoom="${esc(asrc)}" data-a="zoom" data-v="${esc(asrc)}"`:''}>${asrc?`<img src="${esc(asrc)}" alt="">`:''}<span class="chip-name">⚙️ ${esc(EC[a].name)}</span></span>`; }).join('');
   h+=`<div class="bosspanel"><div class="bossbox ${tg==='boss'?'tgt':''}" data-a="cTarget" data-v="boss">${bsrc?`<img class="boss-art" src="${esc(bsrc)}" alt="${esc(B.name)}" data-zoom="${esc(bsrc)}">`:''}<div><div class="bname">${B.icon} ${esc(B.name)}</div>
-   <div class="bar"><i style="width:${Math.max(0,B.hp)/B.maxHp*100}%"></i></div><div class="bstats">❤ ${Math.max(0,B.hp)}/${B.maxHp} ${B.shield?`· 🛡 Shield ${B.shield}`:''} · ⚔ ATK ${Math.max(0,B.atk-B.curse+B.temp)} · 💧 ${B.manaPlayed} mana in play (max ${B.manaCap}) · ✋ ${B.hand.length} · deck ${B.deck.length}</div>
-   <div class="chips">${B.relics.map(r=>relicChip(r,true)).join('')}${B.arts.map(a=>{ const asrc=artForEnemy(a); return `<span class="chip${asrc?' artchip':''}" title="${esc(EC[a].text)}"${asrc?` data-zoom="${esc(asrc)}" data-a="zoom" data-v="${esc(asrc)}"`:''}>${asrc?`<img src="${esc(asrc)}" alt="">`:''}⚙️ ${esc(EC[a].name)}</span>`; }).join('')}</div></div></div>
+   <div class="bar"><i style="width:${Math.max(0,B.hp)/B.maxHp*100}%"></i></div><div class="bstats">❤ ${Math.max(0,B.hp)}/${B.maxHp} ${B.shield?`· 🛡 Shield ${B.shield}`:''} · ⚔ ATK ${Math.max(0,B.atk-B.curse+B.temp)} · 💧 ${B.manaPlayed} mana in play (max ${B.manaCap}) · ✋ ${B.hand.length} · deck ${B.deck.length}</div></div></div>
+   ${bossBonus?`<div class="boss-relics">${bossBonus}</div>`:''}
    <div class="clog">${C.log.slice(0,40).map(l=>`<div>${esc(l)}</div>`).join('')}</div></div>`;
   // phase banner
   let ph='';
