@@ -51,3 +51,11 @@ h1{font-size:2.2em}h2{font-size:1.6em}
 #toast{position:fixed;left:50%;top:18%;transform:translateX(-50%);background:rgba(27,20,12,.95);border:1px solid #ffd85a;border-radius:8px;padding:10px 18px;z-index:30;color:#f6ecd2}
 #loading{position:fixed;right:12px;bottom:12px;z-index:25;color:#d9c79f;font-size:.9em;background:rgba(0,0,0,.5);padding:5px 10px;border-radius:6px}
 @media (max-width:640px){.tile{width:44%}h1{font-size:1.6em}#help{display:none}#purse small{display:none}}
+.panel.wide2{max-width:680px}
+.blurb{font-style:italic;color:#d9c79f;margin:.2em 0 .6em}
+.lv{font-size:.8em;color:#d26a5a;margin-left:6px}
+.easy{font-size:.75em;color:#8fc57a;border:1px solid #8fc57a;border-radius:4px;padding:0 5px;margin-left:6px}
+.tier{font-size:1.05em}
+.row .d b.tier.t-common{color:#d8d0c0}.row .d b.tier.t-rare{color:#6bb8ff}.row .d b.tier.t-epic{color:#c46bff}.row .d b.tier.t-legendary{color:#ff9a3a}
+.row .d b.tier.t-godly{color:#ffd85a;text-shadow:0 0 8px rgba(255,216,90,.8)}
+.row.premium{border:2px solid #ffd85a;background:linear-gradient(90deg,rgba(255,216,90,.18),rgba(196,107,255,.15));box-shadow:0 0 14px rgba(255,216,90,.35)}
