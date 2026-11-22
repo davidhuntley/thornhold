@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Thornhold: 3D Town (test)</title>
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="../favicon.svg">
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="labels"></div>
+<div id="hud" class="hidden">
+  <div id="hudHero"><img id="hudImg" alt=""><div><b id="hudName"></b><span id="hudHp">HP 20 / 20</span></div></div>
+  <div id="purse">Gold <b>120</b> · Gems <b>5</b> <small>(mockup)</small></div>
+  <button id="swapBtn" class="btn small">Change hero</button>
+</div>
+<div id="help" class="hidden">WASD / arrows or tap the ground to move · Shift walks · E to enter · scroll / pinch to zoom</div>
+<button id="prompt" class="btn hidden"></button>
+<div id="select" class="overlay">
+  <div class="panel wide">
+    <h1>Thornhold</h1>
+    <p class="sub">3D Town test: choose your hero</p>
+    <div id="tiles"></div>
+    <p id="loadMsg" class="sub"></p>
+  </div>
+</div>
+<div id="menu" class="overlay hidden">
+  <div class="panel">
+    <button id="closeBtn" class="x" title="Close (Esc)">✕</button>
+    <h2 id="menuTitle"></h2>
+    <p id="menuSub" class="sub"></p>
+    <div id="menuBody"></div>
+  </div>
+</div>
+<div id="toast" class="hidden"></div>
+<div id="loading">Loading the town…</div>
+<script src="game.js"></script>
+</body>
+</html>
