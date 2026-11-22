@@ -189,6 +189,347 @@ svg.board{width:100%;height:auto;display:block}
 #cardzoom img{max-width:min(520px,92vw);max-height:92vh;height:auto;border-radius:14px;box-shadow:0 12px 40px #000;pointer-events:none}
 #cardzoom .cardzoom-close{display:none;position:fixed;top:16px;right:18px;width:40px;height:40px;border:0;border-radius:20px;background:#3a2a18;color:#f6ecd2;font-size:24px;cursor:pointer}
 #cardzoom.pinned .cardzoom-close{display:block}
+
+/* ===== Combat table layout: full cards on the board, hand docked low ===== */
+.overlay.combat-ov{
+  padding:6px;
+  align-items:stretch;
+  justify-content:center;
+  overflow:hidden;
+  background:rgba(8,5,2,.96);
+}
+.modal.combat-modal{
+  max-width:min(1480px,100%);
+  width:100%;
+  height:100%;
+  max-height:100%;
+  display:flex;
+  flex-direction:column;
+  padding:8px 10px 0;
+  overflow:hidden;
+  --table-card-w:128px;
+  --hand-card-w:118px;
+}
+.combat-table{
+  flex:1 1 auto;
+  min-height:0;
+  overflow:auto;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.combat-modal .bosspanel{
+  display:flex;
+  flex-wrap:nowrap;
+  gap:10px;
+  align-items:flex-start;
+  padding:6px 8px;
+  flex:0 0 auto;
+}
+.combat-modal .bossbox{display:flex;gap:8px;align-items:flex-start;flex:1;min-width:0}
+.combat-modal .bossbox .boss-art{width:72px;height:auto;border-radius:6px;flex:none}
+.combat-modal .bosspanel .bname{font-size:16px;line-height:1.2}
+.combat-modal .bstats{font-size:12px;color:#e6d9a8}
+.combat-modal .bar{width:min(260px,100%)}
+.combat-modal .clog{
+  flex:1 1 200px;
+  min-width:160px;
+  max-width:360px;
+  max-height:78px;
+  margin:0;
+  font-size:11px;
+}
+.combat-modal .phase{font-size:14px;padding:6px 10px;margin:0;flex:0 0 auto}
+.combat-fields{display:flex;flex-direction:column;gap:4px;flex:1 1 auto;min-height:0}
+.battle-row{flex:0 0 auto;width:100%;min-width:0}
+.battle-row.ours.act .muted{color:#e8c46a}
+.field-stats{display:inline}
+.combat-modal .field{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  align-items:flex-end;
+  gap:8px;
+  min-height:0;
+  padding:2px 4px;
+}
+/* Full painted card faces on the battlefield (not cropped tokens) */
+.cr.artcr{
+  width:var(--table-card-w);
+  flex:0 0 var(--table-card-w);
+  padding:0;
+  overflow:visible;
+  background:transparent;
+  border:none;
+  box-shadow:0 3px 10px rgba(0,0,0,.7);
+  border-radius:8px;
+}
+.cr.artcr .cardface{
+  width:100%;
+  height:auto;
+  display:block;
+  border-radius:8px;
+  pointer-events:none;
+  user-select:none;
+}
+.cr.artcr .mn,.cr.artcr .kw,.cr.artcr .eq{display:none}
+.cr.artcr .pt{
+  position:absolute;
+  left:8%;
+  right:8%;
+  bottom:3.2%;
+  text-align:center;
+  font-size:calc(var(--table-card-w) * .11);
+  font-weight:bold;
+  color:#f6ecd2;
+  text-shadow:0 1px 3px #000,0 0 6px #000;
+  pointer-events:none;
+  background:rgba(10,6,2,.55);
+  border-radius:6px;
+  padding:1px 0;
+  line-height:1.15;
+}
+.cr.artcr > .muted{
+  position:absolute;
+  left:0;right:0;top:42%;
+  text-align:center;
+  font-weight:bold;
+  text-shadow:0 1px 3px #000;
+  pointer-events:none;
+}
+.cr.artcr .zoom-btn{top:4px;left:4px;width:20px;height:20px;font-size:11px;line-height:20px}
+.field.busy{--table-card-w:108px}
+.field.packed{--table-card-w:92px}
+.combat-modal .fighters{gap:6px;margin:0;flex:0 0 auto}
+.combat-modal .fighter{padding:2px 8px;min-width:200px;flex:1}
+.combat-modal .fighter .chip.artchip img{width:20px;height:32px}
+
+/* Felt / stone play mat for the table */
+.combat-fields{
+  background:
+    radial-gradient(ellipse at 50% 45%, rgba(70,100,60,.2), transparent 65%),
+    linear-gradient(180deg, #243322 0%, #1a2618 55%, #162014 100%);
+  border:3px solid #5a3c1c;
+  box-shadow:inset 0 0 36px rgba(0,0,0,.45), 0 0 0 1px #c4a36a66;
+  border-radius:12px;
+  padding:6px 8px 10px;
+  margin:2px 0 0;
+}
+.combat-modal .field{
+  background:rgba(0,0,0,.18);
+  border:1px solid rgba(80,110,70,.35);
+  box-shadow:inset 0 0 16px rgba(0,0,0,.3);
+  border-radius:8px;
+  padding:8px 6px 6px;
+}
+.combat-modal .fighters{background:rgba(0,0,0,.2);border-color:#4a6a40}
+
+/* Hand tray: leather rail, distinct from the table */
+.combat-hand{
+  flex:0 0 auto;
+  z-index:4;
+  margin:12px 2px 4px;
+  padding:8px 14px 14px;
+  border-radius:18px 18px 12px 12px;
+  border:3px solid #1a0c06;
+  border-top-color:#8a6230;
+  background:
+    linear-gradient(180deg, rgba(90,56,28,.35), rgba(0,0,0,.28) 40%, rgba(0,0,0,.45)),
+    linear-gradient(90deg, #2a180e, #5a3820 18%, #4a2c16 50%, #5a3820 82%, #2a180e);
+  box-shadow:
+    inset 0 2px 0 #d4b07a,
+    inset 0 -10px 18px rgba(0,0,0,.5),
+    0 -6px 16px rgba(0,0,0,.4);
+  overflow:visible;
+}
+.combat-hand .hand-label,
+.combat-hand .muted{color:#e6d0a8}
+
+.combat-hand-rows{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-end;gap:8px 16px}
+.combat-hand .hand-block{min-width:0}
+.combat-hand .cards{margin:4px 0;gap:8px;justify-content:center;flex-wrap:wrap}
+.combat-hand .card,
+.combat-hand .card.artcard{width:var(--hand-card-w)}
+.combat-hand .mana-row .card,
+.combat-hand .mana-row .card.artcard{width:calc(var(--hand-card-w) * .86)}
+.combat-hand .hand-actions{margin:4px 0 0;justify-content:center}
+
+/* Held hand: slight fan, overlap, sits on the tray lip */
+.combat-hand .play-row{
+  gap:0;
+  padding:2px 18px 0;
+  align-items:flex-end;
+}
+.combat-hand .play-row .card{
+  --mid:calc((var(--hand-n, 1) - 1) / 2);
+  --ang:calc((var(--i, 0) - var(--mid)) * 3deg);
+  --drop:calc(abs(var(--i, 0) - var(--mid)) * 4px);
+  margin:0 calc(var(--hand-card-w) * -.16) -10px;
+  transform:rotate(var(--ang)) translateY(var(--drop));
+  transform-origin:50% 120%;
+  z-index:1;
+  box-shadow:0 8px 16px rgba(0,0,0,.65);
+  transition:transform .14s, margin .14s, z-index 0s;
+}
+.combat-hand .play-row .card:hover,
+.combat-hand .play-row .card:focus-visible{
+  transform:rotate(var(--ang)) translateY(-18px) scale(1.06);
+  z-index:8;
+  margin-left:2px;
+  margin-right:2px;
+}
+.combat-hand .mana-row{
+  gap:0;
+  padding:2px 8px 0;
+}
+.combat-hand .mana-row .card{
+  margin:0 -8px -6px;
+  box-shadow:0 6px 12px rgba(0,0,0,.55);
+}
+.combat-hand .hand-actions{position:relative;z-index:2;padding-top:8px}
+
+/* Softer "can't play" — art stays visible, small badge instead of a covering bar */
+.combat-hand .card.cant{opacity:1;filter:none}
+.combat-hand .card.artcard.cant .cardface{opacity:.88;filter:brightness(.88) saturate(.8)}
+.combat-hand .card.artcard .why{
+  left:50%;
+  right:auto;
+  bottom:auto;
+  top:8px;
+  transform:translateX(-50%);
+  width:max-content;
+  max-width:90%;
+  background:rgba(50,18,8,.88);
+  color:#ffe0b0;
+  font-size:9px;
+  font-weight:bold;
+  letter-spacing:.02em;
+  padding:2px 7px;
+  border-radius:8px;
+  box-shadow:0 1px 4px #000;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* Opponent's cards face them (180°). Live stats / zoom stay upright. */
+.battle-row.is-foe .cr,
+.battle-row.is-foe .cr.artcr{transform:rotate(180deg)}
+.battle-row.is-foe .cr.tapped,
+.battle-row.is-foe .cr.artcr.tapped{transform:rotate(189deg)}
+.battle-row.is-foe .cr .pt,
+.battle-row.is-foe .cr .zoom-btn,
+.battle-row.is-foe .cr .sh,
+.battle-row.is-foe .cr > .muted{transform:rotate(180deg)}
+
+
+/* Relic / bonus cards sit in the empty lower-left of the hand tray */
+.combat-hand{display:flex;align-items:flex-end;gap:10px}
+.tray-bonuses{
+  flex:0 0 auto;
+  display:flex;
+  flex-direction:row;
+  flex-wrap:nowrap;
+  align-items:flex-end;
+  gap:6px;
+  padding:0 2px 8px 4px;
+  z-index:3;
+}
+.tray-bonuses .chip{
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+  padding:3px;
+  margin:0;
+  background:rgba(20,10,4,.7);
+  border:1px solid #8a6230;
+  border-radius:6px;
+  font-size:9px;
+  line-height:1.15;
+  text-align:center;
+  color:#e6d0a8;
+  max-width:72px;
+  cursor:pointer;
+}
+.tray-bonuses .chip.artchip img{
+  width:56px;
+  height:88px;
+  object-fit:cover;
+  border-radius:4px;
+  box-shadow:0 3px 8px #000;
+}
+.combat-hand-rows{flex:1 1 auto;min-width:0}
+.combat-modal .fighters.slim{background:transparent;border:none;padding:0 4px}
+.combat-modal .fighters.slim .fighter{padding:1px 8px;border:none;background:transparent;min-width:0}
+
+@media (min-width:1600px) and (min-height:980px){
+  .modal.combat-modal{--table-card-w:160px;--hand-card-w:128px}
+  .field.busy{--table-card-w:148px}
+  .field.packed{--table-card-w:128px}
+}
+@media (max-height:820px){
+  .modal.combat-modal{--table-card-w:120px;--hand-card-w:78px}
+  .field.busy{--table-card-w:114px}
+  .field.packed{--table-card-w:100px}
+  .tray-bonuses .chip.artchip img{width:48px;height:76px}
+  .tray-bonuses{padding-bottom:6px}
+  .combat-modal .bossbox .boss-art{width:44px}
+  .combat-modal .bosspanel{padding:3px 6px;gap:8px}
+  .combat-modal .clog{max-height:40px;font-size:10px}
+  .combat-modal .phase{font-size:12px;padding:3px 8px}
+  .combat-modal .bstats{font-size:11px}
+  .combat-modal .bosspanel .bname{font-size:15px}
+  .combat-fields{padding:4px 6px 4px;gap:2px}
+  .combat-modal .field{padding:3px 4px;gap:6px}
+  .combat-modal .fighters{gap:4px}
+  .combat-modal .fighter{padding:1px 6px;font-size:12px}
+  .combat-modal .fighter .chip.artchip img{width:14px;height:22px}
+  .combat-hand .muted{font-size:11px;margin:0}
+  .combat-hand{padding:4px 10px 6px;margin-top:6px}
+  .combat-hand .hand-actions{margin:0;padding-top:2px}
+  .combat-hand .play-row{padding:0 14px}
+  .combat-hand .play-row .card{margin-bottom:-4px;--drop:calc(abs(var(--i, 0) - var(--mid)) * 3px)}
+  .combat-hand .play-row .card:hover,
+  .combat-hand .play-row .card:focus-visible{transform:rotate(var(--ang)) translateY(-12px) scale(1.05)}
+}
+@media (max-height:700px){
+  .modal.combat-modal{--table-card-w:96px;--hand-card-w:86px}
+  .combat-hand .mana-row .card,
+  .combat-hand .mana-row .card.artcard{width:calc(var(--hand-card-w) * .8)}
+}
+/* Phone landscape */
+@media (max-height:500px) and (orientation:landscape){
+  .overlay.combat-ov{padding:2px}
+  .modal.combat-modal{--table-card-w:70px;--hand-card-w:50px;padding:3px 6px 0}
+  .combat-fields{flex-direction:row;align-items:flex-end;gap:8px}
+  .battle-row{flex:1 1 0;min-width:0}
+  .combat-modal .fighters{display:none}
+  .tray-bonuses{max-width:none;gap:3px;padding:0 2px 4px;flex-wrap:nowrap}
+  .tray-bonuses .chip{max-width:52px;font-size:8px;padding:2px}
+  .tray-bonuses .chip.artchip img{width:36px;height:56px}
+  .combat-modal .bossbox .boss-art{width:36px}
+  .combat-modal .bosspanel{padding:2px 6px}
+  .combat-modal .bosspanel .bname{font-size:14px}
+  .combat-modal .bstats{display:block;font-size:11px}
+  .combat-modal .clog{display:none}
+  .combat-modal .chips{display:none}
+  .field-stats{display:inline}
+  .combat-modal .phase{font-size:11px;padding:3px 8px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;flex:0 0 auto;margin:0 0 6px;background:#2a1c0e;z-index:1}
+  .phase-hint,.wide-hint{display:none}
+  .battle-row > .muted{padding:1px 4px 3px;line-height:1.2;font-size:10px}
+  .combat-fields{margin-top:2px}
+  .combat-hand{margin:4px 0 2px;padding:3px 8px 6px;border-radius:12px 12px 8px 8px}
+  .combat-hand .play-row{padding:0 8px}
+  .combat-hand .play-row .card{margin-left:calc(var(--hand-card-w) * -.2);margin-right:calc(var(--hand-card-w) * -.2);margin-bottom:-4px}
+  .combat-hand .play-row .card:hover,
+  .combat-hand .play-row .card:focus-visible{transform:rotate(var(--ang)) translateY(-8px) scale(1.08)}
+  .combat-hand .muted{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+  .combat-hand .mana-row .card,
+  .combat-hand .mana-row .card.artcard{width:calc(var(--hand-card-w) * .78)}
+  .field.busy,.field.packed{--table-card-w:58px}
+  .combat-modal .field{gap:4px;padding:2px}
+  .combat-hand .hand-actions{margin:2px 0 0}
+}
 </style></head><body><div id="app"></div><script>
 'use strict';
 /* Auto-generated card art map. Do not edit by hand. */
@@ -1235,7 +1576,7 @@ function startCombat(spec, players){
 // ---------- creature helpers ----------
 function mkCreature(side, owner, def, o){
   const c=def.c||def; const inst=o.inst||null;
-  const cr={uid:'c'+(++G.combat.uidc), side, owner, inst, id:o.id||null, name:o.name||def.name, baseAtk:c.atk, baseHp:c.hp, counters:0, dmg:0,
+  const cr={uid:'c'+(++G.combat.uidc), side, owner, inst, id:o.id||def.id||null, name:o.name||def.name, baseAtk:c.atk, baseHp:c.hp, counters:0, dmg:0,
     shield:(c.shield||0), armor:(c.armor||0), kw:Object.assign({},c.kw||{}), tapped:!o.untapped, frozen:false, temp:{atk:0,hp:0}, eq:[], token:!!o.token,
     def:c, tags:(def.tags||c.tags||[]).slice(), curse:0, atkBonus:0, mist:false, sfUsed:false, exileAfter:false};
   if(inst){ cr.shield+=ups(inst,'hardened'); cr.baseHp+=2*ups(inst,'thickHide'); if(ups(inst,'keen')) cr.kw.first=1; if(ups(inst,'quickened')) cr.kw.haste=1; }
@@ -1917,6 +2258,17 @@ function ensureZoom(){
   });
 }
 
+function whyShort(w){
+  if(!w) return '';
+  if(w==='Not enough mana') return 'No mana';
+  if(w==='Needs a creature') return 'Need target';
+  if(w==='Only instants now') return 'Instant only';
+  if(w==='No creature of yours has died') return 'No dead ally';
+  if(w==='No valid enemy creature') return 'No target';
+  if(w==='Use it when the commander attacks') return 'On his attack';
+  if(w==='Nothing to recall') return 'Nothing to recall';
+  return w;
+}
 function cardHTML(inst,o){
   o=o||{}; const id=typeof inst==='string'?inst:inst.id; const c=HC[id]; const up=(inst&&inst.up)||[];
   const cls=['card',c.type]; if(c.junk) cls.push('junk'); if(o.play) cls.push('play'); if(o.cant) cls.push('cant'); if(o.sel) cls.push('sel');
@@ -1930,7 +2282,7 @@ function cardHTML(inst,o){
     return `<div class="${cls.join(' ')}" ${o.attrs||''} data-zoom="${esc(src)}" title="${title}">
       ${faceImg(src,c.name)}${zoomBtn(src)}
       ${up.length?`<div class="stars">${'★'.repeat(up.length)}</div>`:''}${upTxt}
-      ${o.why?`<div class="why">${esc(o.why)}</div>`:''}
+      ${o.why?`<div class="why">${esc(whyShort(o.why))}</div>`:''}
       ${o.price!==undefined?priceTag(o.price):''}${o.foot||''}</div>`;
   }
   return `<div class="${cls.join(' ')}" ${o.attrs||''} title="${title}">
@@ -2132,22 +2484,36 @@ function crHTML(cr,o){ o=o||{};
   }
   return `<div class="${cls.join(' ')}" ${o.attrs||''} title="${title}">${cr.shield?`<div class="sh">🛡${cr.shield}</div>`:''}<div class="mn">${esc(cr.name)}</div><div class="kw">${esc(kws.join(', '))}${cr.counters?` <span class="ctr">+${cr.counters}</span>`:''}</div>${eq?`<div class="eq">🗡 ${esc(eq)}</div>`:''}<div class="pt">${effAtk(cr)}/${hpLeft(cr)}</div>${cr.tapped?'<div class="muted">tapped</div>':''}</div>`;
 }
+function fighterBonusHTML(Fx){
+  const p=FP(Fx);
+  const bits=[];
+  p.relics.forEach(r=>{ const c=relicChip(r,false); if(c) bits.push(c); });
+  Fx.arts.forEach(a=>{ const asrc=artForInst(a); bits.push(`<span class="chip${asrc?' artchip':''}" title="${esc(HC[a.id].text)}"${asrc?` data-zoom="${esc(asrc)}" data-a="zoom" data-v="${esc(asrc)}"`:''}>${asrc?`<img src="${esc(asrc)}" alt="">`:''}⚙️ ${esc(HC[a.id].name)}</span>`); });
+  Fx.manaIn.forEach(x=>{ const msrc=artForMana(x.id); bits.push(`<span class="chip${msrc?' artchip':''}" title="${esc(MANA[x.id].text)}"${msrc?` data-zoom="${esc(msrc)}" data-a="zoom" data-v="${esc(msrc)}"`:''}>${msrc?`<img src="${esc(msrc)}" alt="">`:''}💧${esc(MANA[x.id].name)}${x.sick?' (sick)':''}</span>`); });
+  return bits.length?`<div class="tray-bonuses">${bits.join('')}</div>`:'';
+}
+function fieldHTML(items){
+  const n=items.length;
+  const pack=n>=8?' packed':n>=5?' busy':'';
+  return `<div class="field${pack}" data-n="${n}">${items.join('')||'<i class="muted">no creatures</i>'}</div>`;
+}
 function renderCombat(){
   const C=G.combat, B=C.boss; const F=activeF();
   const tg=F?getTarget(F):null;
-  let h=`<div class="overlay" style="align-items:flex-start"><div class="modal" style="max-width:1300px">`;
+  let h=`<div class="overlay combat-ov"><div class="modal combat-modal"><div class="combat-table">`;
   const bsrc=artForBoss(B.cid);
   h+=`<div class="bosspanel"><div class="bossbox ${tg==='boss'?'tgt':''}" data-a="cTarget" data-v="boss">${bsrc?`<img class="boss-art" src="${esc(bsrc)}" alt="${esc(B.name)}" data-zoom="${esc(bsrc)}">`:''}<div><div class="bname">${B.icon} ${esc(B.name)}</div>
-   <div class="bar" style="width:260px"><i style="width:${Math.max(0,B.hp)/B.maxHp*100}%"></i></div><div>❤ ${Math.max(0,B.hp)}/${B.maxHp} ${B.shield?`· 🛡 Shield ${B.shield}`:''} · ⚔ ATK ${Math.max(0,B.atk-B.curse+B.temp)} · 💧 ${B.manaPlayed} mana in play (max ${B.manaCap}) · ✋ ${B.hand.length} · deck ${B.deck.length}</div>
+   <div class="bar"><i style="width:${Math.max(0,B.hp)/B.maxHp*100}%"></i></div><div class="bstats">❤ ${Math.max(0,B.hp)}/${B.maxHp} ${B.shield?`· 🛡 Shield ${B.shield}`:''} · ⚔ ATK ${Math.max(0,B.atk-B.curse+B.temp)} · 💧 ${B.manaPlayed} mana in play (max ${B.manaCap}) · ✋ ${B.hand.length} · deck ${B.deck.length}</div>
    <div class="chips">${B.relics.map(r=>relicChip(r,true)).join('')}${B.arts.map(a=>{ const asrc=artForEnemy(a); return `<span class="chip${asrc?' artchip':''}" title="${esc(EC[a].text)}"${asrc?` data-zoom="${esc(asrc)}" data-a="zoom" data-v="${esc(asrc)}"`:''}>${asrc?`<img src="${esc(asrc)}" alt="">`:''}⚙️ ${esc(EC[a].name)}</span>`; }).join('')}</div></div></div>
-   <div><div class="muted">His battlefield (click to target)</div><div class="field">${B.field.map(c=>crHTML(c,{tgt:tg===c.uid,attrs:`data-a="cTarget" data-v="${c.uid}"`})).join('')||'<i class="muted">no creatures</i>'}</div></div></div>`;
+   <div class="clog">${C.log.slice(0,40).map(l=>`<div>${esc(l)}</div>`).join('')}</div></div>`;
   // phase banner
   let ph='';
   if(C.over) ph=`<b>${C.won===true?'🏆 Victory!':C.won===false?'💀 Defeat':'Withdrawn'}</b> <button class="btn primary" data-a="leave">Continue</button>`;
-  else if(C.phase==='block') ph=`<b>${esc(B.name)} attacks!</b> Pick an attack, then click one of your untapped creatures to block it (blockers deal their ATK back). You can cast ⚡ instants now. Then confirm.`;
-  else if(F&&C.step==='attack') ph=`<b>${esc(FP(F).name)}: combat.</b> Click your untapped creatures to choose attackers (they tap and can't block his next attack), then attack or skip.`;
-  else if(F) ph=`<b>${esc(FP(F).name)}: play mana and cards.</b> Click an enemy to target it; click your creature to choose it for cards that need one.`;
+  else if(C.phase==='block') ph=`<b>${esc(B.name)} attacks!</b><span class="phase-hint"> Pick an attack, then click one of your untapped creatures to block it (blockers deal their ATK back). You can cast ⚡ instants now. Then confirm.</span>`;
+  else if(F&&C.step==='attack') ph=`<b>${esc(FP(F).name)}: combat.</b><span class="phase-hint"> Click your untapped creatures to choose attackers (they tap and can't block his next attack), then attack or skip.</span>`;
+  else if(F) ph=`<b>${esc(FP(F).name)}: play mana and cards.</b><span class="phase-hint"> Click an enemy to target it; click your creature to choose it for cards that need one.</span>`;
   h+=`<div class="phase">Round ${C.round} · ${ph}</div>`;
+  h+=`<div class="combat-fields"><div class="battle-row is-foe"><div class="muted">His battlefield <span class="wide-hint">(click to target)</span></div>${fieldHTML(B.field.map(c=>crHTML(c,{tgt:tg===c.uid,attrs:`data-a="cTarget" data-v="${c.uid}"`})))}</div>`;
   if(C.phase==='block'&&C.pending){
     h+=`<div class="panel respond">${C.pending.items.map((it,i)=>{ const cands=allHeroCreatures().filter(b=>canBlock(b,it.a));
       return `<div class="atkrow ${C.sel===i?'sel':''} ${it.cancel?'cancel':''}" data-a="bSel" data-v="${i}"><b>${esc(srcName(it))}</b> (${atkOf(it)} ATK${!it.a.cmd&&has(it.a,'fly')?', Flying':''}${!it.a.cmd&&has(it.a,'trample')?', Trample':''}) → ${esc(FP(it.tgt).name)} ·
@@ -2155,36 +2521,47 @@ function renderCombat(){
        ${cands.filter(b=>b!==it.blk).map(b=>`<button class="btn small" data-a="bAssign" data-v="${i}:${b.uid}">Block with ${esc(b.name)} (${effAtk(b)}/${hpLeft(b)})</button>`).join('')}</div>`; }).join('')}
       <button class="btn primary" data-a="bConfirm">Confirm blocks</button></div>`;
   }
-  // fighters
-  h+=`<div class="fighters">`;
+  // slim mid-table stats (no relic chips — those sit in the hand tray)
+  if(C.fighters.length>1){
+    h+=`<div class="fighters slim">`;
+    C.fighters.forEach((Fx,fi)=>{ const p=FP(Fx); const isA=F===Fx;
+      h+=`<div class="fighter ${isA?'act':''}" style="${Fx.out?'opacity:.45':''}"><b style="color:${PCOLORS[Fx.pi]}">${esc(p.name)}</b> ${Fx.out?(Fx.retreated?'(retreated)':'(fallen)'):''} · ❤ ${p.hp}/${p.maxHp} · 🛡 Block ${Fx.block} · 💧 ${Fx.mana} mana · draw ${Fx.draw.length}</div>`; });
+    h+=`</div>`;
+  }
+  // player battlefields as full-card rows
   C.fighters.forEach((Fx,fi)=>{ const p=FP(Fx); const isA=F===Fx;
-    h+=`<div class="fighter ${isA?'act':''}" style="flex:1;min-width:280px;${Fx.out?'opacity:.45':''}"><b style="color:${PCOLORS[Fx.pi]}">${esc(p.name)}</b> ${Fx.out?(Fx.retreated?'(retreated)':'(fallen)'):''} · ❤ ${p.hp}/${p.maxHp} · 🛡 Block ${Fx.block} · 💧 ${Fx.mana} mana · draw ${Fx.draw.length}
-      <div class="chips">${p.relics.map(r=>relicChip(r,false)).join('')}${Fx.arts.map(a=>{ const asrc=artForInst(a); return `<span class="chip${asrc?' artchip':''}" title="${esc(HC[a.id].text)}"${asrc?` data-zoom="${esc(asrc)}" data-a="zoom" data-v="${esc(asrc)}"`:''}>${asrc?`<img src="${esc(asrc)}" alt="">`:''}⚙️ ${esc(HC[a.id].name)}</span>`; }).join('')}${Fx.manaIn.map(x=>{ const msrc=artForMana(x.id); return `<span class="chip${msrc?' artchip':''}" title="${esc(MANA[x.id].text)}"${msrc?` data-zoom="${esc(msrc)}" data-a="zoom" data-v="${esc(msrc)}"`:''}>${msrc?`<img src="${esc(msrc)}" alt="">`:''}💧${esc(MANA[x.id].name)}${x.sick?' (sick)':''}</span>`; }).join('')}</div>
-      <div class="field">${Fx.field.map(c=>{ let attrs='';
-        if(C.phase==='block'&&C.pending){ attrs=`data-a="bAssign" data-v="${C.sel||0}:${c.uid}"`; }
-        else if(isA&&C.step==='attack'&&!c.tapped) attrs=`data-a="cToggleAtk" data-v="${c.uid}"`;
-        else if(isA) attrs=`data-a="cAlly" data-v="${c.uid}"`;
-        return crHTML(c,{atk:isA&&Fx.atkSel[c.uid],ally:isA&&Fx.ally===c.uid,attrs}); }).join('')||'<i class="muted">no creatures</i>'}</div>`;
-    if(C.phase==='block'&&!Fx.out){ const inst=Fx.hand.map((x,i)=>({x,i})).filter(o=>HC[o.x.id].type==='instant');
-      if(inst.length) h+=`<div class="muted">Instants (${Fx.mana} mana left):</div><div class="cards">${inst.map(o=>{ const w=whyNot(Fx,o.x,true); return cardHTML(o.x,{F:Fx,play:!w,cant:!!w,why:w,attrs:w?'':`data-a="bInstant" data-v="${fi}:${o.i}"`}); }).join('')}</div>`; }
-    h+=`</div>`; });
-  h+=`</div>`;
+    const label=(C.fighters.length>1?`${esc(p.name)}'s battlefield`:'Your battlefield')+`<span class="field-stats"> · ❤ ${p.hp}/${p.maxHp} · 🛡 ${Fx.block} · 💧 ${Fx.mana} mana · draw ${Fx.draw.length}</span>`;
+    const cards=Fx.field.map(c=>{ let attrs='';
+      if(C.phase==='block'&&C.pending){ attrs=`data-a="bAssign" data-v="${C.sel||0}:${c.uid}"`; }
+      else if(isA&&C.step==='attack'&&!c.tapped) attrs=`data-a="cToggleAtk" data-v="${c.uid}"`;
+      else if(isA) attrs=`data-a="cAlly" data-v="${c.uid}"`;
+      return crHTML(c,{atk:isA&&Fx.atkSel[c.uid],ally:isA&&Fx.ally===c.uid,attrs}); });
+    h+=`<div class="battle-row ours ${isA?'act':''}${Fx.out?' is-out':''}"><div class="muted">${label}</div>${fieldHTML(cards)}</div>`;
+  });
+  h+=`</div></div>`; // combat-fields + combat-table
+
+  h+=`<div class="combat-hand">${F?fighterBonusHTML(F):''}`;
   if(F&&!C.over){
-    const p=FP(F);
-    if(C.step==='attack'){ const n=Object.values(F.atkSel).filter(x=>x).length; h+=`<div class="row"><button class="btn danger" data-a="cDeclare">⚔️ Attack with ${n} creature${n===1?'':'s'}</button><button class="btn" data-a="cSkip">Don't attack</button></div>`; }
+    if(C.step==='attack'){ const n=Object.values(F.atkSel).filter(x=>x).length; h+=`<div class="row hand-actions"><button class="btn danger" data-a="cDeclare">⚔️ Attack with ${n} creature${n===1?'':'s'}</button><button class="btn" data-a="cSkip">Don't attack</button></div>`; }
     else {
-      h+=`<div class="muted">Your hand (Basic Strike + ${F.hand.length}/${HAND_BOUGHT} bought cards):</div><div class="cards">`;
-      { const ssrc=artPath('hc','strike'); const scls=`card spell ${ssrc?'artcard':''} ${F.strikeUsed?'cant':'play'}`; const sattrs=F.strikeUsed?'':`data-a="cStrike"`;
+      h+=`<div class="combat-hand-rows"><div class="hand-block"><div class="muted hand-label">Your hand (Basic Strike + ${F.hand.length}/${HAND_BOUGHT} bought cards):</div><div class="cards play-row" style="--hand-n:${1+F.hand.length}">`;
+      { const ssrc=artPath('hc','strike'); const scls=`card spell ${ssrc?'artcard':''} ${F.strikeUsed?'cant':'play'}`; const sattrs=`style="--i:0"${F.strikeUsed?'':` data-a="cStrike"`}`;
         h+= ssrc
           ? `<div class="${scls}" ${sattrs} data-zoom="${esc(ssrc)}" title="Basic Strike: Deal 2 damage to your target. Gain 1 Block. Never spent.">${faceImg(ssrc,'Basic Strike')}${zoomBtn(ssrc)}</div>`
           : `<div class="${scls}" ${sattrs}><div class="mana">0</div><div class="cname">Basic Strike</div><div class="ctype">✨ free · once per turn</div><div class="ctext">Deal 2 damage to your target. Gain 1 Block. Never spent.</div></div>`; }
-      F.hand.forEach((x,i)=>{ const w=whyNot(F,x,false); h+=cardHTML(x,{F,play:!w,cant:!!w,why:w,attrs:w?'':`data-a="cPlay" data-v="${i}"`}); });
-      h+=`</div><div class="muted">Mana hand (play 1 per turn${F.manaThisTurn?' — already played this turn':''}):</div><div class="cards">${F.manaHand.map((id,i)=>manaCardHTML(id,{play:!F.manaThisTurn,cant:F.manaThisTurn,attrs:F.manaThisTurn?'':`data-a="cMana" data-v="${i}"`})).join('')||'<i class="muted">all mana in play</i>'}</div>`;
-      h+=`<div class="row"><button class="btn primary" data-a="cEnd">End turn ▶</button>${hasRelic(p,'bloodPact')?`<button class="btn" data-a="cPact" ${F.flags.pact||p.hp<=2?'disabled':''}>Blood Pact: 2 HP → 1 mana</button>`:''}${F.field.filter(c=>c.def.sacMana).map(c=>`<button class="btn small" data-a="cSac" data-v="${c.uid}">Sacrifice ${esc(c.name)} for 1 mana</button>`).join('')}<button class="btn small" data-a="cRetreat">Retreat (−2 gold)</button></div>`;
+      F.hand.forEach((x,i)=>{ const w=whyNot(F,x,false); h+=cardHTML(x,{F,play:!w,cant:!!w,why:w,attrs:`style="--i:${i+1}"${w?'':` data-a="cPlay" data-v="${i}"`}`}); });
+      h+=`</div></div><div class="hand-block"><div class="muted">Mana hand (play 1 per turn${F.manaThisTurn?' — already played this turn':''}):</div><div class="cards mana-row">${F.manaHand.map((id,i)=>manaCardHTML(id,{play:!F.manaThisTurn,cant:F.manaThisTurn,attrs:F.manaThisTurn?'':`data-a="cMana" data-v="${i}"`})).join('')||'<i class="muted">all mana in play</i>'}</div></div></div>`;
+      h+=`<div class="row hand-actions"><button class="btn primary" data-a="cEnd">End turn ▶</button>${hasRelic(FP(F),'bloodPact')?`<button class="btn" data-a="cPact" ${F.flags.pact||FP(F).hp<=2?'disabled':''}>Blood Pact: 2 HP → 1 mana</button>`:''}${F.field.filter(c=>c.def.sacMana).map(c=>`<button class="btn small" data-a="cSac" data-v="${c.uid}">Sacrifice ${esc(c.name)} for 1 mana</button>`).join('')}<button class="btn small" data-a="cRetreat">Retreat (−2 gold)</button></div>`;
     }
   }
-  h+=`<div class="clog" style="max-height:200px;margin-top:8px">${C.log.slice(0,40).map(l=>`<div>${esc(l)}</div>`).join('')}</div>`;
-  return h+`</div></div>`;
+  if(C.phase==='block'&&!C.over){
+    C.fighters.forEach((Fx,fi)=>{ if(Fx.out) return;
+      const inst=Fx.hand.map((x,i)=>({x,i})).filter(o=>HC[o.x.id].type==='instant');
+      if(inst.length) h+=`<div class="muted">Instants (${Fx.mana} mana left):</div><div class="cards">${inst.map(o=>{ const w=whyNot(Fx,o.x,true); return cardHTML(o.x,{F:Fx,play:!w,cant:!!w,why:w,attrs:w?'':`data-a="bInstant" data-v="${fi}:${o.i}"`}); }).join('')}</div>`;
+    });
+  }
+  h+=`</div></div></div>`;
+  return h;
 }
 
 // ===== Input =====
