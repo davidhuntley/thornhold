@@ -197,11 +197,12 @@ const CARD_ART = {
   "hc:windcaller": "assets/cards/windcaller.webp",
   "hc:wrathOaks": "assets/cards/wrathOaks.webp",
   "hero:druid": "assets/cards/rowan.webp",
-  "hero:durgan": "assets/cards/durgan.webp",
-  "hero:dwarf": "assets/cards/durgan.webp",
+  "hero:durgan": "assets/cards/torvik.webp",
+  "hero:dwarf": "assets/cards/torvik.webp",
   "hero:elf": "assets/cards/lyria.webp",
   "hero:lyria": "assets/cards/lyria.webp",
   "hero:rowan": "assets/cards/rowan.webp",
+  "hero:torvik": "assets/cards/torvik.webp",
   "hero:vesper": "assets/cards/vesper.webp",
   "hero:warlock": "assets/cards/vesper.webp",
   "mana:bloodwell": "assets/cards/bloodwell.webp",
@@ -241,5 +242,5 @@ const HERO_ART_FAC = {
   "druid": "assets/cards/rowan.webp",
   "elf": "assets/cards/lyria.webp",
   "warlock": "assets/cards/vesper.webp",
-  "dwarf": "assets/cards/durgan.webp"
+  "dwarf": "assets/cards/torvik.webp"
 };
