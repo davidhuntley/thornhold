@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#1b140c">
 <title>Thornhold: 3D Town (test)</title>
 <link rel="stylesheet" href="style.css">
 <link rel="icon" href="../favicon.svg">
@@ -12,15 +13,33 @@
 <div id="labels"></div>
 <div id="hud" class="hidden">
   <div id="hudHero"><img id="hudImg" alt=""><div><b id="hudName"></b><span id="hudHp">HP 20 / 20</span></div></div>
-  <div id="purse">Gold <b>120</b> · Gems <b>5</b> <small>(mockup)</small></div>
-  <button id="swapBtn" class="btn small">Change hero</button>
+  <div id="purse">Gold <b id="gold">120</b> · Gems <b id="gems">5</b></div>
+  <div id="hudBtns">
+    <span id="netChip" class="chip net off">Solo</span>
+    <button id="coopBtn" class="btn small">Co-op</button>
+    <button id="profileBtn" class="btn small ghost">Profile</button>
+    <button id="swapBtn" class="btn small ghost">Hero</button>
+  </div>
 </div>
-<div id="help" class="hidden">WASD / arrows or tap the ground to move · Shift walks · E to enter · scroll / pinch to zoom</div>
+<div id="help" class="hidden"><span class="kb">WASD / arrows or click the ground to move · Shift walks · E to enter · scroll to zoom</span><span class="tc">Drag the stick to run · tap the ground to walk there · pinch to zoom</span></div>
 <button id="prompt" class="btn hidden"></button>
-<div id="select" class="overlay">
-  <div class="panel wide">
+<div id="joy" class="hidden"><div id="joyKnob"></div></div>
+<div id="invite" class="hidden"><p id="inviteText"></p><div class="btns"><button id="inviteJoin" class="btn small">Join fight</button><button id="inviteNo" class="btn small ghost">Not now</button></div></div>
+<div id="profiles" class="overlay hidden">
+  <div class="panel">
     <h1>Thornhold</h1>
-    <p class="sub">3D Town test: choose your hero</p>
+    <p class="sub">3D Town test: pick your profile</p>
+    <div id="profList"></div>
+    <div class="joinrow"><input id="newProfName" maxlength="20" placeholder="New profile name" autocomplete="off"><button id="newProfBtn" class="btn">Create</button></div>
+    <details><summary>Load a save code</summary><textarea id="importCode" rows="3" placeholder="Paste a save code (starts with TH1.)"></textarea><button id="importBtn" class="btn small">Import</button></details>
+    <p class="note">Profiles are saved in this browser on this device.</p>
+  </div>
+</div>
+<div id="select" class="overlay hidden">
+  <div class="panel wide">
+    <button id="selectBack" class="x hidden" title="Back">✕</button>
+    <h1>Thornhold</h1>
+    <p id="selectSub" class="sub">Choose your hero</p>
     <div id="tiles"></div>
     <p id="loadMsg" class="sub"></p>
   </div>
