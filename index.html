@@ -230,6 +230,7 @@ svg.board{width:100%;height:auto;display:block}
 .combat-modal .bossbox .boss-art{width:72px;height:auto;border-radius:6px;flex:none}
 .combat-modal .bosspanel .bname{font-size:16px;line-height:1.2}
 .combat-modal .bstats{font-size:12px;color:#e6d9a8}
+.bstats-short{display:none}
 .combat-modal .bar{width:min(260px,100%)}
 .combat-modal .clog{
   flex:1 1 200px;
@@ -240,8 +241,8 @@ svg.board{width:100%;height:auto;display:block}
   font-size:11px;
 }
 .combat-modal .phase{font-size:14px;padding:6px 10px;margin:0;flex:0 0 auto}
-.combat-fields{display:flex;flex-direction:column;gap:4px;flex:1 1 auto;min-height:0}
-.battle-row{flex:0 0 auto;width:100%;min-width:0}
+.combat-fields{display:flex;flex-direction:column;gap:8px;flex:1 1 auto;min-height:0}
+.battle-row{flex:0 0 auto;width:100%;min-width:0;overflow:hidden}
 .battle-row.ours.act .muted{color:#e8c46a}
 .field-stats{display:inline}
 .combat-modal .field{
@@ -251,8 +252,10 @@ svg.board{width:100%;height:auto;display:block}
   align-items:flex-end;
   gap:8px;
   min-height:0;
-  padding:2px 4px;
+  padding:16px 10px 18px;
+  overflow:hidden;
 }
+.cr.tapped, .cr.artcr.tapped{transform-origin:center center}
 /* Full painted card faces on the battlefield (not cropped tokens) */
 .cr.artcr{
   width:var(--table-card-w);
@@ -320,7 +323,8 @@ svg.board{width:100%;height:auto;display:block}
   border:1px solid rgba(80,110,70,.35);
   box-shadow:inset 0 0 16px rgba(0,0,0,.3);
   border-radius:8px;
-  padding:8px 6px 6px;
+  padding:16px 10px 18px;
+  overflow:hidden;
 }
 .combat-modal .fighters{background:rgba(0,0,0,.2);border-color:#4a6a40}
 
@@ -597,6 +601,21 @@ body.embed #app{height:100%}
 body.embed .overlay.combat-ov{padding:0;background:#140e08}
 body.embed .modal.combat-modal{max-width:100%;border-radius:0;border-width:0 0 0 0;box-shadow:none}
 .combat-hand .waiting{padding:10px 12px;text-align:center}
+
+/* Narrow / phone portrait: keep boss stats on one line, don't wrap the log mid-word */
+@media (max-width:520px){
+  .combat-modal .clog{display:none}
+  .combat-modal .bossbox{max-width:100%}
+  .bstats-full{display:none}
+  .bstats-short{display:inline}
+  .combat-modal .bstats{white-space:nowrap;font-size:11px}
+  .combat-modal .phase{font-size:13px;line-height:1.35;white-space:normal}
+  .combat-modal .phase .phase-hint{display:block;font-weight:normal;font-size:12px;margin-top:2px}
+  .battle-row > .muted{font-size:12px;line-height:1.3;white-space:normal}
+  .field-stats{display:block;padding-top:1px}
+  .combat-hand .waiting{font-size:13px;line-height:1.4;padding:8px 10px}
+  .combat-fields{gap:10px}
+}
 </style></head><body><div id="app"></div><script>
 'use strict';
 /* Auto-generated card art map. Do not edit by hand. */
@@ -2646,7 +2665,7 @@ function renderCombat(){
   const bsrc=artForBoss(B.cid);
   const bossBonus=B.relics.map(r=>relicChip(r,true)).join('')+B.arts.map(a=>{ const asrc=artForEnemy(a); return `<span class="chip${asrc?' artchip':''}" title="${esc(EC[a].text)}"${asrc?` data-zoom="${esc(asrc)}" data-a="zoom" data-v="${esc(asrc)}"`:''}>${asrc?`<img src="${esc(asrc)}" alt="">`:''}<span class="chip-name">⚙️ ${esc(EC[a].name)}</span></span>`; }).join('');
   h+=`<div class="bosspanel"><div class="bossbox ${tg==='boss'?'tgt':''}" data-a="cTarget" data-v="boss">${bsrc?`<img class="boss-art" src="${esc(bsrc)}" alt="${esc(B.name)}" data-zoom="${esc(bsrc)}">`:''}<div><div class="bname">${B.icon} ${esc(B.name)}</div>
-   <div class="bar"><i style="width:${Math.max(0,B.hp)/B.maxHp*100}%"></i></div><div class="bstats">❤ ${Math.max(0,B.hp)}/${B.maxHp} ${B.shield?`· 🛡 Shield ${B.shield}`:''} · ⚔ ATK ${Math.max(0,B.atk-B.curse+B.temp)} · 💧 ${B.manaPlayed} mana in play (max ${B.manaCap}) · ✋ ${B.hand.length} · deck ${B.deck.length}</div></div></div>
+   <div class="bar"><i style="width:${Math.max(0,B.hp)/B.maxHp*100}%"></i></div><div class="bstats"><span class="bstats-full">❤ ${Math.max(0,B.hp)}/${B.maxHp} ${B.shield?`· 🛡 Shield ${B.shield}`:''} · ⚔ ATK ${Math.max(0,B.atk-B.curse+B.temp)} · 💧 ${B.manaPlayed} mana in play (max ${B.manaCap}) · ✋ ${B.hand.length} · deck ${B.deck.length}</span><span class="bstats-short">❤ ${Math.max(0,B.hp)}/${B.maxHp}${B.shield?` · 🛡 ${B.shield}`:''} · ⚔ ${Math.max(0,B.atk-B.curse+B.temp)} · 💧 ${B.manaPlayed}/${B.manaCap} · ✋ ${B.hand.length} · deck ${B.deck.length}</span></div></div></div>
    ${bossBonus?`<div class="boss-relics">${bossBonus}</div>`:''}
    <div class="clog">${C.log.slice(0,40).map(l=>`<div>${esc(l)}</div>`).join('')}</div></div>`;
   // phase banner
@@ -2658,7 +2677,7 @@ function renderCombat(){
   else if(F&&C.step==='attack') ph=`<b>${esc(FP(F).name)}: combat.</b>`+(myTurn?`<span class="phase-hint"> Click your untapped creatures to choose attackers (they tap and can't block his next attack), then attack or skip.</span>`:`<span class="phase-hint"> Waiting for ${esc(FP(F).name)} to attack.</span>`);
   else if(F) ph=`<b>${esc(FP(F).name)}: play mana and cards.</b>`+(myTurn?`<span class="phase-hint"> Click an enemy to target it; click your creature to choose it for cards that need one.</span>`:`<span class="phase-hint"> Waiting for ${esc(FP(F).name)} to play.</span>`);
   h+=`<div class="phase">Round ${C.round} · ${ph}</div>`;
-  h+=`<div class="combat-fields"><div class="battle-row is-foe"><div class="muted">His battlefield <span class="wide-hint">(click to target)</span></div>${fieldHTML(B.field.map(c=>crHTML(c,{tgt:tg===c.uid,attrs:`data-a="cTarget" data-v="${c.uid}"`})))}</div>`;
+  h+=`<div class="combat-fields"><div class="battle-row is-foe"><div class="muted">Boss battlefield · ${esc(B.name)} <span class="wide-hint">(click to target)</span></div>${fieldHTML(B.field.map(c=>crHTML(c,{tgt:tg===c.uid,attrs:`data-a="cTarget" data-v="${c.uid}"`})))}</div>`;
   if(C.phase==='block'&&C.pending){
     h+=`<div class="panel respond">${C.pending.items.map((it,i)=>{ const cands=allHeroCreatures().filter(b=>canBlock(b,it.a));
       return `<div class="atkrow ${C.sel===i?'sel':''} ${it.cancel?'cancel':''}" data-a="bSel" data-v="${i}"><b>${esc(srcName(it))}</b> (${atkOf(it)} ATK${!it.a.cmd&&has(it.a,'fly')?', Flying':''}${!it.a.cmd&&has(it.a,'trample')?', Trample':''}) → ${esc(FP(it.tgt).name)} ·
@@ -2666,14 +2685,7 @@ function renderCombat(){
        ${cands.filter(b=>b!==it.blk).map(b=>`<button class="btn small" data-a="bAssign" data-v="${i}:${b.uid}">Block with ${esc(b.name)} (${effAtk(b)}/${hpLeft(b)})</button>`).join('')}</div>`; }).join('')}
       <button class="btn primary" data-a="bConfirm">Confirm blocks</button></div>`;
   }
-  // slim mid-table stats (no relic chips — those sit in the hand tray)
-  if(C.fighters.length>1){
-    h+=`<div class="fighters slim">`;
-    C.fighters.forEach((Fx,fi)=>{ const p=FP(Fx); const isA=F===Fx;
-      h+=`<div class="fighter ${isA?'act':''}" style="${Fx.out?'opacity:.45':''}"><b style="color:${PCOLORS[Fx.pi]}">${esc(p.name)}</b> ${Fx.out?(Fx.retreated?'(retreated)':'(fallen)'):''} · ❤ ${p.hp}/${p.maxHp} · 🛡 Block ${Fx.block} · 💧 ${Fx.mana} mana · draw ${Fx.draw.length}</div>`; });
-    h+=`</div>`;
-  }
-  // player battlefields as full-card rows
+  // player battlefields as full-card rows (HP / mana / draw live on these labels; no second stats strip)
   C.fighters.forEach((Fx,fi)=>{ const p=FP(Fx); const isA=F===Fx;
     const label=(C.fighters.length>1?`${esc(p.name)}'s battlefield`:'Your battlefield')+`<span class="field-stats"> · ❤ ${p.hp}/${p.maxHp} · 🛡 ${Fx.block} · 💧 ${Fx.mana} mana · draw ${Fx.draw.length}</span>`;
     const cards=Fx.field.map(c=>{ let attrs='';
