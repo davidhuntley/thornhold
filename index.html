@@ -590,6 +590,13 @@ svg.board{width:100%;height:auto;display:block}
   .combat-modal .field{gap:4px;padding:2px}
   .combat-hand .hand-actions{margin:2px 0 0}
 }
+
+/* Town-map embed: the fight fills the iframe, no board chrome */
+html.embed, body.embed{height:100%;margin:0;background:#140e08;overflow:hidden}
+body.embed #app{height:100%}
+body.embed .overlay.combat-ov{padding:0;background:#140e08}
+body.embed .modal.combat-modal{max-width:100%;border-radius:0;border-width:0 0 0 0;box-shadow:none}
+.combat-hand .waiting{padding:10px 12px;text-align:center}
 </style></head><body><div id="app"></div><script>
 'use strict';
 /* Auto-generated card art map. Do not edit by hand. */
@@ -1376,6 +1383,33 @@ function newGame(count, facs, names, decks, diff, drawOrder){
   beginRound();
   beginTurn();
 }
+
+// Town-map fights reuse the same combat rules and the same starter kit as a new game.
+// They do not start a board-game campaign. Marked as kind:'town' so leaveCombat skips campaign rewards.
+function startTownFight(cfg){
+  const names=cfg.players.map(p=>p.name), facs=cfg.players.map(p=>p.fac), decks=cfg.players.map(p=>p.deckId);
+  const count=cfg.players.length, diff=cfg.diff||'medium', seed=cfg.seed||(Date.now()%2147483646)+1;
+  setSeed(seed);
+  G = {players:[], cur:0, round:1, cleared:[false,false,false], log:[], flags:{}, combat:null, modals:[], over:null,
+       turn:{roll:0,moved:true,acted:false,mud:false,flex:0}, uid:0, diff, drawOrder:cfg.drawOrder||'purchase', herald:0,
+       lastEvent:null, stats:{fights:[]}, eventDeck:[], questDeck:[], tavern:[], spaces:{}, town:cfg.town||null, seed};
+  for(let i=0;i<count;i++){
+    const fac=facs[i], deckId=decks[i]||DECK_IDS[i%4], solo=count===1;
+    const p={idx:i, name:names[i]||('Player '+(i+1)), fac, deckId, hp:START_HP+(solo?SOLO_HP:0), maxHp:START_HP+(solo?SOLO_HP:0), gold:START_GOLD,
+      mats:{iron:0,hide:0,rune:0,ash:0}, supply:buildSupply(deckId), owned:[], buySeq:0, mana:[], relics:FACTIONS[fac].relics.slice(), quests:[], loc:'cross',
+      lastUse:null, blessed:0, dead:false, kos:0, exiled:0, bought:0};
+    for(let k=0;k<START_MANA_CARDS;k++) p.mana.push('plain');
+    for(const [s,n] of [['creature',2],['spell',2],['artifact',1]]){
+      let got=0, guard=0; while(got<n && guard++<40){ const inst=p.supply[s].shift(); if(!inst) break; const c=HC[inst.id];
+        if(c.strong||c.legend){ p.supply[s].push(inst); continue; } addOwned(p,inst); got++; }
+    }
+    G.players.push(p);
+  }
+  log(`A town fight begins on ${DIFFS[G.diff].name}: ${G.players.map(p=>`${p.name} (${FACTIONS[p.fac].one}, ${DECKS[p.deckId].name} deck)`).join(', ')} vs ${COMMANDERS[cfg.cid].name}.`);
+  startCombat({kind:'town', cid:cfg.cid, town:cfg.town||null}, G.players);
+  return G;
+}
+
 
 function beginRound(){
   G.round++; G.flags={};
@@ -2275,8 +2309,11 @@ function leaveCombat(){
     if(C.kind==='stop'){ G.cleared[C.stop]=true; G.herald=0; winners.forEach(p=>{ gainGold(p,STOP_REWARD.gold,'victory'); gainMats(p,STOP_REWARD.mats); heal(p,STOP_REWARD.heal); }); }
     else if(C.kind==='quest'){ const q=QUESTS.find(x=>x.id===C.qid); G.players.forEach(p=>{ p.quests=p.quests.filter(x=>x!==C.qid); }); G.questDeck.unshift(C.qid); winners.forEach(p=>{ gainGold(p,q.reward.gold,'quest'); gainMats(p,q.reward.mats); }); }
   }
-  for(const F of C.fighters){ const p=FP(F); if(F.out&&!F.retreated) heroFalls(p); }
+  if(C.kind!=='town'){
+    for(const F of C.fighters){ const p=FP(F); if(F.out&&!F.retreated) heroFalls(p); }
+  }
   G.combat=null;
+  if(C.kind==='town'){ return true; }
   if(won===true&&C.kind==='boss'){ endGame(true,`Malgrath the Iron Warlord falls! Thornhold is free (round ${G.round}).`); return true; }
   checkAllDead(); return true;
 }
@@ -2412,11 +2449,18 @@ function helpHTML(){
 function render(){
   const app=typeof document!=='undefined'&&document.getElementById('app'); if(!app) return;
   let h='';
-  if(!G) h=renderSetup();
-  else if(G.over) h=renderEnd();
-  else { h=`<div class="wrap">${renderTop()}${UI.err?`<div class="err">Error: ${esc(UI.err)}</div>`:''}<div class="main"><div>${renderGauntlet()}<div class="boardwrap">${renderBoard()}</div>${renderLocPanel()}${helpHTML()}</div><div>${renderPlayers()}<div class="panel"><b>Log</b><div class="log">${G.log.slice(0,80).map(l=>`<div>${esc(l)}</div>`).join('')}</div></div></div></div></div>`;
-    if(G.combat) h+=renderCombat(); else if(G.modals.length) h+=renderModal(G.modals[0]);
-    if(UI.deckView!==null) h+=renderDeckView(); }
+  if(TOWN.on){
+    if(G&&G.combat) h=renderCombat();
+    else if(TOWN.closed) h=`<div class="wrap setup"><div class="panel"><p>Returning to town…</p></div></div>`;
+    else h=`<div class="wrap setup"><div class="panel"><p>Preparing the fight…</p></div></div>`;
+    if(UI.err) h=`<div class="err">Error: ${esc(UI.err)}</div>`+h;
+  } else {
+    if(!G) h=renderSetup();
+    else if(G.over) h=renderEnd();
+    else { h=`<div class="wrap">${renderTop()}${UI.err?`<div class="err">Error: ${esc(UI.err)}</div>`:''}<div class="main"><div>${renderGauntlet()}<div class="boardwrap">${renderBoard()}</div>${renderLocPanel()}${helpHTML()}</div><div>${renderPlayers()}<div class="panel"><b>Log</b><div class="log">${G.log.slice(0,80).map(l=>`<div>${esc(l)}</div>`).join('')}</div></div></div></div></div>`;
+      if(G.combat) h+=renderCombat(); else if(G.modals.length) h+=renderModal(G.modals[0]);
+      if(UI.deckView!==null) h+=renderDeckView(); }
+  }
   app.innerHTML=h;
 }
 function renderSetup(){
@@ -2607,10 +2651,12 @@ function renderCombat(){
    <div class="clog">${C.log.slice(0,40).map(l=>`<div>${esc(l)}</div>`).join('')}</div></div>`;
   // phase banner
   let ph='';
-  if(C.over) ph=`<b>${C.won===true?'🏆 Victory!':C.won===false?'💀 Defeat':'Withdrawn'}</b> <button class="btn primary" data-a="leave">Continue</button>`;
+  const myF=TOWN.on?C.fighters[TOWN.localPi]:null;
+  const myTurn=!(!F||(TOWN.on&&F.pi!==TOWN.localPi));
+  if(C.over) ph=`<b>${C.won===true?'🏆 Victory!':C.won===false?'💀 Defeat':'Withdrawn'}</b> <button class="btn primary" data-a="leave">${TOWN.on?'Return to town':'Continue'}</button>`;
   else if(C.phase==='block') ph=`<b>${esc(B.name)} attacks!</b><span class="phase-hint"> Pick an attack, then click one of your untapped creatures to block it (blockers deal their ATK back). You can cast ⚡ instants now. Then confirm.</span>`;
-  else if(F&&C.step==='attack') ph=`<b>${esc(FP(F).name)}: combat.</b><span class="phase-hint"> Click your untapped creatures to choose attackers (they tap and can't block his next attack), then attack or skip.</span>`;
-  else if(F) ph=`<b>${esc(FP(F).name)}: play mana and cards.</b><span class="phase-hint"> Click an enemy to target it; click your creature to choose it for cards that need one.</span>`;
+  else if(F&&C.step==='attack') ph=`<b>${esc(FP(F).name)}: combat.</b>`+(myTurn?`<span class="phase-hint"> Click your untapped creatures to choose attackers (they tap and can't block his next attack), then attack or skip.</span>`:`<span class="phase-hint"> Waiting for ${esc(FP(F).name)} to attack.</span>`);
+  else if(F) ph=`<b>${esc(FP(F).name)}: play mana and cards.</b>`+(myTurn?`<span class="phase-hint"> Click an enemy to target it; click your creature to choose it for cards that need one.</span>`:`<span class="phase-hint"> Waiting for ${esc(FP(F).name)} to play.</span>`);
   h+=`<div class="phase">Round ${C.round} · ${ph}</div>`;
   h+=`<div class="combat-fields"><div class="battle-row is-foe"><div class="muted">His battlefield <span class="wide-hint">(click to target)</span></div>${fieldHTML(B.field.map(c=>crHTML(c,{tgt:tg===c.uid,attrs:`data-a="cTarget" data-v="${c.uid}"`})))}</div>`;
   if(C.phase==='block'&&C.pending){
@@ -2639,8 +2685,11 @@ function renderCombat(){
   });
   h+=`</div></div>`; // combat-fields + combat-table
 
-  h+=`<div class="combat-hand">${F?fighterBonusHTML(F):''}`;
-  if(F&&!C.over){
+  const showHand=!TOWN.on||(F&&F.pi===TOWN.localPi);
+  h+=`<div class="combat-hand">${showHand&&F?fighterBonusHTML(F):''}`;
+  if(F&&!C.over&&!showHand){
+    h+=`<div class="row hand-actions waiting"><span class="muted">It's ${esc(FP(F).name)}'s turn. Your hand is hidden from your teammate, and theirs is hidden from you.</span></div>`;
+  } else if(F&&!C.over){
     if(C.step==='attack'){ const n=Object.values(F.atkSel).filter(x=>x).length; h+=`<div class="row hand-actions"><button class="btn danger" data-a="cDeclare">⚔️ Attack with ${n} creature${n===1?'':'s'}</button><button class="btn" data-a="cSkip">Don't attack</button></div>`; }
     else {
       h+=`<div class="combat-hand-rows"><div class="hand-block"><div class="muted hand-label">Your hand (Basic Strike + ${F.hand.length}/${HAND_BOUGHT} bought cards):</div><div class="cards play-row" style="--hand-n:${1+F.hand.length}">`;
@@ -2655,6 +2704,7 @@ function renderCombat(){
   }
   if(C.phase==='block'&&!C.over){
     C.fighters.forEach((Fx,fi)=>{ if(Fx.out) return;
+      if(TOWN.on&&Fx.pi!==TOWN.localPi) return;
       const inst=Fx.hand.map((x,i)=>({x,i})).filter(o=>HC[o.x.id].type==='instant');
       if(inst.length) h+=`<div class="muted">Instants (${Fx.mana} mana left):</div><div class="cards">${inst.map(o=>{ const w=whyNot(Fx,o.x,true); return cardHTML(o.x,{F:Fx,play:!w,cant:!!w,why:w,attrs:w?'':`data-a="bInstant" data-v="${fi}:${o.i}"`}); }).join('')}</div>`;
     });
@@ -2722,11 +2772,46 @@ function act(a,v){
   render();
 }
 function confirmRestart(){ try{ return window.confirm('Abandon this game and start over?'); }catch(e){ return true; } }
+// ===== Town-map embed (iframe from the 3D town). Host runs the engine; clients send actions and apply the host's copies. =====
+const TOWN={on:false, role:'solo', localPi:0, closed:false, lastWon:null};
+if(typeof location!=='undefined' && new URLSearchParams(location.search).has('embed')){
+  TOWN.on=true;
+  if(typeof document!=='undefined') document.documentElement.classList.add('embed');
+}
+function townPost(msg){ if(typeof window==='undefined'||!window.parent||window.parent===window) return; window.parent.postMessage(Object.assign({source:'thornhold-battle'}, msg), '*'); }
+function townMaybeResult(){ if(G&&G.combat&&G.combat.over&&TOWN.lastWon===null){ TOWN.lastWon=G.combat.won; townPost({k:'result', won:TOWN.lastWon}); } }
+function townApply(a,v){ act(a,v); townMaybeResult(); }
+function townClick(a,v){
+  if(a==='zoom'||a==='closeZoom'){ act(a,v); return; }
+  if(a==='leave'){
+    TOWN.closed=true; townPost({k:'over', won:TOWN.lastWon});
+    if(G&&G.combat) act('leave');
+    render(); return;
+  }
+  if(TOWN.role==='client'){ townPost({k:'act', a, v}); return; }
+  act(a,v);
+  if(TOWN.role==='host') townPost({k:'act', a, v});
+  townMaybeResult();
+}
+if(typeof window!=='undefined'){
+  window.TownFight={
+    start(cfg){ if(G&&G.combat&&!TOWN.closed) return; TOWN.role=cfg.role||'solo'; TOWN.localPi=cfg.localPi||0; TOWN.closed=false; TOWN.lastWon=null; startTownFight(cfg); render(); },
+    apply(a,v){ townApply(a,v); },
+    getState(){ return G; },
+  };
+  window.addEventListener('message', ev=>{
+    if(!TOWN.on||!ev.data||ev.data.source!=='thornhold-town') return;
+    const m=ev.data;
+    if(m.k==='start') window.TownFight.start(m.cfg);
+    else if(m.k==='act') window.TownFight.apply(m.a, m.v);
+  });
+}
 if(typeof document!=='undefined'){
-  document.addEventListener('click',e=>{ const el=e.target.closest('[data-a]'); if(!el) return; e.stopPropagation(); act(el.dataset.a, el.dataset.v); });
+  document.addEventListener('click',e=>{ const el=e.target.closest('[data-a]'); if(!el) return; e.stopPropagation(); if(TOWN.on) townClick(el.dataset.a, el.dataset.v); else act(el.dataset.a, el.dataset.v); });
   document.addEventListener('input',e=>{ const t=e.target; if(t&&t.dataset&&t.dataset.name!==undefined) UI.setup.names[+t.dataset.name]=t.value||('Player '+(+t.dataset.name+1)); });
-  window.TH={get G(){return G;}, forgeReveal, act, newGame, setSeed, render, reachable, getActions, activeF, HC, P, callTargets, showCardZoom, hideCardZoom};
-  document.addEventListener('DOMContentLoaded', ()=>{ ensureZoom(); render(); });
-  if(document.readyState!=='loading'){ ensureZoom(); render(); }
+  window.TH={get G(){return G;}, forgeReveal, act, newGame, startTownFight, setSeed, render, reachable, getActions, activeF, HC, P, callTargets, showCardZoom, hideCardZoom, TOWN};
+  const boot=()=>{ ensureZoom(); if(TOWN.on){ document.body.classList.add('embed'); townPost({k:'ready'}); } render(); };
+  document.addEventListener('DOMContentLoaded', boot);
+  if(document.readyState!=='loading') boot();
 }
 </script></body></html>

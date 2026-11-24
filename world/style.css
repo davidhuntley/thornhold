@@ -115,3 +115,9 @@ body.touch #prompt small{display:none}
   #joy{width:110px;height:110px;bottom:12px}
   #toast{top:auto;bottom:16px}
 }
+
+/* Card-battle overlay (iframe of the card game) */
+#battle{position:fixed;inset:0;z-index:40;background:#140e08}
+#battle iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#140e08}
+body.in-battle #hud, body.in-battle #help, body.in-battle #prompt, body.in-battle #joy, body.in-battle #invite, body.in-battle #menu, body.in-battle #labels{display:none!important}
+body.in-battle #c{visibility:hidden}
