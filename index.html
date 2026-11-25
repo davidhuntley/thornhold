@@ -54,6 +54,20 @@ svg.board{width:100%;height:auto;display:block}
 .card{width:132px;min-height:188px;border-radius:9px;background:linear-gradient(#f6ecd2,#dcc89c);color:#2a1a0a;border:3px solid #7a5a2a;position:relative;padding:22px 7px 26px;font-size:12px;box-shadow:0 3px 8px rgba(0,0,0,.6);display:flex;flex-direction:column;transition:transform .12s}
 .card.play{cursor:pointer}
 .card.play:hover{transform:translateY(-6px)}
+/* Combat hand: never move the card's hit box on hover (that looped zoom-in/out on laptops). */
+.combat-hand .card.play:hover{transform:none}
+.combat-hand .play-row .card.play:hover,
+.combat-hand .play-row .card:hover,
+.combat-hand .play-row .card:focus-visible{
+  transform:rotate(var(--ang)) translateY(var(--drop));
+  z-index:8;
+}
+.combat-hand .play-row .card:hover .cardface,
+.combat-hand .mana-row .card:hover .cardface{
+  transform:translateY(-14px) scale(1.05);
+  transform-origin:50% 100%;
+  pointer-events:none;
+}
 .card.cant{opacity:.55;filter:grayscale(.5)}
 .card .mana{position:absolute;top:-9px;left:-9px;width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#8fd0ff,#1f5fa8);color:#fff;font-weight:bold;display:flex;align-items:center;justify-content:center;border:2px solid #0c2c55;font-size:15px}
 .card .cost{position:absolute;bottom:-9px;right:-9px;min-width:30px;height:28px;border-radius:14px;padding:0 5px;background:radial-gradient(circle at 35% 30%,#ffe58a,#b8860b);color:#3a2500;font-weight:bold;display:flex;align-items:center;justify-content:center;border:2px solid #6b4a00;font-size:13px}
@@ -380,10 +394,8 @@ svg.board{width:100%;height:auto;display:block}
 }
 .combat-hand .play-row .card:hover,
 .combat-hand .play-row .card:focus-visible{
-  transform:rotate(var(--ang)) translateY(-18px) scale(1.06);
+  transform:rotate(var(--ang)) translateY(var(--drop));
   z-index:8;
-  margin-left:2px;
-  margin-right:2px;
 }
 .combat-hand .mana-row{
   gap:0;
@@ -554,7 +566,7 @@ svg.board{width:100%;height:auto;display:block}
   .combat-hand .play-row{padding:0 14px}
   .combat-hand .play-row .card{margin-bottom:-4px;--drop:calc(abs(var(--i, 0) - var(--mid)) * 3px)}
   .combat-hand .play-row .card:hover,
-  .combat-hand .play-row .card:focus-visible{transform:rotate(var(--ang)) translateY(-12px) scale(1.05)}
+  .combat-hand .play-row .card:focus-visible{transform:rotate(var(--ang)) translateY(var(--drop));z-index:8}
 }
 @media (max-height:700px){
   .modal.combat-modal{--table-card-w:96px;--hand-card-w:86px}
@@ -589,7 +601,7 @@ svg.board{width:100%;height:auto;display:block}
   .combat-hand .play-row{padding:0 8px}
   .combat-hand .play-row .card{margin-left:calc(var(--hand-card-w) * -.2);margin-right:calc(var(--hand-card-w) * -.2);margin-bottom:-4px}
   .combat-hand .play-row .card:hover,
-  .combat-hand .play-row .card:focus-visible{transform:rotate(var(--ang)) translateY(-8px) scale(1.08)}
+  .combat-hand .play-row .card:focus-visible{transform:rotate(var(--ang)) translateY(var(--drop));z-index:8}
   .combat-hand .muted{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
   .combat-hand .mana-row .card,
   .combat-hand .mana-row .card.artcard{width:calc(var(--hand-card-w) * .78)}
@@ -2490,17 +2502,27 @@ function ensureZoom(){
   document.body.appendChild(z);
   z.addEventListener('click', ev=>{ if(ev.target===z) hideCardZoom(true); });
   document.addEventListener('keydown', ev=>{ if(ev.key==='Escape') hideCardZoom(true); });
-  document.addEventListener('mousemove', ev=>{
+  document.addEventListener('pointermove', ev=>{
+    if(ev.pointerType && ev.pointerType!=='mouse'){ UI.zoomHover=false; return; }
     if(ev.movementX===0 && ev.movementY===0) return;
     UI.zoomHover=true;
+    if(UI.zoomPinned) return;
+    const el=ev.target.closest && ev.target.closest('[data-zoom]');
+    if(el) showCardZoom(el.getAttribute('data-zoom'), false);
   }, {passive:true});
-  document.addEventListener('mouseover', ev=>{
+  document.addEventListener('pointerover', ev=>{
+    if(ev.target.closest && ev.target.closest('.combat-hand')) UI.handHover=true;
+    if(ev.pointerType && ev.pointerType!=='mouse') return;
     const el=ev.target.closest && ev.target.closest('[data-zoom]');
     if(!el || UI.zoomPinned || !UI.zoomHover) return;
     showCardZoom(el.getAttribute('data-zoom'), false);
   });
-  document.addEventListener('mouseout', ev=>{
+  document.addEventListener('pointerout', ev=>{
+    const fromH=ev.target.closest && ev.target.closest('.combat-hand');
+    const toH=ev.relatedTarget && ev.relatedTarget.closest && ev.relatedTarget.closest('.combat-hand');
+    if(fromH && !toH) UI.handHover=false;
     if(UI.zoomPinned) return;
+    if(ev.pointerType && ev.pointerType!=='mouse') return;
     const from=ev.target.closest && ev.target.closest('[data-zoom]');
     const to=ev.relatedTarget && ev.relatedTarget.closest && ev.relatedTarget.closest('[data-zoom]');
     if(from && !to) hideCardZoom(false);
@@ -2561,8 +2583,10 @@ function helpHTML(){
 }
 
 function render(){
-  UI.zoomHover=false; hideCardZoom(false);
   const app=typeof document!=='undefined'&&document.getElementById('app'); if(!app) return;
+  const keepHand=UI.handHover && !UI.forceHandRender ? app.querySelector('.combat-hand') : null;
+  if(!keepHand){ UI.zoomHover=false; hideCardZoom(false); }
+  UI.forceHandRender=false;
   let h='';
   if(TOWN.on){
     if(G&&G.combat) h=renderCombat();
@@ -2577,6 +2601,10 @@ function render(){
       if(UI.deckView!==null) h+=renderDeckView(); }
   }
   app.innerHTML=h;
+  if(keepHand){
+    const fresh=app.querySelector('.combat-hand');
+    if(fresh) fresh.replaceWith(keepHand);
+  }
 }
 function renderSetup(){
   const S=UI.setup; let h=`<div class="wrap setup"><div class="panel"><h1 style="color:#e8c46a">Thornhold: Relics of the Warlord</h1><p class="muted">Prototype v3 · co-op deck-building board game · hover or tap 🔍 to zoom a card</p>
@@ -2872,6 +2900,7 @@ function renderCombat(){
 function act(a,v,fromPi){
   UI.err=null;
   UI.actorPi=(fromPi!=null&&fromPi!=='')?+fromPi:(TOWN.on?TOWN.localPi:null);
+  if(!TOWN.on || UI.actorPi===TOWN.localPi) UI.forceHandRender=true;
   try{
     switch(a){
       case 'restart': if(!G||G.over||confirmRestart()){ G=null; UI.deckView=null; } break;
