@@ -1488,6 +1488,25 @@ function newGame(count, facs, names, decks, diff, drawOrder){
 
 // Town-map fights reuse the same combat rules and the same starter kit as a new game.
 // They do not start a board-game campaign. Marked as kind:'town' so leaveCombat skips campaign rewards.
+function giveTownLoadout(p, slot){
+  const deck=slot&&slot.deck;
+  const cards=deck&&deck.cards;
+  if(cards&&typeof cards==='object'){
+    p.mana=[]; p.owned=[]; p.buySeq=0;
+    for(const id of Object.keys(cards)){
+      if(!HC[id]) continue;
+      const n=Math.max(0,Math.floor(+cards[id]||0));
+      for(let i=0;i<n;i++) addOwned(p, mkInst(id));
+    }
+    if(!p.owned.length) giveStarterKit(p);
+    else p.mana=(deck.mana&&deck.mana.length)?deck.mana.slice():['plain','plain','plain'];
+  } else {
+    giveStarterKit(p);
+  }
+  // relics: an array (even empty) is the player's unlocked set. Missing means an old client, so use the faction's three.
+  if(Array.isArray(slot&&slot.relics)) p.relics=slot.relics.filter(id=>RELICS[id]);
+  else p.relics=FACTIONS[p.fac].relics.slice();
+}
 function startTownFight(cfg){
   const names=cfg.players.map(p=>p.name), facs=cfg.players.map(p=>p.fac), decks=cfg.players.map(p=>p.deckId);
   const count=cfg.players.length, diff=cfg.diff||'medium', seed=cfg.seed||(Date.now()%2147483646)+1;
@@ -1498,12 +1517,16 @@ function startTownFight(cfg){
   for(let i=0;i<count;i++){
     const fac=facs[i], deckId=decks[i]||DECK_IDS[i%4], solo=count===1;
     const p={idx:i, name:names[i]||('Player '+(i+1)), fac, deckId, hp:START_HP+(solo?SOLO_HP:0), maxHp:START_HP+(solo?SOLO_HP:0), gold:START_GOLD,
-      mats:{iron:0,hide:0,rune:0,ash:0}, supply:buildSupply(deckId), owned:[], buySeq:0, mana:[], relics:FACTIONS[fac].relics.slice(), quests:[], loc:'cross',
+      mats:{iron:0,hide:0,rune:0,ash:0}, supply:buildSupply(deckId), owned:[], buySeq:0, mana:[], relics:[], quests:[], loc:'cross',
       lastUse:null, blessed:0, dead:false, kos:0, exiled:0, bought:0};
-    giveStarterKit(p);
+    giveTownLoadout(p, cfg.players[i]);
     G.players.push(p);
   }
-  log(`A town fight begins on ${DIFFS[G.diff].name}: ${G.players.map(p=>`${p.name} (${FACTIONS[p.fac].one}, ${DECKS[p.deckId].name} deck)`).join(', ')} vs ${COMMANDERS[cfg.cid].name}.`);
+  const who=G.players.map(p=>{
+    const rel=p.relics.length?('relics: '+p.relics.map(r=>RELICS[r].name).join(', ')):('no relics');
+    return p.name+' ('+FACTIONS[p.fac].one+', '+rel+')';
+  }).join(', ');
+  log('A town fight begins on '+DIFFS[G.diff].name+': '+who+' vs '+COMMANDERS[cfg.cid].name+'.');
   startCombat({kind:'town', cid:cfg.cid, town:cfg.town||null}, G.players);
   return G;
 }
