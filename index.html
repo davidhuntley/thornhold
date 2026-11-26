@@ -152,6 +152,11 @@ svg.board{width:100%;height:auto;display:block}
 .bossbox{cursor:pointer;padding:6px;border-radius:8px}
 .bossbox.tgt{box-shadow:0 0 0 3px #ffd85a,0 0 14px #ffd85a}
 .phase{font-size:16px;padding:8px 12px;border-radius:8px;background:#3a2a12;border:1px solid #c99a4a;margin:8px 0}
+.awaken-banner{margin:8px 0 0;padding:10px 14px;border-radius:8px;text-align:center;font-size:18px;font-weight:bold;letter-spacing:.02em;color:#1a1204;background:linear-gradient(#ffe9a0,#c99a4a);border:2px solid #ffd85a;box-shadow:0 0 18px rgba(255,216,90,.55);animation:awakenpop .45s ease-out}
+@keyframes awakenpop{0%{transform:scale(.85);opacity:0}100%{transform:scale(1);opacity:1}}
+.cr.artcr.awakened{box-shadow:0 0 0 3px #ffd85a,0 0 16px #ffe9a0}
+.cr.artcr.awaken-flash{animation:awakenflash 1.1s ease-out}
+@keyframes awakenflash{0%{box-shadow:0 0 0 6px #fff6c8,0 0 28px #ffd85a;filter:brightness(1.35)}100%{box-shadow:0 0 0 3px #ffd85a,0 0 16px #ffe9a0;filter:none}}
 .atkrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:6px;border-radius:8px;border:1px solid #6b4f2a;margin:4px 0;background:rgba(0,0,0,.25);cursor:pointer}
 .atkrow.sel{border-color:#ffd85a;background:rgba(80,60,10,.4)}
 .atkrow.cancel{opacity:.5;text-decoration:line-through}
@@ -1007,7 +1012,7 @@ const RELICS = {
 };
 
 // ===== Keywords =====
-const KW = {fly:'Flying', reach:'Reach', first:'First Strike', life:'Lifelink', trample:'Trample', taunt:'Taunt', haste:'Haste', dt:'Deathtouch', twice:'Double Attack', pierce:'Pierce', vig:'Vigilance', ward:'Ward', rally:'Rally', fortify:'Fortify', overgrow:'Overgrow', noblock:"Can't block"};
+const KW = {fly:'Flying', reach:'Reach', first:'First Strike', life:'Lifelink', trample:'Trample', taunt:'Taunt', haste:'Haste', dt:'Deathtouch', twice:'Double Attack', pierce:'Pierce', vig:'Vigilance', ward:'Ward', rally:'Rally', fortify:'Fortify', overgrow:'Overgrow', stealth:'Stealth', noblock:"Can't block"};
 const KW_HELP = {
   fly:'Can only be blocked by creatures with Flying or Reach.',
   reach:'Can block creatures with Flying.',
@@ -1024,6 +1029,7 @@ const KW_HELP = {
   rally:'When it attacks, your other attackers get +1 ATK for that combat.',
   fortify:'When it blocks, it gains Shield 1.',
   overgrow:'At the start of your next turn it becomes 2/2.',
+  stealth:'No rule for Stealth is written in the game yet.',
   noblock:'Cannot block.',
   shield:'Shield N: each hit is reduced by N, then the creature loses 1 Shield (whatever the hit size).',
   armor:'Armor N: each hit is reduced by N.',
@@ -1186,6 +1192,10 @@ hc('frostling','Frostling','creature','creature',1,1,'1/1.',{c:{atk:1,hp:1}});
 hc('gloomling','Gloomling','creature','creature',1,1,'1/1.',{c:{atk:1,hp:1}});
 hc('stormling','Stormling','creature','creature',1,1,'1/1.',{c:{atk:1,hp:1}});
 hc('magmaling','Magmaling','creature','creature',1,1,'1/1.',{c:{atk:1,hp:1}});
+// --- Godly (Shadowpaw transforms into Ursanox in combat; Ursanox is not a separate collectible) ---
+hc('shadowpaw','Shadowpaw, the Hearth Familiar','creature','creature',7,9,'Godly Creature — Familiar. 1/2. Stealth. Awaken: When Shadowpaw would take fatal damage or is targeted by a spell or ability, you may transform him into Ursanox. That damage or effect is canceled. Max 1 copy.',{c:{atk:1,hp:2,kw:{stealth:1}},strong:1,godly:1,typeline:'Godly Creature — Familiar'});
+hc('ursanox','Ursanox, the Moonbound Bear','creature','creature',0,0,'Godly Creature — Spirit Bear. 7/8. Taunt, Lifelink. Awakened form of Shadowpaw. When Ursanox awakens, deal 3 damage to every enemy creature. Until this fight ends, Ursanox takes no damage and can\'t be affected by spells or abilities.',{c:{atk:7,hp:8,kw:{taunt:1,life:1}},strong:1,godly:1,form:1,typeline:'Godly Creature — Spirit Bear'});
+hc('caelthorn','Caelthorn, Last Light of Thornhold','creature','creature',8,9,'Godly Creature — Celestial. 6/6. Flying, Lifelink. ETB: exile the enemy creature with the highest ATK until Caelthorn leaves this fight. You lose 2 HP. Max 1 copy.',{c:{atk:6,hp:6,kw:{fly:1,life:1},etb:{exileHighest:1,selfDmg:2}},strong:1,godly:1,typeline:'Godly Creature — Celestial'});
 
 // Vanilla 1/1s, grouped by faction from card_art/manifest.json and the site DECKS.
 // A class starter uses only that class's 1/1s, with copies to stay near 17 without going over 4.
@@ -1860,6 +1870,60 @@ function tryWard(cr, spellName){
   log(`🛡 Ward: ${cr.name} cancels ${spellName}.`);
   return true;
 }
+function isImmune(cr){ return !!(cr && cr.immune); }
+function isShadowpaw(cr){ return !!(cr && !cr.awakened && (cr.id==='shadowpaw' || (cr.inst && cr.inst.id==='shadowpaw' && cr.id!=='ursanox'))); }
+function canAwaken(cr){ return isShadowpaw(cr) && crAlive(cr) && !cr.awakened; }
+function showAwakenBanner(text){
+  const C=G.combat; if(!C) return;
+  C.flash={text, uid:null, at:C.round};
+}
+function awakenToUrsanox(cr, reason){
+  const C=G.combat; if(!C||!canAwaken(cr)) return false;
+  const u=HC.ursanox, c=u.c;
+  const old=cr.name;
+  cr.awakened=true; cr.immune=true; cr.formId='ursanox'; cr.id='ursanox';
+  cr.name=u.name; cr.baseAtk=c.atk; cr.baseHp=c.hp; cr.dmg=0;
+  cr.kw=Object.assign({}, c.kw||{});
+  cr.def=Object.assign({}, c);
+  cr.tags=(u.tags||c.tags||[]).slice();
+  C.flash={text:old+' awakens as '+u.name+'!', uid:cr.uid, at:C.round};
+  log(`✨ Awaken: ${old} transforms into ${u.name}. ${reason||'That damage or effect'} is canceled.`);
+  const enemies=cr.side==='hero'?C.boss.field.slice():allHeroCreatures();
+  log(`${u.name} awakens and deals 3 damage to every enemy creature.`);
+  enemies.forEach(e=>damageCreature(e,3,{src:u.name}));
+  return true;
+}
+function tryProtect(cr, effectName){
+  if(!cr) return false;
+  if(isImmune(cr)){ log(`${cr.name} can't be affected by spells or abilities${effectName?' ('+effectName+')':''}.`); return true; }
+  if(canAwaken(cr)) return awakenToUrsanox(cr, effectName||'That effect');
+  return false;
+}
+function returnHeld(host){
+  const C=G.combat; if(!C||!host||!host.holding||!host.holding.length) return;
+  const held=host.holding.slice(); host.holding=[];
+  for(const t of held){
+    if(!t) continue;
+    t.tempExiled=false;
+    if(t.side==='boss'){ if(!C.boss.field.includes(t)) C.boss.field.push(t); }
+    else { const F=ownerF(t); if(F && !F.out && !F.field.includes(t)) F.field.push(t); }
+    log(`${t.name} returns from exile (${host.name} left this fight).`);
+  }
+}
+function leavePlay(cr){ if(cr) returnHeld(cr); }
+function exileHighestUntilLeave(F, host){
+  const C=G.combat; if(!C||!host) return;
+  const pool=(host.side==='hero'?C.boss.field:allHeroCreatures()).filter(c=>!isImmune(c));
+  if(!pool.length){ log(`${host.name} finds no enemy creature to exile.`); return; }
+  pool.sort((a,b)=> (effAtk(b)-effAtk(a)) || (crValue(b)-crValue(a)));
+  const t=pool[0];
+  if(t.side==='boss') C.boss.field.splice(C.boss.field.indexOf(t),1);
+  else { const o=ownerF(t); if(o) o.field.splice(o.field.indexOf(t),1); }
+  t.tempExiled=true;
+  host.holding=host.holding||[];
+  host.holding.push(t);
+  log(`✖ ${t.name} is exiled until ${host.name} leaves this fight.`);
+}
 function effAtk(cr){
   const C=G.combat; let a=cr.baseAtk+cr.counters+cr.temp.atk+cr.atkBonus-cr.curse;
   if(cr.side==='hero'){
@@ -1916,6 +1980,7 @@ function summon(F, def, o){
     if(e.tokens) for(let i=0;i<e.tokens[0];i++) summon(F,TOKENS[e.tokens[1]],{token:true});
     if(e.draw) drawCards(F,e.draw);
     if(e.dmg) damageTarget(F,getTarget(F),e.dmg,{});
+    if(e.exileHighest) exileHighestUntilLeave(F, cr);
     if(e.selfDmg) loseHp(F,e.selfDmg,cr.name);
     if(e.freeEquip) F.flags.freeEquip=1;
     if(e.scry) scry(F,e.scry);
@@ -1935,8 +2000,10 @@ function scry(F,n){ const top=F.draw.slice(0,n); if(top.length<2) return; const 
 // ---------- damage ----------
 function damageCreature(cr,n,o){
   o=o||{}; if(n<=0||!crAlive(cr)) return 0;
+  if(isImmune(cr)){ log(`${cr.name} takes no damage.`); return 0; }
   if(!o.pierce){ n-=cr.armor; for(const e of cr.eq) n-=HC[e.id].eq.armor||0; if(n<=0) return 0;
     if(cr.shield>0){ n-=cr.shield; cr.shield--; if(n<=0){ return 0; } } }
+  if(canAwaken(cr) && (o.dt || cr.dmg+n>=effHp(cr))){ awakenToUrsanox(cr, 'That damage'); return 0; }
   cr.dmg+=n;
   if(o.dt || cr.dmg>=effHp(cr)) killCreature(cr,o.src);
   return n;
@@ -1967,7 +2034,7 @@ function heroDown(F){
   if(hasRelic(p,'shadowVeil')&&!F.flags.veil){ F.flags.veil=1; p.hp=1; log(`🌑 Shadow Veil: ${p.name} clings on at 1 HP.`); return; }
   const ph=F.arts.findIndex(a=>a.id==='phylactery');
   if(ph>=0&&F.field.length&&!F.flags.phyl){ F.flags.phyl=1; const v=F.field.slice().sort((a,b)=>crValue(a)-crValue(b))[0]; log(`Soulstone Phylactery: ${p.name} sacrifices ${v.name} and returns to 5 HP.`); killCreature(v,null); p.hp=5; return; }
-  F.out=true; p.hp=0; F.bench=F.field; F.field=[]; log(`💀 ${p.name} falls in battle!`);
+  F.out=true; p.hp=0; F.field.slice().forEach(leavePlay); F.bench=F.field; F.field=[]; log(`💀 ${p.name} falls in battle!`);
   if(liveF().length===0) endCombat(false);
 }
 function getTarget(F){
@@ -1988,8 +2055,10 @@ function getAlly(F,pref){
 
 function killCreature(cr,src){
   const C=G.combat; if(!crAlive(cr)) return;
+  if(tryProtect(cr, 'A spell or ability')) return;
   if(cr.side==='hero'){
     const F=ownerF(cr), p=FP(F); F.field.splice(F.field.indexOf(cr),1); log(`☠ ${cr.name} (${p.name}) dies.`);
+    leavePlay(cr);
     for(const e of cr.eq) F.used.push(e); cr.eq=[];
     let back=false;
     if(cr.inst && hasRelic(p,'verdantHeart') && !F.flags.verdant){ F.flags.verdant=1; back=true; const n=summon(F,HC[cr.inst.id],{inst:cr.inst,noEtb:true,noHasteAttack:true}); n.tapped=true; n.counters=1; log('Verdant Heart returns it to play.'); }
@@ -2000,6 +2069,7 @@ function killCreature(cr,src){
     for(const art of F.arts){ const A=HC[art.id].art; if(A&&A.altar&&(F.flags.altar||0)<A.altar+ups(art,'masterwork')){ F.flags.altar=(F.flags.altar||0)+1; F.mana++; log('Bone Altar: +1 mana.'); } }
   } else {
     const B=C.boss; B.field.splice(B.field.indexOf(cr),1); log(`☠ ${B.name}'s ${cr.name} dies.`);
+    leavePlay(cr);
     if(!cr.token) B.dead.push(cr.id);
     const d=cr.def.death; if(d){ if(d.hurtHeroes) liveF().forEach(f=>loseHp(f,d.hurtHeroes,cr.name)); if(d.hit) bossHit(d.hit,'creature',cr.name); }
     if(B.relics.includes('graveTide')&&rnd()<0.5&&!C.over){ summonBoss(TOKENS.zombie,{token:true,name:'Risen Zombie'}); B.field[B.field.length-1].baseAtk=1; B.field[B.field.length-1].baseHp=1; }
@@ -2010,8 +2080,9 @@ function killCreature(cr,src){
 }
 function exileCreature(cr){
   const C=G.combat; if(!crAlive(cr)) return;
-  if(cr.side==='boss'){ C.boss.field.splice(C.boss.field.indexOf(cr),1); C.boss.exiledN++; log(`✖ ${cr.name} is exiled.`); }
-  else { const F=ownerF(cr); F.field.splice(F.field.indexOf(cr),1); for(const e of cr.eq) F.used.push(e); if(cr.inst){ FP(F).exiled++; } log(`✖ ${cr.name} is exiled.`); }
+  if(tryProtect(cr, 'Exile')) return;
+  if(cr.side==='boss'){ C.boss.field.splice(C.boss.field.indexOf(cr),1); leavePlay(cr); C.boss.exiledN++; log(`✖ ${cr.name} is exiled.`); }
+  else { const F=ownerF(cr); F.field.splice(F.field.indexOf(cr),1); leavePlay(cr); for(const e of cr.eq) F.used.push(e); if(cr.inst){ FP(F).exiled++; } log(`✖ ${cr.name} is exiled.`); }
 }
 
 // ---------- hero turn ----------
@@ -2183,7 +2254,9 @@ function playCard(i,fi){
   const B=C.boss;
   if(c.type==='instant'&&B.relics.includes('loadedDice')&&!B.flags.dice){ B.flags.dice=1; log(`🎲 Loaded Dice: ${B.name} cancels ${c.name}!`); F.used.push(inst); return true; }
   if(c.type==='creature'){ summon(F,c,{inst}); }
-  else if(c.type==='equipment'){ const cr=getAlly(F); cr.eq.push(inst); const q=c.eq; if(q.shield) cr.shield+=q.shield; log(`${c.name} is attached to ${cr.name}.`); }
+  else if(c.type==='equipment'){ const cr=getAlly(F); if(!cr){ F.used.push(inst); }
+    else if(tryProtect(cr,c.name)){ F.used.push(inst); }
+    else { cr.eq.push(inst); const q=c.eq; if(q.shield) cr.shield+=q.shield; log(`${c.name} is attached to ${cr.name}.`); } }
   else if(c.type==='artifact'){ const A=c.art, mw=ups(inst,'masterwork');
     if(A.drawNow){ drawCards(F,A.drawNow+mw); F.used.push(inst); }
     else if(A.shieldNow){ const cr=getAlly(F,'sturdy'); cr.shield+=A.shieldNow+mw; log(`${cr.name} gains Shield ${A.shieldNow+mw}.`); F.used.push(inst); }
@@ -2219,25 +2292,25 @@ function resolveFx(F,inst,fx,inBlock){
   if(C.over) return;
   if(fx.volley){ B.field.slice().forEach(c=>damageCreature(c,has(c,'fly')?2:1,{})); damageBoss(1,{}); }
   if(fx.tokens) for(let i=0;i<fx.tokens[0];i++) summon(F,TOKENS[fx.tokens[1]],{token:true});
-  if(fx.pump){ const cr=getAlly(F); if(cr){ const b=fx.pump.token&&cr.token?1:0; cr.temp.atk+=fx.pump.atk+b; cr.temp.hp+=fx.pump.hp+b; log(`${cr.name} gets +${fx.pump.atk+b}/+${fx.pump.hp+b}.`);} }
-  if(fx.untapOne){ const cr=getAlly(F); if(cr) cr.tapped=false; }
+  if(fx.pump){ const cr=getAlly(F); if(cr && !tryProtect(cr,HC[inst.id].name)){ const b=fx.pump.token&&cr.token?1:0; cr.temp.atk+=fx.pump.atk+b; cr.temp.hp+=fx.pump.hp+b; log(`${cr.name} gets +${fx.pump.atk+b}/+${fx.pump.hp+b}.`);} }
+  if(fx.untapOne){ const cr=getAlly(F); if(cr && !tryProtect(cr,HC[inst.id].name)) cr.tapped=false; }
   if(fx.packHowl){ const w=Math.min(fx.packHowl,F.field.filter(c=>c.tags.includes('wolf')||/Wolf/.test(c.name)).length); F.field.forEach(c=>c.temp.atk+=w); log(`Pack Howl: +${w} ATK to every creature.`); }
-  if(fx.countersAll) F.field.forEach(c=>c.counters+=fx.countersAll);
-  if(fx.untapAll) F.field.forEach(c=>c.tapped=false);
-  if(fx.pumpAll) F.field.forEach(c=>c.temp.atk+=fx.pumpAll);
+  if(fx.countersAll) F.field.forEach(c=>{ if(!isImmune(c)) c.counters+=fx.countersAll; });
+  if(fx.untapAll) F.field.forEach(c=>{ if(!isImmune(c)) c.tapped=false; });
+  if(fx.pumpAll) F.field.forEach(c=>{ if(!isImmune(c)) c.temp.atk+=fx.pumpAll; });
   if(fx.raise){ for(let i=0;i<fx.raise.n&&F.dead.length;i++){ const di=F.dead.pop(); const cr=summon(F,HC[di.id],{inst:di,noEtb:false,noHasteAttack:true}); cr.tapped=true; if(fx.raise.counter) cr.counters++; if(fx.raise.atk) cr.atkBonus+=fx.raise.atk; if(fx.raise.exile) cr.exileAfter=true; } }
-  if(fx.freeze){ B.field.filter(c=>!c.tapped).sort((a,b)=>crValue(b)-crValue(a)).slice(0,fx.freeze).forEach(c=>{ c.tapped=true; c.frozen=true; log(`${c.name} is pinned down.`); }); }
+  if(fx.freeze){ B.field.filter(c=>!c.tapped&&!isImmune(c)).sort((a,b)=>crValue(b)-crValue(a)).slice(0,fx.freeze).forEach(c=>{ c.tapped=true; c.frozen=true; log(`${c.name} is pinned down.`); }); }
   if(fx.counterShot){ let tc=null; if(inBlock&&C.pending){ const it=C.pending.items[C.sel||0]; if(it&&!it.a.cmd) tc=it.a; }
     if(tc) damageCreature(tc,fx.counterShot+R,{pierce:true}); else damageTarget(F,t,fx.counterShot+R,{pierce:true}); }
   if(fx.cancelAttack&&inBlock&&C.pending){ const it=C.pending.items[C.sel||0]||C.pending.items.find(x=>!x.cancel); if(it){ it.cancel=true; log(`${srcName(it)}'s attack is canceled.`);} }
   if(fx.smoke) { C.smoke=true; log('Smoke Screen: this turn, attacks deal no damage to heroes.'); }
   if(fx.twin){ let kills=0; for(let k=0;k<2;k++){ const tt=k===0?t:getTarget(F); const target=B.field.find(c=>c.uid===tt); const before=target?1:0; damageTarget(F,tt,1+R,{}); if(target&&!crAlive(target)) kills++; if(C.over) return; } if(kills===2) drawCards(F,1); }
-  if(fx.mistwalk){ const cr=getAlly(F); if(cr){ cr.mist=true; log(`${cr.name} slips into the mist.`);} }
-  if(fx.offering){ const cr=getAlly(F,'weak'); if(cr){ const n=effAtk(cr); log(`${p.name} sacrifices ${cr.name}.`); killCreature(cr,null); damageTarget(F,getTarget(F),n,{}); } }
+  if(fx.mistwalk){ const cr=getAlly(F); if(cr && !tryProtect(cr,HC[inst.id].name)){ cr.mist=true; log(`${cr.name} slips into the mist.`);} }
+  if(fx.offering){ const cr=getAlly(F,'weak'); if(cr && !tryProtect(cr,HC[inst.id].name)){ const n=effAtk(cr); log(`${p.name} sacrifices ${cr.name}.`); killCreature(cr,null); damageTarget(F,getTarget(F),n,{}); } }
   if(fx.bloodprice){ const k=Math.max(0,Math.min(fx.bloodprice,p.hp-3,HAND_MAX-F.hand.length,F.draw.length)); if(k){ loseHp(F,k,'Bloodprice'); drawCards(F,k);} }
-  if(fx.curse){ const tc=B.field.find(c=>c.uid===t); if(tc) tc.curse+=fx.curse; else B.curse+=fx.curse; }
-  if(fx.destroy){ const tc=pickDestroy(F,fx.destroy); if(tc){ if(fx.destroy.exile) exileCreature(tc); else killCreature(tc,null);} }
-  if(fx.shieldAll) F.field.forEach(c=>c.shield+=fx.shieldAll);
+  if(fx.curse){ const tc=B.field.find(c=>c.uid===t); if(tc && tryProtect(tc,HC[inst.id].name)){} else if(tc) tc.curse+=fx.curse; else B.curse+=fx.curse; }
+  if(fx.destroy){ const tc=pickDestroy(F,fx.destroy); if(tc && !tryProtect(tc,HC[inst.id].name)){ if(fx.destroy.exile) exileCreature(tc); else killCreature(tc,null);} }
+  if(fx.shieldAll) F.field.forEach(c=>{ if(!isImmune(c)) c.shield+=fx.shieldAll; });
   if(fx.hammer){ const cr=getAlly(F); if(cr) damageTarget(F,t,effAtk(cr)+cr.shield+R,{}); }
   if(fx.delve){ const j=F.draw.findIndex(x=>{ const ty=HC[x.id].type; return ty==='artifact'||ty==='equipment'; }); if(j>=0&&F.hand.length<HAND_MAX){ F.hand.push(F.draw.splice(j,1)[0]); } else drawCards(F,1); }
   if(fx.draw) drawCards(F,fx.draw);
@@ -2261,7 +2334,7 @@ function endHeroTurn(){
 }
 function retreat(){
   const C=G.combat, F=activeF(); if(!requireActiveHero()||!F) return false; const p=FP(F);
-  F.out=true; F.retreated=true; F.bench=F.field; F.field=[]; const l=Math.min(2,p.gold); p.gold-=l; log(`🏃 ${p.name} retreats (−${l} gold).`);
+  F.out=true; F.retreated=true; F.field.slice().forEach(leavePlay); F.bench=F.field; F.field=[]; const l=Math.min(2,p.gold); p.gold-=l; log(`🏃 ${p.name} retreats (−${l} gold).`);
   if(liveF().length===0){ endCombat(null); return true; }
   startHeroTurn(C.active+1); return true;
 }
@@ -2401,6 +2474,7 @@ function bossFx(e){
     const mode=fx.hit?'any':(hc.length?'creature':'hero');
     const n=fx.hit||fx.hitCre;
     const t=pickSpellCreature(mode,n);
+    if(t && tryProtect(t,e.name)) return;
     if(t && tryWard(t,e.name)) return;
     if(t){ log(`${e.name} hits ${t.name} for ${n}.`); damageCreature(t,n,{}); }
     else { const h=pickHeroTarget(0); damageHero(h,n,e.name); }
@@ -2408,7 +2482,9 @@ function bossFx(e){
   if(fx.hitHero){ const h=pickHeroTarget(0); damageHero(h,fx.hitHero,e.name); }
   if(fx.heal) B.hp=Math.min(B.maxHp,B.hp+fx.heal);
   if(fx.tap){
-    const picks=hc.filter(c=>!c.tapped).sort((a,b)=>crValue(b)-crValue(a)).slice(0,fx.tap);
+    const picks=hc.filter(c=>!c.tapped&&!isImmune(c)).sort((a,b)=>crValue(b)-crValue(a)).slice(0,fx.tap);
+    const a=picks.find(c=>canAwaken(c));
+    if(a){ tryProtect(a,e.name); return; }
     const w=picks.find(c=>has(c,'ward')&&!c.wardUsed);
     if(w){ tryWard(w,e.name); return; }
     picks.forEach(c=>{ c.tapped=true; log(`${c.name} is tapped.`); });
@@ -2419,9 +2495,11 @@ function bossFx(e){
   if(fx.exileHand){ const fs=liveF().filter(F=>F.hand.length); if(fs.length){ const F=pick(fs); const inst=F.hand.splice(ri(F.hand.length),1)[0]; if(!HC[inst.id].junk) FP(F).exiled++; log(`✖ ${HC[inst.id].name} is exiled from ${FP(F).name}'s hand.`);} }
   if(fx.decree){ liveF().forEach(F=>{ if(F.hand.length){ const inst=F.hand.splice(ri(F.hand.length),1)[0]; if(!HC[inst.id].junk) FP(F).exiled++; log(`✖ Decree: ${HC[inst.id].name} is exiled from ${FP(F).name}'s hand.`);} }); }
   if(fx.untapPump){ B.field.forEach(c=>{ c.tapped=false; c.temp.atk+=1; }); B.temp+=1; }
-  if(fx.destroyTapped){ const t=hc.filter(c=>c.tapped).sort((a,b)=>crValue(b)-crValue(a))[0]; if(t){ if(tryWard(t,e.name)) return; log(`Crushing Blow destroys ${t.name}.`); killCreature(t,null);} }
+  if(fx.destroyTapped){ const t=hc.filter(c=>c.tapped&&!isImmune(c)).sort((a,b)=>crValue(b)-crValue(a))[0]; if(t){ if(tryProtect(t,e.name)) return; if(tryWard(t,e.name)) return; log(`Crushing Blow destroys ${t.name}.`); killCreature(t,null);} }
   if(fx.cleave){
     const s=hc.slice().sort((a,b)=>crValue(b)-crValue(a));
+    const a=(s[0]&&canAwaken(s[0]))?s[0]:(s[1]&&canAwaken(s[1]))?s[1]:null;
+    if(a){ tryProtect(a,e.name); return; }
     const w=(s[0]&&has(s[0],'ward')&&!s[0].wardUsed)?s[0]:(s[1]&&has(s[1],'ward')&&!s[1].wardUsed)?s[1]:null;
     if(w){ tryWard(w,e.name); return; }
     if(s[0]) damageCreature(s[0],fx.cleave[0],{}); else bossHit(fx.cleave[0],'hero',e.name); if(s[1]) damageCreature(s[1],fx.cleave[1],{}); else bossHit(fx.cleave[1],'hero',e.name);
@@ -2494,6 +2572,8 @@ function artForBoss(id){ return artPath('boss', id); }
 function artForHeroFac(f){ return (typeof HERO_ART_FAC!=='undefined' && HERO_ART_FAC[f]) || artPath('hero', f); }
 function artForCreature(cr){
   if(!cr) return '';
+  if(cr.formId) return artPath('hc', cr.formId) || artPath('hc', cr.id);
+  if(cr.id && cr.inst && cr.id!==cr.inst.id) return artPath('hc', cr.id) || artForInst(cr.inst);
   if(cr.inst) return artForInst(cr.inst);
   if(cr.id) return artForEnemy(cr.id) || artPath('hc', cr.id) || artPath('token', cr.id);
   if(typeof TOKENS!=='undefined'){
@@ -2591,7 +2671,7 @@ function cardHTML(inst,o){
   }
   return `<div class="${cls.join(' ')}" ${o.attrs||''} title="${title}">
     <div class="mana">${cost}</div>${up.length?`<div class="stars">${'★'.repeat(up.length)}</div>`:''}
-    <div class="cname">${esc(c.name)}</div><div class="ctype">${TYPE_ICON[c.type]||''} ${c.type}${c.legend?' · legendary':''}</div>
+    <div class="cname">${esc(c.name)}</div><div class="ctype">${TYPE_ICON[c.type]||''} ${c.typeline||c.type}${c.legend?' · legendary':''}${c.godly?' · godly':''}</div>
     <div class="ctext">${esc(c.text)}</div>${upTxt}${stats}${o.price!==undefined?priceTag(o.price):''}${o.foot||''}</div>`;
 }
 function manaCardHTML(id,o){ o=o||{}; const M=MANA[id]; const src=artForMana(id); const title=esc(M.name+': '+M.text);
@@ -2791,11 +2871,12 @@ function renderModal(m){
 
 // ===== Combat screen =====
 function crHTML(cr,o){ o=o||{};
-  const cls=['cr']; if(cr.side==='boss') cls.push('boss'); if(cr.token) cls.push('token'); if(cr.tapped) cls.push('tapped'); if(o.atk) cls.push('atk'); if(o.ally) cls.push('ally'); if(o.tgt) cls.push('tgt');
-  const kws=Object.keys(KW).filter(k=>has(cr,k)).map(k=>KW[k]); if(cr.armor) kws.push('Armor '+cr.armor);
+  const cls=['cr']; if(cr.side==='boss') cls.push('boss'); if(cr.token) cls.push('token'); if(cr.tapped) cls.push('tapped'); if(o.atk) cls.push('atk'); if(o.ally) cls.push('ally'); if(o.tgt) cls.push('tgt'); if(cr.awakened) cls.push('awakened'); if(G.combat&&G.combat.flash&&G.combat.flash.uid===cr.uid) cls.push('awaken-flash');
+  const kws=Object.keys(KW).filter(k=>has(cr,k)).map(k=>KW[k]); if(cr.armor) kws.push('Armor '+cr.armor); if(cr.immune) kws.push('Immune');
   const eq=cr.eq.map(e=>HC[e.id].name).join(', ');
   const src=artForCreature(cr);
-  const title=esc((cr.inst?HC[cr.inst.id].name+': '+HC[cr.inst.id].text:cr.name)+(kws.length? ' · '+kws.join(', '):'')+(eq? ' · '+eq:''));
+  const face=(cr.formId&&HC[cr.formId])||(cr.id&&HC[cr.id]&&(!cr.inst||cr.id!==cr.inst.id)?HC[cr.id]:null)||(cr.inst?HC[cr.inst.id]:null);
+  const title=esc((face?face.name+': '+face.text:cr.name)+(kws.length? ' · '+kws.join(', '):'')+(eq? ' · '+eq:''));
   if(src){
     cls.push('artcr');
     return `<div class="${cls.join(' ')}" ${o.attrs||''} data-zoom="${esc(src)}" title="${title}">${cr.shield?`<div class="sh">🛡${cr.shield}</div>`:''}${faceImg(src,cr.name)}${zoomBtn(src)}<div class="pt">${effAtk(cr)}/${hpLeft(cr)}${cr.counters?` +${cr.counters}`:''}${eq?' 🗡':''}</div>${cr.tapped?'<div class="muted">tapped</div>':''}</div>`;
@@ -2873,6 +2954,7 @@ function renderCombat(){
   else if(F&&C.step==='main2') ph=`<b>${esc(FP(F).name)}: second main.</b>`+(myTurn?`<span class="phase-hint"> Play more cards, then End turn. You may play only 1 mana card per turn.</span>`:`<span class="phase-hint"> Waiting for ${esc(FP(F).name)} to play.</span>`);
   else if(F) ph=`<b>${esc(FP(F).name)}: first main.</b>`+(myTurn?`<span class="phase-hint"> Play 1 mana card and play cards, then go to Combat.</span>`:`<span class="phase-hint"> Waiting for ${esc(FP(F).name)} to play.</span>`);
   h+=`<div class="phase">Round ${C.round} · ${ph}</div>`;
+  if(C.flash&&C.flash.text) h+=`<div class="awaken-banner" role="status">${esc(C.flash.text)}</div>`;
   if(TOWN.on) h+=`<div class="coach" role="status"><span class="coach-text">${esc(combatCoach(C,F,myTurn))}</span><button type="button" class="howto-btn" data-a="townHelp" title="How to fight" aria-label="How to fight">?</button></div>`;
   const minePi=TOWN.on?TOWN.localPi:(F?F.pi:null);
   const myCreatures=(list)=> minePi==null?list:list.filter(b=>b.owner===minePi);
@@ -3019,6 +3101,7 @@ if(typeof window!=='undefined'){
     start(cfg){ if(G&&G.combat&&!TOWN.closed) return; TOWN.role=cfg.role||'solo'; TOWN.localPi=cfg.localPi||0; TOWN.closed=false; TOWN.lastWon=null; TOWN.help=!townHelpSeen(); startTownFight(cfg); render(); },
     apply(a,v,fromPi){ townApply(a,v,fromPi); },
     getState(){ return G; },
+    setState(s){ G=s; render(); },
   };
   window.addEventListener('message', ev=>{
     if(!TOWN.on||!ev.data||ev.data.source!=='thornhold-town') return;
@@ -3030,7 +3113,7 @@ if(typeof window!=='undefined'){
 if(typeof document!=='undefined'){
   document.addEventListener('click',e=>{ const el=e.target.closest('[data-a]'); if(!el) return; e.stopPropagation(); if(TOWN.on) townClick(el.dataset.a, el.dataset.v); else act(el.dataset.a, el.dataset.v); });
   document.addEventListener('input',e=>{ const t=e.target; if(t&&t.dataset&&t.dataset.name!==undefined) UI.setup.names[+t.dataset.name]=t.value||('Player '+(+t.dataset.name+1)); });
-  window.TH={get G(){return G;}, forgeReveal, act, newGame, startTownFight, setSeed, render, reachable, getActions, activeF, HC, P, callTargets, showCardZoom, hideCardZoom, TOWN};
+  window.TH={get G(){return G;}, forgeReveal, act, newGame, startTownFight, setSeed, render, reachable, getActions, activeF, HC, P, callTargets, showCardZoom, hideCardZoom, TOWN, awakenToUrsanox, damageCreature, canAwaken, exileHighestUntilLeave};
   const boot=()=>{ ensureZoom(); if(TOWN.on){ document.body.classList.add('embed'); townPost({k:'ready'}); } render(); };
   document.addEventListener('DOMContentLoaded', boot);
   if(document.readyState!=='loading') boot();
