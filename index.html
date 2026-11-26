@@ -1536,18 +1536,20 @@ const COMMANDERS = {
 // hp/perHero: boss HP solo and extra HP per extra hero. atk: his own attack (+1 per extra hero).
 // atkPerHero: extra ATK per extra hero. mana: extra starting mana. cap: mana cap (+2 per extra hero).
 // ramp: extra mana gained each turn. draw: extra cards drawn each turn; drawPerHero: extra draw in co-op.
+// party: per-party-size tuning (2/3/4 heroes): extra boss HP, extra ATK and extra draw over solo. When set it replaces
+// perHero/atkPerHero/drawPerHero so N identical heroes win about as often as one solo hero (sim-tuned, GM-16).
 // Stronger decks (TOWN_DECKS tiers) and more mana carry most of the climb, so HP rises gently.
 const TOWN_LEVEL = {
-  1:  {hp:45, perHero:10, atk:3, atkPerHero:1, mana:1, cap:5, ramp:0, draw:0, drawPerHero:1},
-  2:  {hp:57, perHero:10, atk:3, atkPerHero:1, mana:1, cap:5, ramp:0, draw:0, drawPerHero:1},
-  3:  {hp:57, perHero:20, atk:3, atkPerHero:1, mana:1, cap:6, ramp:0, draw:0, drawPerHero:1},
-  4:  {hp:58, perHero:40, atk:3, atkPerHero:1, mana:1, cap:6, ramp:0, draw:0, drawPerHero:0},
-  5:  {hp:58, perHero:40, atk:3, atkPerHero:1, mana:1, cap:6, ramp:0, draw:0, drawPerHero:0},
-  6:  {hp:60, perHero:36, atk:3, atkPerHero:1, mana:1, cap:6, ramp:0, draw:0, drawPerHero:0},
-  7:  {hp:62, perHero:30, atk:3, atkPerHero:1, mana:1, cap:7, ramp:0, draw:0, drawPerHero:0},
-  8:  {hp:64, perHero:30, atk:3, atkPerHero:1, mana:1, cap:7, ramp:0, draw:0, drawPerHero:0},
-  9:  {hp:66, perHero:28, atk:3, atkPerHero:1, mana:1, cap:7, ramp:0, draw:0, drawPerHero:0},
-  10: {hp:70, perHero:28, atk:3, atkPerHero:1, mana:1, cap:8, ramp:0, draw:0, drawPerHero:0},
+  1:  {hp:45, perHero:10, atk:3, atkPerHero:1, mana:1, cap:5, ramp:0, draw:0, drawPerHero:1, party:{2:{hp:28,atk:1,draw:1},3:{hp:66,atk:10,draw:1},4:{hp:44,atk:18,draw:0}}},
+  2:  {hp:57, perHero:10, atk:3, atkPerHero:1, mana:1, cap:5, ramp:0, draw:0, drawPerHero:1, party:{2:{hp:12,atk:2,draw:1},3:{hp:73,atk:12,draw:1},4:{hp:167,atk:18,draw:0}}},
+  3:  {hp:57, perHero:20, atk:3, atkPerHero:1, mana:1, cap:6, ramp:0, draw:0, drawPerHero:1, party:{2:{hp:37,atk:2,draw:1},3:{hp:189,atk:10,draw:1},4:{hp:-18,atk:18,draw:1}}},
+  4:  {hp:58, perHero:40, atk:3, atkPerHero:1, mana:1, cap:6, ramp:0, draw:0, drawPerHero:0, party:{2:{hp:24,atk:0,draw:1},3:{hp:104,atk:2,draw:1},4:{hp:85,atk:6,draw:1}}},
+  5:  {hp:58, perHero:40, atk:3, atkPerHero:1, mana:1, cap:6, ramp:0, draw:0, drawPerHero:0, party:{2:{hp:51,atk:2,draw:0},3:{hp:84,atk:2,draw:1},4:{hp:65,atk:9,draw:0}}},
+  6:  {hp:60, perHero:36, atk:3, atkPerHero:1, mana:1, cap:6, ramp:0, draw:0, drawPerHero:0, party:{2:{hp:36,atk:3,draw:0},3:{hp:60,atk:4,draw:1},4:{hp:89,atk:12,draw:0}}},
+  7:  {hp:62, perHero:30, atk:3, atkPerHero:1, mana:1, cap:7, ramp:0, draw:0, drawPerHero:0, party:{2:{hp:49,atk:1,draw:0},3:{hp:46,atk:6,draw:1},4:{hp:52,atk:3,draw:1}}},
+  8:  {hp:64, perHero:30, atk:3, atkPerHero:1, mana:1, cap:7, ramp:0, draw:0, drawPerHero:0, party:{2:{hp:103,atk:0,draw:0},3:{hp:36,atk:12,draw:0},4:{hp:95,atk:0,draw:1}}},
+  9:  {hp:66, perHero:28, atk:3, atkPerHero:1, mana:1, cap:7, ramp:0, draw:0, drawPerHero:0, party:{2:{hp:18,atk:0,draw:1},3:{hp:35,atk:8,draw:1},4:{hp:107,atk:0,draw:0}}},
+  10: {hp:70, perHero:28, atk:3, atkPerHero:1, mana:1, cap:8, ramp:0, draw:0, drawPerHero:0, party:{2:{hp:16,atk:0,draw:1},3:{hp:11,atk:12,draw:1},4:{hp:46,atk:3,draw:1}}},
 };
 const TOWN_MAX_LEVEL = 10;
 // Boss relics by level (index = level-1).
