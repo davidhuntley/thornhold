@@ -1995,13 +1995,15 @@ function startCombat(spec, players){
     ts=TOWN_LEVEL[lv];
     if(ts){
       hp=ts.hp+ts.perHero*(N-1); atk=ts.atk+(ts.atkPerHero!=null?ts.atkPerHero:1)*(N-1); manaCap=ts.cap+(N-1)*2; manaPlayed=sc.start+(ts.mana||0);
+      const pz=ts.party&&ts.party[N]; // per-party-size tuning: keeps 2/3/4-player as hard as solo
+      if(pz){ hp=ts.hp+pz.hp; atk=ts.atk+pz.atk; }
       deckDef=townDeck(kind,lv); if(TOWN_RELICS[kind]) relics=TOWN_RELICS[kind](lv);
     }
   }
   const deck=[]; for(const id in deckDef) for(let i=0;i<deckDef[id];i++) deck.push(id); shuffle(deck);
   const B={cid:spec.cid, name:def.name, icon:def.icon, hp, maxHp:hp, shield:0, atk, manaCap,
     manaPlayed, mana:0, deck, hand:[], used:[], field:[], arts:[], relics, flags:{}, dead:[], exiledN:0, curse:0, temp:0,
-    ramp:ts?(ts.ramp||0):0, drawBonus:ts?(ts.draw||0)+(N>1?(ts.drawPerHero||0):0):0};
+    ramp:ts?(ts.ramp||0):0, drawBonus:ts?(ts.draw||0)+(ts.party&&ts.party[N]&&ts.party[N].draw!=null?ts.party[N].draw:(N>1?(ts.drawPerHero||0):0)):0};
   const C={...spec, fighters:[], boss:B, round:1, phase:'hero', active:0, step:'main1', pending:null, log:[], uidc:0, smoke:false, sel:null};
   G.combat=C;
   if(relics.includes('dragonscale')) B.shield=3; if(relics.includes('ironWill')) B.shield=4; if(relics.includes('scaleLite')) B.shield=2;

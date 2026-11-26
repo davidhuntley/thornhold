@@ -245,3 +245,9 @@ label.mana-auto{display:flex;gap:8px;align-items:center;justify-content:center;m
 .mana-slot .btn{width:100%;padding-left:4px;padding-right:4px;white-space:nowrap;font-size:12px}
 .bp-zoom.big{width:300px}.bp-zoom.big img{width:300px;height:468px;object-fit:contain}
 .panel.wide3{max-width:900px}
+/* Deck editor: save bar (GM-17) */
+.bp-savebar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0}
+.bp-savebar .bp-dirty{color:#ffcf6b;font-weight:600}
+.bp-savebar .bp-saved{color:#8fe28f;font-weight:600}
+.bp-savebar .bp-need{color:#ffb0a0}
+
