@@ -1199,13 +1199,13 @@ hc('ursanox','Ursanox, the Moonbound Bear','creature','creature',0,0,'Godly Crea
 hc('caelthorn','Caelthorn, Last Light of Thornhold','creature','creature',8,9,'Godly Creature — Celestial. 6/6. Flying, Lifelink. ETB: exile the enemy creature with the highest ATK until Caelthorn leaves this fight. You lose 2 HP. Max 1 copy.',{c:{atk:6,hp:6,kw:{fly:1,life:1},etb:{exileHighest:1,selfDmg:2}},strong:1,godly:1,typeline:'Godly Creature — Celestial'});
 
 // Vanilla 1/1s, grouped by faction from card_art/manifest.json and the site DECKS.
-// A class starter uses only that class's 1/1s, with copies to stay near 17 without going over 4.
+// A class starter is 50 of that class's 1/1s, split as evenly as possible. Magmaling is not above the other Warlock 1/1s.
 const STARTER_ONES = ['pebbleCarrier','rubbleMiner','drowsyCobble','tumblestone','moonkitPouncer','moonkitStalker','moonkitHowler','moonkitSentry','acornHauler','rootDigger','thornSprout','vineClimber','cinderling','frostling','gloomling','stormling','magmaling'];
 const STARTER_BY_FACTION = {
-  dwarf: { pebbleCarrier:4, rubbleMiner:4, drowsyCobble:4, tumblestone:4 },
-  elf: { moonkitPouncer:4, moonkitStalker:4, moonkitHowler:4, moonkitSentry:4 },
-  druid: { acornHauler:4, rootDigger:4, thornSprout:4, vineClimber:4 },
-  warlock: { cinderling:4, frostling:4, gloomling:3, stormling:3, magmaling:3 }
+  dwarf: { pebbleCarrier:13, rubbleMiner:13, drowsyCobble:12, tumblestone:12 },
+  elf: { moonkitPouncer:13, moonkitStalker:13, moonkitHowler:12, moonkitSentry:12 },
+  druid: { acornHauler:13, rootDigger:13, thornSprout:12, vineClimber:12 },
+  warlock: { cinderling:10, frostling:10, gloomling:10, stormling:10, magmaling:10 }
 };
 function starterCountsForFac(fac){ return Object.assign({}, STARTER_BY_FACTION[fac]||{}); }
 
