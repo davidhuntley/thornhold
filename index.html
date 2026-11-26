@@ -152,6 +152,10 @@ svg.board{width:100%;height:auto;display:block}
 .bossbox{cursor:pointer;padding:6px;border-radius:8px}
 .bossbox.tgt{box-shadow:0 0 0 3px #ffd85a,0 0 14px #ffd85a}
 .phase{font-size:16px;padding:8px 12px;border-radius:8px;background:#3a2a12;border:1px solid #c99a4a;margin:8px 0}
+.bosscast-banner{margin:8px 0 0;padding:8px 12px;border-radius:8px;font-size:15px;color:#f3e8ff;background:linear-gradient(#4a2370,#2a1240);border:2px solid #c46bff;box-shadow:0 0 16px rgba(196,107,255,.5);animation:awakenpop .45s ease-out;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bosscast-banner .bc-spell{display:inline-flex;align-items:center;gap:6px;background:rgba(0,0,0,.25);padding:3px 8px;border-radius:6px}
+.bosscast-banner .bc-spell img{width:34px;height:46px;object-fit:cover;border-radius:3px}
+.bosscast-banner small{opacity:.85}
 .awaken-banner{margin:8px 0 0;padding:10px 14px;border-radius:8px;text-align:center;font-size:18px;font-weight:bold;letter-spacing:.02em;color:#1a1204;background:linear-gradient(#ffe9a0,#c99a4a);border:2px solid #ffd85a;box-shadow:0 0 18px rgba(255,216,90,.55);animation:awakenpop .45s ease-out}
 @keyframes awakenpop{0%{transform:scale(.85);opacity:0}100%{transform:scale(1);opacity:1}}
 .cr.artcr.awakened{box-shadow:0 0 0 3px #ffd85a,0 0 16px #ffe9a0}
@@ -734,6 +738,57 @@ const CARD_ART = {
   "enemy:banshee": "assets/cards/banshee.webp",
   "enemy:blackDragon": "assets/cards/blackDragon.webp",
   "enemy:boneGolem": "assets/cards/boneGolem.webp",
+  "enemy:mnSlagRat": "assets/cards/plagueRat.webp",
+  "enemy:mnCaveBats": "assets/cards/whelp.webp",
+  "enemy:mnPickGoblin": "assets/cards/sapper.webp",
+  "enemy:mnOreOgre": "assets/cards/thug.webp",
+  "enemy:mnOverseer": "assets/cards/lieutenant.webp",
+  "enemy:mnSlagGolem": "assets/cards/golem.webp",
+  "enemy:mnDeepWyrm": "assets/cards/fireDrake.webp",
+  "enemy:mnChampion": "assets/cards/trollChief.webp",
+  "enemy:mnBrawlerTok": "assets/cards/grunt.webp",
+  "enemy:mnRockToss": "assets/cards/hammerBlow.webp",
+  "enemy:mnSlagArmor": "assets/cards/ironWill.webp",
+  "enemy:mnNightShift": "assets/cards/recruit.webp",
+  "enemy:mnRoar": "assets/cards/command.webp",
+  "enemy:mnCaveIn": "assets/cards/deepDelve.webp",
+  "enemy:mnBoulder": "assets/cards/catapult.webp",
+  "enemy:mnCrush": "assets/cards/crushingBlow.webp",
+  "enemy:mnCollapse": "assets/cards/inferno.webp",
+  "enemy:mnForgeFury": "assets/cards/warDrums.webp",
+  "enemy:wdSprite": "assets/cards/bee.webp",
+  "enemy:wdStrangler": "assets/cards/saplingGrow.webp",
+  "enemy:wdStalker": "assets/cards/timberWolf.webp",
+  "enemy:wdOwl": "assets/cards/spiritOwl.webp",
+  "enemy:wdHulk": "assets/cards/mossShambler.webp",
+  "enemy:wdWraith": "assets/cards/witheringAura.webp",
+  "enemy:wdColossus": "assets/cards/wrathOaks.webp",
+  "enemy:wdWolfTok": "assets/cards/wolfPup.webp",
+  "enemy:wdThornDart": "assets/cards/brambleLash.webp",
+  "enemy:wdRoots": "assets/cards/seedField.webp",
+  "enemy:wdSap": "assets/cards/wildRegrowth.webp",
+  "enemy:wdGloomCall": "assets/cards/packHowl.webp",
+  "enemy:wdBriars": "assets/cards/vineWhip.webp",
+  "enemy:wdThornBurst": "assets/cards/circleThorns.webp",
+  "enemy:wdFrenzy": "assets/cards/feralSurge.webp",
+  "enemy:wdDevour": "assets/cards/swarm.webp",
+  "enemy:wdStorm": "assets/cards/stampede.webp",
+  "enemy:rnWisp": "assets/cards/shadowVeil.webp",
+  "enemy:rnSquire": "assets/cards/boneThrall.webp",
+  "enemy:rnGravewing": "assets/cards/vampThrall.webp",
+  "enemy:rnSentinel": "assets/cards/bloodKnight.webp",
+  "enemy:rnWraith": "assets/cards/plagueBearer.webp",
+  "enemy:rnRevenant": "assets/cards/lichLord.webp",
+  "enemy:rnServantTok": "assets/cards/skelMinion.webp",
+  "enemy:rnGraveBolt": "assets/cards/shadowBolt.webp",
+  "enemy:rnWard": "assets/cards/runeBulwark.webp",
+  "enemy:rnServants": "assets/cards/raiseDead.webp",
+  "enemy:rnHex": "assets/cards/curseWeak.webp",
+  "enemy:rnShroud": "assets/cards/smokeScreen.webp",
+  "enemy:rnWail": "assets/cards/soulRend.webp",
+  "enemy:rnDoom": "assets/cards/banish.webp",
+  "enemy:rnNightfall": "assets/cards/corruption.webp",
+  "enemy:rnDecree": "assets/cards/bloodPact.webp",
   "enemy:caltrops": "assets/cards/caltrops.webp",
   "enemy:catapult": "assets/cards/catapult.webp",
   "enemy:cleave": "assets/cards/cleave.webp",
@@ -1385,6 +1440,61 @@ ec('warDrums','War Drums','artifact',4,'Artifact. His creatures have Haste.',{ar
 ec('direWolf','Dire Wolf','creature',2,'3/2.',{c:{atk:3,hp:2}});
 ec('snarl','Snarl','spell',1,'Deal 2 damage to a hero or creature.',{fx:{hit:2}});
 ec('alphaFang','Alpha Fang','creature',4,'4/4. Trample.',{c:{atk:4,hp:4,kw:{trample:1}}});
+// ===== Town boss cards (3D town boss fights only; levels unlock stronger cards) =====
+// Slagjaw Mine (Korgrath Slagjaw, ogre foreman)
+ec('mnSlagRat','Slag Rat','creature',1,'1/1. Dies: 1 damage to a hero creature (or a hero).',{c:{atk:1,hp:1,death:{hit:1}}});
+ec('mnCaveBats','Cave Bat Swarm','creature',2,'1/2. Flying.',{c:{atk:1,hp:2,kw:{fly:1}}});
+ec('mnPickGoblin','Pickaxe Goblin','creature',2,'2/2. First Strike.',{c:{atk:2,hp:2,kw:{first:1}}});
+ec('mnOreOgre','Ore-Hauler Ogre','creature',3,'3/4. Trample.',{c:{atk:3,hp:4,kw:{trample:1}}});
+ec('mnOverseer','Pit Overseer','creature',4,'3/4. Rally, Vigilance.',{c:{atk:3,hp:4,kw:{rally:1,vig:1}}});
+ec('mnSlagGolem','Slag Golem','creature',5,'3/7. Taunt, Shield 2. Start of his turn: 1 damage to a hero creature (or a hero).',{c:{atk:3,hp:7,shield:2,kw:{taunt:1},upkeep:{ping:1}}});
+ec('mnDeepWyrm','Deepfire Wyrm','creature',6,'5/5. Flying, Trample.',{c:{atk:5,hp:5,kw:{fly:1,trample:1}}});
+ec('mnChampion','Slagjaw Champion','creature',7,'6/6. Double Attack, Trample.',{c:{atk:6,hp:6,kw:{twice:1,trample:1}}});
+ec('mnBrawlerTok','Pit Brawler','creature',0,'2/2 token.',{c:{atk:2,hp:2},token:1});
+ec('mnRockToss','Rock Toss','spell',1,'Deal 2 damage to a hero or creature.',{fx:{hit:2}});
+ec('mnSlagArmor','Slag Armor','spell',2,'He gains Shield 3.',{fx:{shieldSelf:3}});
+ec('mnNightShift','Call the Night Shift','spell',3,'Create two 2/2 Pit Brawlers.',{fx:{summon:{id:'mnBrawlerTok',n:2}}});
+ec('mnRoar',"Foreman's Roar",'spell',2,'Before he attacks: his creatures get +1 ATK and Trample this turn.',{fx:{boost:{atk:1,kw:'trample'}}});
+ec('mnCaveIn','Cave-In','spell',3,'Deal 1 damage to every hero creature.',{fx:{aoeCre:1}});
+ec('mnBoulder','Hurled Boulder','spell',3,'Deal 5 damage to a hero.',{fx:{hitHero:5}});
+ec('mnCrush','Ogre Crush','spell',4,'Destroy the strongest hero creature.',{fx:{destroy:1}});
+ec('mnCollapse','Mine Collapse','spell',5,'Deal 2 damage to every hero creature and 2 to every hero.',{fx:{aoeHeroes:2}});
+ec('mnForgeFury','Slagforge Fury','spell',5,'His creatures get +2/+2 for the rest of the fight.',{fx:{pumpAll:2}});
+// Gloomroot Wood (Mossbane, the Thorn Wraith)
+ec('wdSprite','Thorn Sprite','creature',1,'1/1. Flying.',{c:{atk:1,hp:1,kw:{fly:1}}});
+ec('wdStrangler','Strangler Vine','creature',2,"0/4. Reach, Taunt. Start of his turn: 1 damage to a hero creature (or a hero).",{c:{atk:0,hp:4,kw:{reach:1,taunt:1},upkeep:{ping:1}}});
+ec('wdStalker','Gloomroot Stalker','creature',3,'2/2. Haste, Deathtouch.',{c:{atk:2,hp:2,kw:{haste:1,dt:1}}});
+ec('wdOwl','Hollowbark Owl','creature',3,'2/3. Flying, Lifelink.',{c:{atk:2,hp:3,kw:{fly:1,life:1}}});
+ec('wdHulk','Bramble Hulk','creature',4,'3/6. Taunt. Heals fully at the start of his turn.',{c:{atk:3,hp:6,kw:{taunt:1},regen:1}});
+ec('wdWraith','Briar Wraith','creature',5,'4/4. Flying, Lifelink.',{c:{atk:4,hp:4,kw:{fly:1,life:1}}});
+ec('wdColossus','Gloomroot Colossus','creature',7,'7/7. Trample. Heals fully at the start of his turn.',{c:{atk:7,hp:7,kw:{trample:1},regen:1}});
+ec('wdWolfTok','Gloom Wolf','creature',0,'2/2 token.',{c:{atk:2,hp:2},tags:['wolf'],token:1});
+ec('wdThornDart','Thorn Dart','spell',1,'Deal 2 damage to a hero or creature.',{fx:{hit:2}});
+ec('wdRoots','Grasping Roots','spell',2,"Before he attacks: tap 2 of the heroes' untapped creatures.",{fx:{tap:2}});
+ec('wdSap','Heartwood Sap','spell',2,'He heals 6.',{fx:{heal:6}});
+ec('wdGloomCall','Call of the Gloom','spell',3,'Create two 2/2 Gloom Wolves.',{fx:{summon:{id:'wdWolfTok',n:2}}});
+ec('wdBriars','Choking Briars','spell',2,'Deal 3 damage to a creature (or a hero if none).',{fx:{hitCre:3}});
+ec('wdThornBurst','Thorn Burst','spell',3,'Deal 1 damage to every hero creature.',{fx:{aoeCre:1}});
+ec('wdFrenzy','Wild Frenzy','spell',3,'His creatures get +1/+1 for the rest of the fight.',{fx:{pumpAll:1}});
+ec('wdDevour','Devouring Thicket','spell',4,'Destroy the strongest hero creature.',{fx:{destroy:1}});
+ec('wdStorm','Bramble Storm','spell',5,'Deal 2 damage to every hero creature.',{fx:{aoeCre:2}});
+// Fallen Spire Ruins (Umbrath, the Hollow King)
+ec('rnWisp','Spire Wisp','creature',1,'1/1. Flying. Dies: each hero loses 1 HP.',{c:{atk:1,hp:1,kw:{fly:1},death:{hurtHeroes:1}}});
+ec('rnSquire','Hollow Squire','creature',2,'2/3. First Strike.',{c:{atk:2,hp:3,kw:{first:1}}});
+ec('rnGravewing','Gravewing Bat','creature',3,'3/2. Flying, Lifelink.',{c:{atk:3,hp:2,kw:{fly:1,life:1}}});
+ec('rnSentinel','Throne Sentinel','creature',4,'3/6. Taunt, Shield 1, Lifelink.',{c:{atk:3,hp:6,shield:1,kw:{taunt:1,life:1}}});
+ec('rnWraith','Hollow Wraith','creature',4,'3/3. Flying, Deathtouch.',{c:{atk:3,hp:3,kw:{fly:1,dt:1}}});
+ec('rnRevenant','Crowned Revenant','creature',7,'5/6. Flying, Lifelink, Double Attack.',{c:{atk:5,hp:6,kw:{fly:1,life:1,twice:1}}});
+ec('rnServantTok','Bone Servant','creature',0,'2/1 token.',{c:{atk:2,hp:1},token:1});
+ec('rnGraveBolt','Grave Bolt','spell',1,'Deal 2 damage to a hero or creature.',{fx:{hit:2}});
+ec('rnWard','Hollow Ward','spell',2,'He gains Shield 3.',{fx:{shieldSelf:3}});
+ec('rnServants','Rise, Servants','spell',3,'Create two 2/1 Bone Servants.',{fx:{summon:{id:'rnServantTok',n:2}}});
+ec('rnHex','Withering Hex','spell',2,"The strongest hero creature gets -2 ATK for the rest of the fight.",{fx:{curseCre:2}});
+ec('rnShroud','Shadow Shroud','spell',2,'Before he attacks: his creatures gain Flying and +1 ATK this turn.',{fx:{boost:{atk:1,kw:'fly'}}});
+ec('rnWail','Dread Wail','spell',4,'Deal 1 damage to every hero creature and 1 to every hero.',{fx:{aoeHeroes:1}});
+ec('rnDoom','Hollow Doom','spell',4,'Destroy the strongest hero creature.',{fx:{destroy:1}});
+ec('rnNightfall','Endless Night','spell',6,'Deal 3 damage to every hero creature. He heals 5.',{fx:{aoeCre:3,heal:5}});
+ec('rnDecree','Hollow King\'s Decree','spell',5,'His creatures get +2/+2 for the rest of the fight.',{fx:{pumpAll:2}});
 
 const ERELICS = {
   stolenPurse:{name:'Stolen Purse', text:"When one of his creatures damages a hero, that hero loses 1 gold."},
@@ -1422,16 +1532,56 @@ const COMMANDERS = {
   apprentice:{name:'Rogue Apprentice', icon:'🧙', hp:13, perHero:6, atk:2, mana:6, relics:['loadedDice'], deck:{kobold:4,shiv:2,fireBreath:3,wingBuffet:1}},
 };
 
-// Extra stats for 3D-town boss levels only (not campaign commanders).
-// Tuned so level 1 is a real fight with a class starter and no relics, and later
-// levels still step up from that new baseline. Starting values; David can tweak them.
+// Town boss levels (3D town only, not campaign commanders). Table-driven so David can tweak.
+// hp/perHero: boss HP solo and extra HP per extra hero. atk: his own attack (+1 per extra hero).
+// atkPerHero: extra ATK per extra hero. mana: extra starting mana. cap: mana cap (+2 per extra hero).
+// ramp: extra mana gained each turn. draw: extra cards drawn each turn; drawPerHero: extra draw in co-op.
+// Stronger decks (TOWN_DECKS tiers) and more mana carry most of the climb, so HP rises gently.
 const TOWN_LEVEL = {
-  1: {hp:36, perHero:26, atk:4, mana:1, wood:{mana:2}},
-  2: {hp:42, perHero:30, atk:4, mana:1, wood:{mana:2}},
-  3: {hp:50, perHero:36, atk:4, mana:1, wood:{mana:2}},
-  4: {hp:58, perHero:42, atk:4, mana:1, wood:{mana:2}},
-  5: {hp:68, perHero:50, atk:5, mana:1, wood:{mana:2}}
+  1:  {hp:45, perHero:10, atk:3, atkPerHero:1, mana:1, cap:5, ramp:0, draw:0, drawPerHero:1},
+  2:  {hp:57, perHero:10, atk:3, atkPerHero:1, mana:1, cap:5, ramp:0, draw:0, drawPerHero:1},
+  3:  {hp:57, perHero:20, atk:3, atkPerHero:1, mana:1, cap:6, ramp:0, draw:0, drawPerHero:1},
+  4:  {hp:58, perHero:40, atk:3, atkPerHero:1, mana:1, cap:6, ramp:0, draw:0, drawPerHero:0},
+  5:  {hp:58, perHero:40, atk:3, atkPerHero:1, mana:1, cap:6, ramp:0, draw:0, drawPerHero:0},
+  6:  {hp:60, perHero:36, atk:3, atkPerHero:1, mana:1, cap:6, ramp:0, draw:0, drawPerHero:0},
+  7:  {hp:62, perHero:30, atk:3, atkPerHero:1, mana:1, cap:7, ramp:0, draw:0, drawPerHero:0},
+  8:  {hp:64, perHero:30, atk:3, atkPerHero:1, mana:1, cap:7, ramp:0, draw:0, drawPerHero:0},
+  9:  {hp:66, perHero:28, atk:3, atkPerHero:1, mana:1, cap:7, ramp:0, draw:0, drawPerHero:0},
+  10: {hp:70, perHero:28, atk:3, atkPerHero:1, mana:1, cap:8, ramp:0, draw:0, drawPerHero:0},
 };
+const TOWN_MAX_LEVEL = 10;
+// Boss relics by level (index = level-1).
+const TOWN_RELICS = {
+  mine:  lv => lv>=6?['stolenPurse','ambusherHorn']:['stolenPurse'],
+  wood:  lv => ['packHunt'],
+  ruins: lv => lv>=9?['graveTide','witheringAura','phylactery']:lv>=6?['graveTide','witheringAura']:['graveTide'],
+};
+// Deck tiers: levels 1-2 = tier 1, 3-4 = 2, 5-6 = 3, 7-8 = 4, 9-10 = 5. Stronger cards unlock at higher tiers.
+const TOWN_DECKS = {
+  mine: [
+    {cutthroat:3,mnSlagRat:4,mnCaveBats:2,mnPickGoblin:3,thug:2,mnRockToss:3,mnSlagArmor:1},
+    {cutthroat:3,mnSlagRat:2,mnCaveBats:3,mnPickGoblin:3,banditArcher:2,thug:2,mnOreOgre:2,mnRockToss:3,mnSlagArmor:1,mnNightShift:2,mnRoar:1},
+    {cutthroat:2,mnCaveBats:3,mnPickGoblin:3,banditArcher:2,mnOreOgre:3,lieutenant:2,mnOverseer:2,mnRockToss:2,mnRoar:2,mnNightShift:2,mnCaveIn:2,mnBoulder:1,mnSlagArmor:1},
+    {cutthroat:2,mnCaveBats:3,mnPickGoblin:3,banditArcher:2,mnOreOgre:3,lieutenant:2,mnOverseer:2,mnSlagGolem:2,mnDeepWyrm:1,mnRockToss:2,mnRoar:2,mnNightShift:2,mnCaveIn:1,mnBoulder:1,mnCrush:1,mnSlagArmor:1},
+    {cutthroat:2,mnCaveBats:2,mnPickGoblin:3,mnOreOgre:3,lieutenant:2,mnOverseer:2,mnSlagGolem:2,mnDeepWyrm:2,mnChampion:1,mnRockToss:2,mnRoar:2,mnNightShift:2,mnCaveIn:1,mnBoulder:2,mnCrush:1,mnCollapse:1,mnForgeFury:1,mnSlagArmor:1},
+  ],
+  wood: [
+    {wdSprite:4,direWolf:5,wdStrangler:2,wdStalker:2,wdThornDart:3,wdSap:1,wdRoots:1},
+    {wdSprite:4,direWolf:3,wdStrangler:2,wdStalker:3,wdOwl:2,alphaFang:1,wdThornDart:3,wdRoots:2,wdSap:1,wdGloomCall:2,wdBriars:1},
+    {wdSprite:2,direWolf:3,wdStrangler:2,wdStalker:3,wdOwl:3,alphaFang:2,wdHulk:2,wdThornDart:2,wdRoots:2,wdSap:1,wdGloomCall:2,wdBriars:2,wdThornBurst:1},
+    {direWolf:3,wdSprite:2,wdStrangler:2,wdStalker:2,wdOwl:3,alphaFang:2,wdHulk:2,wdWraith:2,wdThornDart:2,wdRoots:2,wdSap:1,wdGloomCall:2,wdBriars:2,wdThornBurst:1,wdFrenzy:1,wdDevour:1},
+    {direWolf:2,wdStrangler:2,wdStalker:3,wdOwl:2,alphaFang:2,wdHulk:2,wdWraith:2,wdColossus:1,wdThornDart:2,wdRoots:2,wdSap:1,wdGloomCall:2,wdBriars:2,wdThornBurst:1,wdFrenzy:2,wdDevour:1,wdStorm:1},
+  ],
+  ruins: [
+    {skelArcher:3,zombie:4,rnWisp:3,rnSquire:3,ghast:1,rnGraveBolt:3,rnWard:1},
+    {skelArcher:2,zombie:3,rnWisp:3,rnSquire:3,ghast:2,banshee:1,rnGravewing:2,rnGraveBolt:3,rnWard:1,rnServants:2,rnHex:2},
+    {zombie:2,rnWisp:2,rnSquire:3,ghast:2,banshee:2,rnGravewing:3,rnSentinel:2,rnGraveBolt:2,rnWard:1,rnServants:2,rnHex:2,rnShroud:2,soulDrain:2},
+    {rnWisp:2,rnSquire:2,ghast:2,banshee:2,rnGravewing:3,rnSentinel:2,rnWraith:2,boneGolem:2,rnGraveBolt:2,rnServants:2,rnHex:2,rnShroud:2,soulDrain:2,rnWail:2,rnDoom:1,rnWard:1},
+    {zombie:2,rnSquire:3,banshee:2,rnGravewing:3,rnSentinel:2,rnWraith:2,boneGolem:2,deathKnight:2,rnRevenant:1,rnGraveBolt:2,rnServants:2,rnHex:2,rnShroud:2,soulDrain:2,rnWail:1,rnDoom:1,rnNightfall:1,rnDecree:1,raiseFallen:1},
+  ],
+};
+function townTier(lv){ return Math.min(5,Math.ceil(Math.max(1,Math.min(TOWN_MAX_LEVEL,+lv||1))/2)); }
+function townDeck(kind,lv){ const d=(TOWN_DECKS[kind]||TOWN_DECKS.mine)[townTier(lv)-1]; return Object.assign({},d); }
 
 const STOPS = ['bandit','drake','lich'];
 const STOP_REWARD = {gold:5, mats:{iron:1,hide:1,rune:1,ash:1}, heal:5};
@@ -1837,21 +1987,20 @@ function startCombat(spec, players){
   const N=NP(), d=DIFF(), def=COMMANDERS[spec.cid], sc=SCALE[Math.min(4,N)];
   const isQuest=spec.kind==='quest';
   let hp=Math.round((def.hp+def.perHero*(N-1))*d.hp*(PARTY_HP[N]||1)*(1+0.1*escalation())); if(!isQuest) hp+=G.herald;
-  let townAtkBonus=0, townManaBonus=0;
+  let relics=isQuest?def.relics.slice():def.relics.slice(0,d.relics);
+  let deckDef=def.deck, atk=Math.max(1,def.atk+(N-1)+d.atk), manaCap=def.mana+(N-1)*2, manaPlayed=d.mana+sc.start, ts=null;
   if(spec.kind==='town'&&spec.town&&typeof TOWN_LEVEL!=='undefined'){
-    let ts=TOWN_LEVEL[Math.max(1,Math.min(5,+spec.town.level||1))];
+    const lv=Math.max(1,Math.min(TOWN_MAX_LEVEL,+spec.town.level||1)), kind=spec.town.boss||'mine';
+    ts=TOWN_LEVEL[lv];
     if(ts){
-      const kind=spec.town.boss;
-      if(kind&&ts[kind]) ts=Object.assign({},ts,ts[kind]);
-      hp=hp+(ts.hp||0)+(ts.perHero||0)*(N-1);
-      if(ts.atk!=null) townAtkBonus=ts.atk-(def.atk+(N-1)+d.atk);
-      townManaBonus=ts.mana||0;
+      hp=ts.hp+ts.perHero*(N-1); atk=ts.atk+(ts.atkPerHero!=null?ts.atkPerHero:1)*(N-1); manaCap=ts.cap+(N-1)*2; manaPlayed=sc.start+(ts.mana||0);
+      deckDef=townDeck(kind,lv); if(TOWN_RELICS[kind]) relics=TOWN_RELICS[kind](lv);
     }
   }
-  const relics=isQuest?def.relics.slice():def.relics.slice(0,d.relics);
-  const deck=[]; for(const id in def.deck) for(let i=0;i<def.deck[id];i++) deck.push(id); shuffle(deck);
-  const B={cid:spec.cid, name:def.name, icon:def.icon, hp, maxHp:hp, shield:0, atk:Math.max(1,def.atk+(N-1)+d.atk+townAtkBonus), manaCap:def.mana+(N-1)*2,
-    manaPlayed:d.mana+sc.start+townManaBonus, mana:0, deck, hand:[], used:[], field:[], arts:[], relics, flags:{}, dead:[], exiledN:0, curse:0, temp:0};
+  const deck=[]; for(const id in deckDef) for(let i=0;i<deckDef[id];i++) deck.push(id); shuffle(deck);
+  const B={cid:spec.cid, name:def.name, icon:def.icon, hp, maxHp:hp, shield:0, atk, manaCap,
+    manaPlayed, mana:0, deck, hand:[], used:[], field:[], arts:[], relics, flags:{}, dead:[], exiledN:0, curse:0, temp:0,
+    ramp:ts?(ts.ramp||0):0, drawBonus:ts?(ts.draw||0)+(N>1?(ts.drawPerHero||0):0):0};
   const C={...spec, fighters:[], boss:B, round:1, phase:'hero', active:0, step:'main1', pending:null, log:[], uidc:0, smoke:false, sel:null};
   G.combat=C;
   if(relics.includes('dragonscale')) B.shield=3; if(relics.includes('ironWill')) B.shield=4; if(relics.includes('scaleLite')) B.shield=2;
@@ -2384,8 +2533,9 @@ function bossTurn(){
   const C=G.combat, B=C.boss; if(C.over) return; C.phase='bossMain'; const sc=SCALE[Math.min(4,NP())];
   B.field.forEach(c=>{ if(c.frozen){ c.frozen=false; } else c.tapped=false; if(c.def.regen) c.dmg=0; });
   B.temp=0;
-  const add=sc.mana+(B.relics.includes('crown')&&C.round>=4?1:0); B.manaPlayed=Math.min(B.manaCap,B.manaPlayed+add); B.mana=B.manaPlayed;
-  for(let i=0;i<sc.draw;i++) bossDraw();
+  C.bossCasts=[];
+  const add=sc.mana+(B.ramp||0)+(B.relics.includes('crown')&&C.round>=4?1:0); B.manaPlayed=Math.min(B.manaCap,B.manaPlayed+add); B.mana=B.manaPlayed;
+  for(let i=0;i<sc.draw+(B.drawBonus||0);i++) bossDraw();
   log(`— ${B.name}'s turn · ${B.mana} mana · ${B.hand.length} cards in hand —`);
   if(B.relics.includes('dragonscale')&&C.round%3===0){ B.shield=Math.max(B.shield,3); log('Dragonscale refills.'); }
   if(B.relics.includes('ironWill')) B.shield=Math.min(4,B.shield+1);
@@ -2399,7 +2549,7 @@ function bossTurn(){
   // declare attacks
   const items=[]; const targets=liveF(); if(!targets.length) return;
   items.push({a:cmdObj(), tgt:pickHeroTarget(0), blk:null, cancel:false});
-  bossChooseAttackers().forEach((cr,i)=>{ cr.tapped=true; items.push({a:cr,tgt:pickHeroTarget(i+1),blk:null,cancel:false,bonus:0}); });
+  bossChooseAttackers().forEach((cr,i)=>{ if(!has(cr,'vig')) cr.tapped=true; items.push({a:cr,tgt:pickHeroTarget(i+1),blk:null,cancel:false,bonus:0}); });
   const rallies=items.filter(it=>!it.a.cmd&&has(it.a,'rally')).length; items.forEach(it=>{ if(!it.a.cmd) it.bonus=rallies-(has(it.a,'rally')?1:0); });
   log(`${B.name} attacks: ${items.map(it=>`${srcName(it)} (${atkOf(it)}) → ${FP(it.tgt).name}`).join(', ')}.`);
   openBlockStep(items,'main');
@@ -2447,11 +2597,24 @@ function confirmBlocks(){
   else if(P_.resume==='cont'){ bossCast(false); }
   return true;
 }
+function bossBoostWorth(b){
+  const B=G.combat.boss, ready=B.field.filter(c=>!c.tapped&&effAtk(c)+(b.atk||0)>0);
+  if(!ready.length) return false;
+  if(b.kw==='fly'){ const blockers=allHeroCreatures().filter(x=>!x.tapped&&!has(x,'noblock')&&!has(x,'fly')&&!has(x,'reach')); return ready.filter(c=>!has(c,'fly')).length>=1&&blockers.length>=1; }
+  return ready.length>=2;
+}
 function bossCastable(id,pre){
   const C=G.combat, B=C.boss, e=EC[id]; if(e.cost>B.mana) return false; if(e.type==='instant') return false;
   const hc=allHeroCreatures(); const fx=e.fx||{};
-  if(pre){ return (fx.tap&&hc.some(c=>!c.tapped))||(fx.untapPump&&B.field.length>=2); }
-  if(fx.untapPump) return false;
+  if(pre){ if(fx.boost) return bossBoostWorth(fx.boost); return (fx.tap&&hc.some(c=>!c.tapped))||(fx.untapPump&&B.field.length>=2); }
+  if(fx.untapPump||fx.boost) return false;
+  if(fx.summon) return B.field.length<7;
+  if(fx.shieldSelf) return B.shield<2;
+  if(fx.heal&&!fx.hitHero&&!fx.aoeCre) return B.maxHp-B.hp>=Math.ceil(fx.heal*0.6);
+  if(fx.aoeCre) return hc.length>=2||hc.some(c=>hpLeft(c)+c.shield<=fx.aoeCre&&crValue(c)>=5);
+  if(fx.pumpAll) return B.field.length>=2;
+  if(fx.curseCre) return hc.some(c=>effAtk(c)>=2&&!isImmune(c));
+  if(fx.destroy) return hc.some(c=>!isImmune(c)&&crValue(c)>=4);
   if(fx.tap) return false; // tap tricks are used before combat
   if(fx.hitCre&&!hc.length&&false) return false;
   if(fx.raise) return B.dead.length>0;
@@ -2469,7 +2632,8 @@ function bossCast(pre){
     if(ai==='easy'){ if(rnd()<0.25) break; ch=opts[ri(opts.length)]; }
     else ch=opts.sort((x,y)=>bossScore(y.id)-bossScore(x.id))[0];
     const id=ch.id, e=EC[id]; B.hand.splice(B.hand.indexOf(id),1); B.mana-=e.cost;
-    log(`${B.name} plays ${e.name}.`);
+    if(e.type==='spell'){ log(`✨ ${B.name} casts ${e.name}: ${e.text}`); (C.bossCasts=C.bossCasts||[]).push(id); }
+    else log(`${B.name} plays ${e.name}.`);
     if(e.type!=='creature'&&e.type!=='artifact'&&luckyCancel()){ B.used.push(id); continue; }
     if(e.type==='creature'){ const cr=summonBoss(e,{id}); if(has(cr,'haste')&&!pre&&liveF().length){ cr.tapped=true; const it={a:cr,tgt:pickHeroTarget(0),blk:null,cancel:false,bonus:0}; log(`${cr.name} has Haste and attacks ${FP(it.tgt).name}!`); openBlockStep([it],'cont'); return; } }
     else if(e.type==='artifact'){ B.arts.push(id); }
@@ -2482,7 +2646,13 @@ function bossScore(id){
   if(e.type==='creature') s+=3;
   if(fx.hitHero){ if(liveF().some(F=>FP(F).hp+F.block<=fx.hitHero)) s+=50; }
   if(fx.hit||fx.hitCre){ const n=fx.hit||fx.hitCre; if(hc.some(c=>hpLeft(c)+c.shield<=n&&crValue(c)>=4)) s+=6; else if(!hc.length&&fx.hitCre) s-=2; }
-  if(fx.destroyTapped) s+=8; if(fx.aoeHeroes) s+=hc.length*2; if(fx.tap) s+=hc.filter(c=>!c.tapped).length*2;
+  if(fx.destroyTapped) s+=8; if(fx.aoeHeroes) s+=hc.length*2;
+  if(fx.aoeCre) s+=hc.filter(c=>hpLeft(c)+c.shield+c.armor<=fx.aoeCre).length*3;
+  if(fx.summon) s+=5; if(fx.shieldSelf) s+=3; if(fx.heal&&!fx.hitHero) s+=4;
+  if(fx.pumpAll) s+=G.combat.boss.field.length*2*fx.pumpAll;
+  if(fx.boost) s+=G.combat.boss.field.filter(c=>!c.tapped).length*2;
+  if(fx.curseCre) s+=Math.max(0,...hc.map(c=>effAtk(c)))*2;
+  if(fx.destroy) s+=Math.max(0,...hc.map(c=>crValue(c))); if(fx.tap) s+=hc.filter(c=>!c.tapped).length*2;
   return s;
 }
 function bossHit(n,mode,src){ // mode: any | creature | creatureFirst | hero
@@ -2519,7 +2689,16 @@ function bossFx(e){
     else { const h=pickHeroTarget(0); damageHero(h,n,e.name); }
   }
   if(fx.hitHero){ const h=pickHeroTarget(0); damageHero(h,fx.hitHero,e.name); }
-  if(fx.heal) B.hp=Math.min(B.maxHp,B.hp+fx.heal);
+  if(fx.aoeCre){ log(`${e.name} deals ${fx.aoeCre} damage to every hero creature.`); hc.slice().forEach(c=>damageCreature(c,fx.aoeCre,{})); }
+  if(fx.heal){ const was=B.hp; B.hp=Math.min(B.maxHp,B.hp+fx.heal); if(B.hp>was&&!fx.hitHero) log(`${B.name} heals ${B.hp-was}.`); }
+  if(fx.shieldSelf){ B.shield=Math.min(6,B.shield+fx.shieldSelf); log(`${B.name} gains Shield ${fx.shieldSelf} (now ${B.shield}).`); }
+  if(fx.summon){ for(let i=0;i<fx.summon.n;i++) summonBoss(EC[fx.summon.id],{id:fx.summon.id,token:true}); }
+  if(fx.pumpAll){ B.field.forEach(c=>{ c.counters+=fx.pumpAll; }); log(`${B.name}'s creatures get +${fx.pumpAll}/+${fx.pumpAll}.`); }
+  if(fx.boost){ const k=fx.boost.kw; B.field.forEach(c=>{ c.temp.atk+=fx.boost.atk||0; if(k&&!c.kw[k]){ c.kw[k]=1; (c.tmpKw=c.tmpKw||[]).push(k); } }); B.temp+=fx.boost.atk||0; log(`${B.name}'s creatures get +${fx.boost.atk||0} ATK${k?' and '+KW[k]:''} this turn.`); }
+  if(fx.curseCre){ const t=hc.filter(c=>!isImmune(c)).sort((a,b)=>effAtk(b)-effAtk(a)||crValue(b)-crValue(a))[0];
+    if(t&&!tryProtect(t,e.name)&&!tryWard(t,e.name)){ t.curse+=fx.curseCre; log(`${t.name} gets -${fx.curseCre} ATK for the rest of the fight.`); } }
+  if(fx.destroy){ const t=hc.filter(c=>!isImmune(c)).sort((a,b)=>crValue(b)-crValue(a))[0];
+    if(t&&!tryProtect(t,e.name)&&!tryWard(t,e.name)){ log(`${e.name} destroys ${t.name}.`); killCreature(t,null); } }
   if(fx.tap){
     const picks=hc.filter(c=>!c.tapped&&!isImmune(c)).sort((a,b)=>crValue(b)-crValue(a)).slice(0,fx.tap);
     const a=picks.find(c=>canAwaken(c));
@@ -2546,7 +2725,7 @@ function bossFx(e){
 }
 function endBossTurn(){
   const C=G.combat, B=C.boss; if(C.over) return;
-  B.field.forEach(c=>{ c.temp={atk:0,hp:0}; }); B.temp=0; B.curse=Math.max(0,B.curse);
+  B.field.forEach(c=>{ c.temp={atk:0,hp:0}; if(c.tmpKw){ c.tmpKw.forEach(k=>{ delete c.kw[k]; }); c.tmpKw=null; } }); B.temp=0; B.curse=Math.max(0,B.curse);
   B.field.slice().forEach(c=>{ if(c.dmg>=effHp(c)) killCreature(c,null); });
   C.round++;
   startHeroTurn(0);
@@ -2994,6 +3173,7 @@ function renderCombat(){
   else if(F) ph=`<b>${esc(FP(F).name)}: first main.</b>`+(myTurn?`<span class="phase-hint"> Play 1 mana card and play cards, then go to Combat.</span>`:`<span class="phase-hint"> Waiting for ${esc(FP(F).name)} to play.</span>`);
   h+=`<div class="phase">Round ${C.round} · ${ph}</div>`;
   if(C.flash&&C.flash.text) h+=`<div class="awaken-banner" role="status">${esc(C.flash.text)}</div>`;
+  if(C.bossCasts&&C.bossCasts.length&&!C.over) h+=`<div class="bosscast-banner" role="status">✨ ${esc(B.name)} cast ${C.bossCasts.map(id=>{ const asrc=artForEnemy(id); return `<span class="bc-spell" title="${esc(EC[id].text)}">${asrc?`<img src="${esc(asrc)}" alt="" data-zoom="${esc(asrc)}">`:''}<b>${esc(EC[id].name)}</b> <small>${esc(EC[id].text)}</small></span>`; }).join(' ')}</div>`;
   if(TOWN.on) h+=`<div class="coach" role="status"><span class="coach-text">${esc(combatCoach(C,F,myTurn))}</span><button type="button" class="howto-btn" data-a="townHelp" title="How to fight" aria-label="How to fight">?</button></div>`;
   const minePi=TOWN.on?TOWN.localPi:(F?F.pi:null);
   const myCreatures=(list)=> minePi==null?list:list.filter(b=>b.owner===minePi);
