@@ -231,3 +231,17 @@ button.bp-tile:hover,button.bp-tile.on{border-color:#ffd85a}
 .row.equipped{border-color:#c99a4a;background:rgba(201,154,74,.08)}
 .bp-edhead .bp-cover{margin-right:8px}
 .bp-edhead{align-items:flex-start}
+.row.mana-row{gap:10px;align-items:center}.row.mana-row .bp-thumb{width:40px;height:56px}h3.shop-h{margin:10px 0 4px;color:#e9c77b}
+.mana-low{background:#5a1d14;border:1px solid #d9774f;color:#ffd9c2;border-radius:8px;padding:8px 12px;margin:6px 0 10px;font-weight:600}
+label.mana-auto{display:flex;gap:8px;align-items:center;justify-content:center;margin:0 0 8px;font-size:.92em;cursor:pointer}.mana-auto input{width:auto!important;margin:0;flex:0 0 auto}
+.tav-tabs{display:flex;gap:8px;margin:0 0 10px}.tav-tabs .btn.on{background:#e9c77b;color:#2a1c0c}
+.mana-slots{display:grid;grid-template-columns:repeat(5,minmax(0,150px));justify-content:center;gap:12px;margin-top:6px;padding:4px 2px 6px}
+.mana-slot{min-width:0;display:flex;flex-direction:column;align-items:center;gap:6px}
+.mana-face{position:relative;width:100%;aspect-ratio:500/780;border-radius:8px;overflow:hidden;cursor:zoom-in;box-shadow:0 4px 12px rgba(0,0,0,.5);touch-action:manipulation}
+.mana-face img{display:block;width:100%;height:100%;pointer-events:none}
+.mana-slot.r-rare .mana-face{outline:2px solid #4f8fd8}.mana-slot.r-epic .mana-face{outline:2px solid #a45ae0}
+.mana-slot.sold .mana-face img{filter:grayscale(.85) brightness(.5)}
+.mana-face .soldtag{position:absolute;left:0;right:0;top:42%;text-align:center;font:700 26px "Cinzel",Georgia,serif;color:#e9c77b;background:rgba(0,0,0,.6);padding:4px 0;transform:rotate(-12deg)}
+.mana-slot .btn{width:100%;padding-left:4px;padding-right:4px;white-space:nowrap;font-size:12px}
+.bp-zoom.big{width:300px}.bp-zoom.big img{width:300px;height:468px;object-fit:contain}
+.panel.wide3{max-width:900px}
