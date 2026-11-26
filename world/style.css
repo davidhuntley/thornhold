@@ -251,3 +251,11 @@ label.mana-auto{display:flex;gap:8px;align-items:center;justify-content:center;m
 .bp-savebar .bp-saved{color:#8fe28f;font-weight:600}
 .bp-savebar .bp-need{color:#ffb0a0}
 
+/* Deck Draft (GM-18) */
+.dd-decks{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
+.dd-decks .btn.on{outline:2px solid #ffd77a}
+.mana-slot.picked .mana-face{outline:3px solid #8fe28f;outline-offset:2px}
+.soldtag.keep{background:rgba(40,120,40,.85)}
+.dd-list{max-height:22vh;overflow:auto}
+.dd-pick{display:flex;flex-direction:column;gap:10px;margin:6px 0}
+.dd-pick .btn{font-size:16px;padding:12px}
