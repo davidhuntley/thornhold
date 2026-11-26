@@ -1695,7 +1695,7 @@ function startTownFight(cfg){
   const count=cfg.players.length, diff=cfg.diff||'medium', seed=cfg.seed||(Date.now()%2147483646)+1;
   setSeed(seed);
   G = {players:[], cur:0, round:1, cleared:[false,false,false], log:[], flags:{}, combat:null, modals:[], over:null,
-       turn:{roll:0,moved:true,acted:false,mud:false,flex:0}, uid:0, diff, drawOrder:cfg.drawOrder||'purchase', herald:0,
+       turn:{roll:0,moved:true,acted:false,mud:false,flex:0}, uid:0, diff, drawOrder:'random', herald:0,
        lastEvent:null, stats:{fights:[]}, eventDeck:[], questDeck:[], tavern:[], spaces:{}, town:cfg.town||null, seed};
   for(let i=0;i<count;i++){
     const fac=facs[i], deckId=decks[i]||DECK_IDS[i%4], solo=count===1;
