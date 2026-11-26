@@ -1187,8 +1187,16 @@ hc('gloomling','Gloomling','creature','creature',1,1,'1/1.',{c:{atk:1,hp:1}});
 hc('stormling','Stormling','creature','creature',1,1,'1/1.',{c:{atk:1,hp:1}});
 hc('magmaling','Magmaling','creature','creature',1,1,'1/1.',{c:{atk:1,hp:1}});
 
-// The 17 vanilla 1/1s. A fresh hero starts with one of each, plus START_MANA_CARDS Plain Mana.
+// Vanilla 1/1s, grouped by faction from card_art/manifest.json and the site DECKS.
+// A class starter uses only that class's 1/1s, with copies to stay near 17 without going over 4.
 const STARTER_ONES = ['pebbleCarrier','rubbleMiner','drowsyCobble','tumblestone','moonkitPouncer','moonkitStalker','moonkitHowler','moonkitSentry','acornHauler','rootDigger','thornSprout','vineClimber','cinderling','frostling','gloomling','stormling','magmaling'];
+const STARTER_BY_FACTION = {
+  dwarf: { pebbleCarrier:4, rubbleMiner:4, drowsyCobble:4, tumblestone:4 },
+  elf: { moonkitPouncer:4, moonkitStalker:4, moonkitHowler:4, moonkitSentry:4 },
+  druid: { acornHauler:4, rootDigger:4, thornSprout:4, vineClimber:4 },
+  warlock: { cinderling:4, frostling:4, gloomling:3, stormling:3, magmaling:3 }
+};
+function starterCountsForFac(fac){ return Object.assign({}, STARTER_BY_FACTION[fac]||{}); }
 
 
 // Tokens
@@ -1465,8 +1473,10 @@ function buildTavernStack(){ const a=[]; for(const k in TAVERN_SPECIALS) for(let
 
 function giveStarterKit(p){
   for(let k=0;k<START_MANA_CARDS;k++) p.mana.push('plain');
-  // Grant the 17 vanilla 1/1s (minted, so the faction shop supply stays a full 100-card pile).
-  for(const id of STARTER_ONES) addOwned(p, mkInst(id));
+  const counts=starterCountsForFac(p.fac);
+  const ids=Object.keys(counts);
+  if(!ids.length){ for(const id of STARTER_ONES) addOwned(p, mkInst(id)); return; }
+  for(const id of ids){ for(let i=0;i<counts[id];i++) addOwned(p, mkInst(id)); }
 }
 
 function newGame(count, facs, names, decks, diff, drawOrder){
