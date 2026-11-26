@@ -982,6 +982,7 @@ const sum = a => a.reduce((x,y)=>x+y,0);
 const START_GOLD = 8, START_HP = 20, INCOME = 2, ROUND_LIMIT = 30, ESCALATE_ROUNDS = [10,20,30];
 const HAND_BOUGHT = 5;           // hand = free Basic Strike + up to 5 bought cards
 const START_MANA_CARDS = 3;      // every hero starts with 3 Plain Mana
+const MANA_OPEN_HAND = 3;        // opening mana hand; the rest stay in the mana deck
 const SHOP_REVEAL = 5, SHOP_BUY = 3;
 const WARLORD_UNLOCK = 2;        // Malgrath can be called once this many Gauntlet stops are cleared
 const SOLO_HP = 5, SOLO_INCOME = 1, SOLO_MANA = 1; // Lone Hero bonus (solo games only)
@@ -1857,7 +1858,9 @@ function startCombat(spec, players){
   for(let i=0;i<sc.hand;i++) bossDraw();
   for(const p of players){
     const draw = G.drawOrder==='random' ? shuffle(p.owned.slice()) : ownedSorted(p);
-    const F={pi:p.idx, hand:[], draw, used:[], field:[], arts:[], dead:[], bench:[], manaHand:p.mana.map(id=>id), manaIn:[], mana:0, block:0,
+    const manaDraw=shuffle((p.mana&&p.mana.length?p.mana.slice():['plain','plain','plain']));
+    const manaHand=[]; while(manaHand.length<MANA_OPEN_HAND && manaDraw.length) manaHand.push(manaDraw.shift());
+    const F={pi:p.idx, hand:[], draw, used:[], field:[], arts:[], dead:[], bench:[], manaHand, manaDraw, manaIn:[], mana:0, block:0,
       target:null, ally:null, strikeUsed:false, flags:{}, out:false, retreated:false, startBonus:(p.blessed?1:0)+(N===1?SOLO_MANA:0), spells:0, atkSel:{}};
     p.owned=[]; C.fighters.push(F);
     if(hasRelic(p,'hawk')) summon(F,TOKENS.hawk,{token:true});
@@ -2133,7 +2136,20 @@ function startHeroTurn(i){
   if(hasRelic(p,'wolfTotem')&&C.round%2===0&&F.field.filter(c=>c.name==='Wolf Pup').length<2) summon(F,TOKENS.wolfPup,{token:true});
   if(hasRelic(p,'circleThorns')) F.field.forEach(c=>{ if(c.counters>0&&c.shield===0) c.shield=1; });
   refillHand(F);
+  if(C.round>1) drawMana(F,1);
   C.step='main1';
+}
+function drawMana(F,n){
+  n=n||1;
+  if(!F.manaDraw) F.manaDraw=[];
+  let got=0;
+  for(let i=0;i<n;i++){
+    if(!F.manaDraw.length) break;
+    F.manaHand.push(F.manaDraw.shift());
+    got++;
+  }
+  if(got) log(`${FP(F).name} draws ${got===1?'a mana card':got+' mana cards'} (${F.manaDraw.length} left in the mana deck).`);
+  return got;
 }
 function handBought(F){ return F.hand.length; }
 function drawOne(F){
@@ -2993,7 +3009,7 @@ function renderCombat(){
   // player battlefields; two or more sit side by side on desktop so cards aren't cut off
   if(C.fighters.length>1) h+=`<div class="hero-fields">`;
   C.fighters.forEach((Fx,fi)=>{ const p=FP(Fx); const isA=F===Fx; const mine=!TOWN.on||Fx.pi===TOWN.localPi;
-    const label=(C.fighters.length>1?`${esc(p.name)}'s battlefield`:'Your battlefield')+`<span class="field-stats"> · ❤ ${p.hp}/${p.maxHp} · 🛡 ${Fx.block} · 💧 ${Fx.mana} mana · draw ${Fx.draw.length}</span>`;
+    const label=(C.fighters.length>1?`${esc(p.name)}'s battlefield`:'Your battlefield')+`<span class="field-stats"> · ❤ ${p.hp}/${p.maxHp} · 🛡 ${Fx.block} · 💧 ${Fx.mana} mana · draw ${Fx.draw.length} · mana deck ${(Fx.manaDraw&&Fx.manaDraw.length)||0}</span>`;
     const cards=Fx.field.map(c=>{ let attrs='';
       if(C.phase==='block'&&C.pending&&mine){ attrs=`data-a="bAssign" data-v="${C.sel||0}:${c.uid}"`; }
       else if(isA&&mine&&C.step==='attack'&&!c.tapped) attrs=`data-a="cToggleAtk" data-v="${c.uid}"`;
@@ -3017,7 +3033,7 @@ function renderCombat(){
           ? `<div class="${scls}" ${sattrs} data-zoom="${esc(ssrc)}" title="Basic Strike: Deal 2 damage to your target. Gain 1 Block. Never spent.">${faceImg(ssrc,'Basic Strike')}${zoomBtn(ssrc)}</div>`
           : `<div class="${scls}" ${sattrs}><div class="mana">0</div><div class="cname">Basic Strike</div><div class="ctype">✨ free · once per turn</div><div class="ctext">Deal 2 damage to your target. Gain 1 Block. Never spent.</div></div>`; }
       F.hand.forEach((x,i)=>{ const w=whyNot(F,x,false); h+=cardHTML(x,{F,play:!w,cant:!!w,why:w,attrs:`style="--i:${i+1}"${w?'':` data-a="cPlay" data-v="${i}"`}`}); });
-      h+=`</div></div><div class="hand-block"><div class="muted">Mana hand (play 1 per turn${F.manaThisTurn?' — already played this turn':''}):</div><div class="cards mana-row">${F.manaHand.map((id,i)=>manaCardHTML(id,{play:!F.manaThisTurn,cant:F.manaThisTurn,attrs:F.manaThisTurn?'':`data-a="cMana" data-v="${i}"`})).join('')||'<i class="muted">all mana in play</i>'}</div></div></div>`;
+      h+=`</div></div><div class="hand-block"><div class="muted">Mana hand (play 1 per turn${F.manaThisTurn?' — already played this turn':''}) · mana deck ${(F.manaDraw&&F.manaDraw.length)||0}:</div><div class="cards mana-row">${F.manaHand.map((id,i)=>manaCardHTML(id,{play:!F.manaThisTurn,cant:F.manaThisTurn,attrs:F.manaThisTurn?'':`data-a="cMana" data-v="${i}"`})).join('')||`<i class="muted">${(F.manaDraw&&F.manaDraw.length)?'mana deck still has cards':'no mana left'}</i>`}</div></div></div>`;
       h+=`<div class="row hand-actions"><button class="btn primary glow" data-a="${C.step==='main1'?'cCombat':'cEnd'}">${C.step==='main1'?'Combat ▶':'End turn ▶'}</button>${hasRelic(FP(F),'bloodPact')?`<button class="btn" data-a="cPact" ${F.flags.pact||FP(F).hp<=2?'disabled':''}>Blood Pact: 2 HP → 1 mana</button>`:''}${F.field.filter(c=>c.def.sacMana).map(c=>`<button class="btn small" data-a="cSac" data-v="${c.uid}">Sacrifice ${esc(c.name)} for 1 mana</button>`).join('')}<button class="btn small" data-a="cRetreat">Retreat (−2 gold)</button></div>`;
     }
   }
