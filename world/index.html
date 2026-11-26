@@ -29,7 +29,7 @@
 <div id="profiles" class="overlay hidden">
   <div class="panel">
     <h1>Thornhold</h1>
-    <p class="sub">3D Town test: pick your profile</p>
+    <p class="sub">Pick the account you want to play. If it already has a hero, you will go straight in as that hero.</p>
     <div id="profList"></div>
     <div class="joinrow"><input id="newProfName" maxlength="20" placeholder="New profile name" autocomplete="off"><button id="newProfBtn" class="btn">Create</button></div>
     <details><summary>Load a save code</summary><textarea id="importCode" rows="3" placeholder="Paste a save code (starts with TH1.)"></textarea><button id="importBtn" class="btn small">Import</button></details>
@@ -42,6 +42,12 @@
     <h1>Thornhold</h1>
     <p id="selectSub" class="sub">Choose your hero</p>
     <div id="tiles"></div>
+    <div id="heroView" class="hero-view hidden">
+      <img id="heroViewImg" alt="">
+      <div class="nm" id="heroViewName"></div>
+      <div class="fc" id="heroViewFac"></div>
+      <p id="heroViewNote" class="note"></p>
+    </div>
     <p id="loadMsg" class="sub"></p>
   </div>
 </div>
