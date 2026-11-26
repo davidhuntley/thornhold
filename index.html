@@ -1413,13 +1413,25 @@ const COMMANDERS = {
   warlord:{name:'Malgrath the Iron Warlord', icon:'👑', hp:56, perHero:20, atk:4, mana:12, relics:['crown','warhost','ironWill'],
     deck:{grunt:4,sapper:4,orcBerserker:3,wargRider:3,orcShield:3,trollChief:1,blackDragon:1,cleave:3,command:2,crushingBlow:2,decree:1,catapult:2,warDrums:1}, teach:'Everything at once. His big Shield needs many small hits.'},
   // quest commanders
-  direAlpha:{name:'Dire Wolf Alpha', icon:'🐺', hp:12, perHero:6, atk:2, mana:4, relics:['packHunt'], deck:{direWolf:5,snarl:3}},
+  direAlpha:{name:'Dire Wolf Alpha', icon:'🐺', hp:12, perHero:6, atk:2, mana:4, relics:['packHunt'], deck:{direWolf:6,alphaFang:2,snarl:4}},
   treeline:{name:'Pack of the Treeline', icon:'🐺', hp:16, perHero:7, atk:3, mana:5, relics:['packHunt'], deck:{direWolf:5,alphaFang:1,snarl:3}},
-  cryptKeeper:{name:'Crypt Keeper', icon:'⚰️', hp:14, perHero:6, atk:2, mana:5, relics:['graveTide'], deck:{skelArcher:4,zombie:3,ghast:1,soulDrain:1}},
+  cryptKeeper:{name:'Crypt Keeper', icon:'⚰️', hp:14, perHero:6, atk:2, mana:5, relics:['graveTide'], deck:{skelArcher:4,zombie:4,ghast:2,banshee:2,soulDrain:2}},
   youngDrake:{name:'Young Drake', icon:'🐲', hp:15, perHero:7, atk:3, mana:5, relics:['scaleLite'], deck:{whelp:4,kobold:3,fireBreath:2}},
-  banditBoss:{name:'Mine Bandit Boss', icon:'🪓', hp:14, perHero:6, atk:2, mana:5, relics:['stolenPurse'], deck:{cutthroat:4,thug:2,shiv:3}},
+  banditBoss:{name:'Mine Bandit Boss', icon:'🪓', hp:14, perHero:6, atk:2, mana:5, relics:['stolenPurse'], deck:{cutthroat:4,banditArcher:2,thug:3,shiv:4}},
   apprentice:{name:'Rogue Apprentice', icon:'🧙', hp:13, perHero:6, atk:2, mana:6, relics:['loadedDice'], deck:{kobold:4,shiv:2,fireBreath:3,wingBuffet:1}},
 };
+
+// Extra stats for 3D-town boss levels only (not campaign commanders).
+// Tuned so level 1 is a real fight with a class starter and no relics, and later
+// levels still step up from that new baseline. Starting values; David can tweak them.
+const TOWN_LEVEL = {
+  1: {hp:36, perHero:26, atk:4, mana:1, wood:{mana:2}},
+  2: {hp:42, perHero:30, atk:4, mana:1, wood:{mana:2}},
+  3: {hp:50, perHero:36, atk:4, mana:1, wood:{mana:2}},
+  4: {hp:58, perHero:42, atk:4, mana:1, wood:{mana:2}},
+  5: {hp:68, perHero:50, atk:5, mana:1, wood:{mana:2}}
+};
+
 const STOPS = ['bandit','drake','lich'];
 const STOP_REWARD = {gold:5, mats:{iron:1,hide:1,rune:1,ash:1}, heal:5};
 
@@ -1824,10 +1836,21 @@ function startCombat(spec, players){
   const N=NP(), d=DIFF(), def=COMMANDERS[spec.cid], sc=SCALE[Math.min(4,N)];
   const isQuest=spec.kind==='quest';
   let hp=Math.round((def.hp+def.perHero*(N-1))*d.hp*(PARTY_HP[N]||1)*(1+0.1*escalation())); if(!isQuest) hp+=G.herald;
+  let townAtkBonus=0, townManaBonus=0;
+  if(spec.kind==='town'&&spec.town&&typeof TOWN_LEVEL!=='undefined'){
+    let ts=TOWN_LEVEL[Math.max(1,Math.min(5,+spec.town.level||1))];
+    if(ts){
+      const kind=spec.town.boss;
+      if(kind&&ts[kind]) ts=Object.assign({},ts,ts[kind]);
+      hp=hp+(ts.hp||0)+(ts.perHero||0)*(N-1);
+      if(ts.atk!=null) townAtkBonus=ts.atk-(def.atk+(N-1)+d.atk);
+      townManaBonus=ts.mana||0;
+    }
+  }
   const relics=isQuest?def.relics.slice():def.relics.slice(0,d.relics);
   const deck=[]; for(const id in def.deck) for(let i=0;i<def.deck[id];i++) deck.push(id); shuffle(deck);
-  const B={cid:spec.cid, name:def.name, icon:def.icon, hp, maxHp:hp, shield:0, atk:Math.max(1,def.atk+(N-1)+d.atk), manaCap:def.mana+(N-1)*2,
-    manaPlayed:d.mana+sc.start, mana:0, deck, hand:[], used:[], field:[], arts:[], relics, flags:{}, dead:[], exiledN:0, curse:0, temp:0};
+  const B={cid:spec.cid, name:def.name, icon:def.icon, hp, maxHp:hp, shield:0, atk:Math.max(1,def.atk+(N-1)+d.atk+townAtkBonus), manaCap:def.mana+(N-1)*2,
+    manaPlayed:d.mana+sc.start+townManaBonus, mana:0, deck, hand:[], used:[], field:[], arts:[], relics, flags:{}, dead:[], exiledN:0, curse:0, temp:0};
   const C={...spec, fighters:[], boss:B, round:1, phase:'hero', active:0, step:'main1', pending:null, log:[], uidc:0, smoke:false, sel:null};
   G.combat=C;
   if(relics.includes('dragonscale')) B.shield=3; if(relics.includes('ironWill')) B.shield=4; if(relics.includes('scaleLite')) B.shield=2;
