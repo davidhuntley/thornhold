@@ -1,0 +1,19 @@
+{
+  "world": 220.0,
+  "origin": [
+    -110.0,
+    -110.0
+  ],
+  "hmax": 1.15,
+  "height_res": 512,
+  "splat_res": 2048,
+  "uv": "u=(x+110)/220  v=(110-z)/220  row0 is +Z",
+  "splat": "R=dirt G=cobble B=ruts A=255  grass=1-R-G",
+  "stats": {
+    "height_max_m": 0.6052283705329833,
+    "height_mean_m": 0.16106406836490683,
+    "zero_frac": 0.15243911743164062,
+    "cobble_frac": 0.005919694900512695,
+    "dirt_frac": 0.01284027099609375
+  }
+}
