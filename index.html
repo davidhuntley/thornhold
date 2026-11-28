@@ -265,10 +265,10 @@ svg.board{width:100%;height:auto;display:block}
 }
 .combat-modal .phase{font-size:14px;padding:6px 10px;margin:0;flex:0 0 auto}
 .combat-fields{display:flex;flex-direction:column;gap:8px;flex:1 1 auto;min-height:0}
-.battle-row{flex:0 0 auto;width:100%;min-width:0;overflow:hidden}
+.battle-row{flex:0 0 auto;width:100%;min-width:0;overflow:visible}
 .battle-row.ours.act .muted{color:#e8c46a}
 .hero-fields{display:flex;flex-direction:row;flex-wrap:nowrap;gap:8px;flex:1 1 auto;min-height:0;align-items:stretch}
-.combat-fields.multi .hero-fields .battle-row.ours{flex:1 1 0;width:auto;min-width:0;overflow:auto}
+.combat-fields.multi .hero-fields .battle-row.ours{flex:1 1 0;width:auto;min-width:0;overflow:visible}
 .combat-fields.multi .hero-fields .field{overflow:visible;min-height:0}
 .field-stats{display:inline}
 .combat-modal .field{
@@ -279,13 +279,13 @@ svg.board{width:100%;height:auto;display:block}
   gap:8px;
   min-height:0;
   padding:16px 10px 18px;
-  overflow:hidden;
+  overflow:visible;
 }
 .cr.tapped, .cr.artcr.tapped{transform-origin:center center}
 /* Full painted card faces on the battlefield (not cropped tokens) */
 .cr.artcr{
-  width:var(--table-card-w);
-  flex:0 0 var(--table-card-w);
+  width:var(--fit-card-w, var(--table-card-w));
+  flex:0 0 var(--fit-card-w, var(--table-card-w));
   padding:0;
   overflow:visible;
   background:transparent;
@@ -350,7 +350,7 @@ svg.board{width:100%;height:auto;display:block}
   box-shadow:inset 0 0 16px rgba(0,0,0,.3);
   border-radius:8px;
   padding:16px 10px 18px;
-  overflow:hidden;
+  overflow:visible;
 }
 .combat-modal .fighters{background:rgba(0,0,0,.2);border-color:#4a6a40}
 
@@ -565,7 +565,7 @@ svg.board{width:100%;height:auto;display:block}
   .combat-modal .bstats{font-size:11px}
   .combat-modal .bosspanel .bname{font-size:15px}
   .combat-fields{padding:4px 6px 4px;gap:2px}
-  .combat-modal .field{padding:3px 4px;gap:6px}
+  .combat-modal .field{padding:8px 6px 10px;gap:6px}
   .combat-modal .fighters{gap:4px}
   .combat-modal .fighter{padding:1px 6px;font-size:12px}
   .combat-modal .fighter .chip.artchip img{width:14px;height:22px}
@@ -615,7 +615,7 @@ svg.board{width:100%;height:auto;display:block}
   .combat-hand .mana-row .card,
   .combat-hand .mana-row .card.artcard{width:calc(var(--hand-card-w) * .78)}
   .field.busy,.field.packed{--table-card-w:58px}
-  .combat-modal .field{gap:4px;padding:2px}
+  .combat-modal .field{gap:4px;padding:6px 4px}
   .combat-hand .hand-actions{margin:2px 0 0}
 }
 
@@ -2918,6 +2918,66 @@ function helpHTML(){
   <p><b>Difficulty:</b> ${Object.values(DIFFS).map(d=>`<b>${d.name}</b>: ${d.text}`).join(' ')} Commanders scale with the number of heroes in the game. Lone Hero (solo): +${SOLO_HP} max HP, +${SOLO_INCOME} income, +${SOLO_MANA} mana every turn in fights.</p></details>`;
 }
 
+
+function battlefieldCardOverflow(){
+  const table=document.querySelector('.combat-table');
+  const fields=document.querySelector('.combat-fields');
+  const hand=document.querySelector('.combat-hand');
+  if(!table||!fields) return false;
+  if(table.scrollHeight>table.clientHeight+1) return true;
+  const tableBox=table.getBoundingClientRect();
+  const fieldsBox=fields.getBoundingClientRect();
+  const handTop=hand?hand.getBoundingClientRect().top:Infinity;
+  // Only the table, the playmat, and the hand tray. A tapped card may sit a few
+  // pixels outside its field box because of the tilt; that is not clipping.
+  for(const cr of fields.querySelectorAll('.cr')){
+    const r=cr.getBoundingClientRect();
+    if(r.bottom>handTop-2) return true;
+    if(r.bottom>tableBox.bottom-2||r.top<tableBox.top+2) return true;
+    if(r.top<fieldsBox.top+2||r.bottom>fieldsBox.bottom-2) return true;
+  }
+  return false;
+}
+function fitBattlefieldCards(){
+  const modal=document.querySelector('.modal.combat-modal');
+  const fields=document.querySelector('.combat-fields');
+  if(!modal||!fields) return;
+  modal.style.removeProperty('--fit-card-w');
+  const cs=getComputedStyle(modal);
+  const cssW=parseFloat(cs.getPropertyValue('--table-card-w'))||128;
+  let maxW=cssW;
+  for(const field of fields.querySelectorAll('.field')){
+    const fw=parseFloat(getComputedStyle(field).getPropertyValue('--table-card-w'));
+    if(fw) maxW=Math.min(maxW, fw);
+  }
+  if(!battlefieldCardOverflow()) return;
+  let lo=52, hi=maxW, best=52;
+  for(let i=0;i<12;i++){
+    const mid=(lo+hi)/2;
+    modal.style.setProperty('--fit-card-w', mid+'px');
+    if(battlefieldCardOverflow()) hi=mid;
+    else { best=mid; lo=mid; }
+  }
+  modal.style.setProperty('--fit-card-w', Math.floor(best)+'px');
+}
+function scheduleFitBattlefields(){
+  if(!(G&&G.combat)) return;
+  const run=()=>{ if(G&&G.combat) fitBattlefieldCards(); };
+  run();
+  if(typeof requestAnimationFrame==='function') requestAnimationFrame(()=>{ run(); requestAnimationFrame(run); });
+  const fields=document.querySelector('.combat-fields');
+  if(!fields) return;
+  for(const img of fields.querySelectorAll('img')){
+    if(img.complete&&img.naturalWidth) continue;
+    img.addEventListener('load', run, {once:true});
+    img.addEventListener('error', run, {once:true});
+  }
+}
+if(typeof window!=='undefined'&&!window.__fitBfBound){
+  window.__fitBfBound=1;
+  window.addEventListener('resize', ()=>{ if(G&&G.combat) fitBattlefieldCards(); });
+}
+
 function render(){
   const app=typeof document!=='undefined'&&document.getElementById('app'); if(!app) return;
   const keepHand=UI.handHover && !UI.forceHandRender ? app.querySelector('.combat-hand') : null;
@@ -2941,6 +3001,7 @@ function render(){
     const fresh=app.querySelector('.combat-hand');
     if(fresh) fresh.replaceWith(keepHand);
   }
+  scheduleFitBattlefields();
 }
 function renderSetup(){
   const S=UI.setup; let h=`<div class="wrap setup"><div class="panel"><h1 style="color:#e8c46a">Thornhold: Relics of the Warlord</h1><p class="muted">Prototype v3 · co-op deck-building board game · hover or tap 🔍 to zoom a card</p>
