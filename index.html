@@ -164,6 +164,49 @@ svg.board{width:100%;height:auto;display:block}
 .atkrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:6px;border-radius:8px;border:1px solid #6b4f2a;margin:4px 0;background:rgba(0,0,0,.25);cursor:pointer}
 .atkrow.sel{border-color:#ffd85a;background:rgba(80,60,10,.4)}
 .atkrow.cancel{opacity:.5;text-decoration:line-through}
+/* GM-23 block selection: card to card, numbered links */
+.blockbar{display:flex;flex-wrap:wrap;gap:6px;padding:6px 8px;align-items:center}
+.blk-item{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:999px;border:2px solid var(--bc);background:rgba(0,0,0,.35);font-size:12px;cursor:pointer;line-height:1.3}
+.blk-item.is-blocked{background:rgba(0,0,0,.55)}
+.blk-item.cancel{opacity:.5;text-decoration:line-through}
+.blk-item .blk-num{background:var(--bc);color:#141008;border-radius:999px;padding:0 6px;font-weight:800}
+.blk-item .blk-by{color:var(--bc);font-weight:700}
+.blk-picking .blk-item.droppable,.blk-item.drop-hover{box-shadow:0 0 0 2px #fff,0 0 12px var(--bc)}
+.blk-badge{position:absolute;top:-9px;left:-9px;z-index:6;min-width:24px;height:24px;padding:0 5px;border-radius:12px;background:var(--bc,#ffcf4a);color:#141008;font:800 12px/24px system-ui,sans-serif;text-align:center;box-shadow:0 1px 5px #000,0 0 0 2px rgba(0,0,0,.6);pointer-events:none;white-space:nowrap}
+.battle-row.is-foe .cr .blk-badge{top:auto;left:auto;bottom:-9px;right:-9px;transform:rotate(180deg)}
+.bossbox{position:relative}
+.bossbox .blk-badge{top:-6px;left:-6px}
+.cr.attacking{box-shadow:0 0 0 3px var(--bc),0 0 14px var(--bc)}
+.combat-modal.blocking .cr.attacking{opacity:1;filter:none}
+.combat-modal.blocking .cr.attacking > .muted{display:none}
+.bossbox.attacking{box-shadow:0 0 0 3px var(--bc),0 0 16px var(--bc);cursor:pointer}
+.blk-picking .cr.attacking.droppable,.blk-picking .bossbox.attacking.droppable{animation:blkPulse 1s ease-in-out infinite;cursor:pointer}
+.cr.attacking.drop-hover,.bossbox.attacking.drop-hover{box-shadow:0 0 0 4px #fff,0 0 22px #fff !important}
+@keyframes blkPulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.35)}}
+.combat-modal.blocking .cr.can-blk{box-shadow:0 0 0 2px #ffd85a,0 0 12px rgba(255,216,90,.7);cursor:grab;touch-action:none}
+.combat-modal.blocking .cr.blocking{box-shadow:0 0 0 3px var(--bcb,#fff)}
+.combat-modal.blocking .cr.blk-sel{box-shadow:0 0 0 4px #fff,0 0 22px #ffd85a;filter:brightness(1.15)}
+.combat-modal.blocking .battle-row.is-mine .cr:not(.can-blk):not(.blocking){opacity:.55}
+.blk-ghost{position:fixed;left:0;top:0;z-index:9999;pointer-events:none;opacity:.9;box-shadow:0 10px 28px rgba(0,0,0,.7)}
+body.blk-dragging,body.blk-dragging *{cursor:grabbing !important}
+body.blk-dragging{user-select:none;-webkit-user-select:none}
+#blkLinks{position:fixed;left:0;top:0;width:100vw;height:100vh;pointer-events:none;z-index:60}
+.blk-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-end}
+.blk-whos{display:flex;flex-wrap:wrap;gap:6px;margin-right:auto}
+.blk-who{font-size:12px;padding:4px 9px;border-radius:999px;background:rgba(0,0,0,.4);border:1px solid #6b4f2a}
+.blk-who.done{border-color:#5fae5a;color:#bff0b4}
+.blk-who.wait{border-color:#e0a83a;color:#ffe2a0;animation:blkPulse 1.2s ease-in-out infinite}
+.btn.blk-waiting{opacity:.85;cursor:default}
+.chip.base-mana{border-color:#6ec4e0;color:#cdeefc}
+.chip.base-mana.spent{opacity:.55}
+.blood-ov{position:fixed;inset:0;z-index:80;background:rgba(5,3,8,.62);display:flex;align-items:center;justify-content:center}
+.blood-card{display:flex;gap:16px;align-items:center;max-width:min(560px,92vw);background:#1d1218;border:2px solid #b8323c;border-radius:14px;padding:16px 18px;box-shadow:0 18px 50px rgba(0,0,0,.75),0 0 30px rgba(184,50,60,.35);color:#f4e6dc}
+.blood-card img{width:120px;height:auto;border-radius:8px;flex:none;box-shadow:0 4px 14px #000}
+.blood-card h3{margin:0 0 6px;font-size:20px;color:#ffb0b0}
+.blood-card p{margin:4px 0}
+.blood-btns{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.blood-btns .btn{min-height:44px;font-size:15px;padding:8px 16px}
+@media (max-width:520px){.blood-card{flex-direction:column;text-align:center}.blood-card img{width:96px}}
 .eventcard{max-width:460px;width:90%;margin:auto;text-align:center;border-radius:16px;padding:24px;border:4px solid #c99a4a;background:linear-gradient(#f6ecd2,#dcc89c);color:#2a1a0a;box-shadow:0 10px 50px #000;animation:pop .35s ease-out}
 .eventcard.bad{border-color:#a3221a;background:linear-gradient(#f6d8d2,#dca89c)}
 .eventcard.good{border-color:#3f7d3a;background:linear-gradient(#e6f6d2,#b9dc9c)}
@@ -1289,7 +1332,8 @@ const sum = a => a.reduce((x,y)=>x+y,0);
 
 // ===== Core numbers =====
 const START_GOLD = 8, START_HP = 20, INCOME = 2, ROUND_LIMIT = 30, ESCALATE_ROUNDS = [10,20,30];
-const HAND_BOUGHT = 5;           // hand = free Basic Strike + up to 5 bought cards
+const HAND_BOUGHT = 5;           // opening hand: 5 cards; after that you draw 1 card per turn
+const BASE_MANA = 3;             // every hero gets 3 mana each turn, plus the mana from their mana cards
 const START_MANA_CARDS = 3;      // every hero starts with 3 Plain Mana
 const MANA_OPEN_HAND = 3;        // opening mana hand; the rest stay in the mana deck
 const SHOP_REVEAL = 5, SHOP_BUY = 3;
@@ -1534,7 +1578,7 @@ const MANA = {
   primal:  {name:'Primal Spring', gold:4, text:'Gives 1 mana, or 2 if you control 3+ creatures.', sick:0, primal:1},
   starlit: {name:'Starlit Glade', gold:3, text:'Enters sick. When played: draw a card.', sick:1, onPlay:{draw:1}},
   sylvan:  {name:'Sylvan Spring', gold:4, text:'Gives 1 mana. Your first instant each turn costs 1 less.', sick:0, sylvan:1},
-  bloodwell:{name:'Bloodwell', gold:4, text:'Gives 1 mana. When played: you may pay 1 HP for 1 extra mana this turn.', sick:0, bloodwell:1},
+  bloodwell:{name:'Bloodwell', gold:4, text:'Gives 1 mana. When played: you may pay 2 HP for 1 extra mana this turn.', sick:0, bloodwell:1},
   cryptPool:{name:'Crypt Pool', gold:3, text:'Enters sick. When played: return a card you used this fight to your hand.', sick:1, onPlay:{recall:1}},
   deepVein:{name:'Deep Vein', gold:3, text:'Enters sick. Your equipment costs 1 less this fight.', sick:1, onPlay:{eqDiscount:1}},
   hearth:  {name:'Forge Hearth', gold:4, text:'Gives 1 mana. When played: your sturdiest creature gains Shield 1.', sick:0, onPlay:{shieldAlly:1}},
@@ -2275,6 +2319,7 @@ function startCombat(spec, players){
     if(hasRelic(p,'impFamiliar')) summon(F,TOKENS.impTok,{token:true});
     if(hasRelic(p,'golemCore')) summon(F,TOKENS.golem,{token:true});
   }
+  C.fighters.forEach(F=>drawCards(F,HAND_BOUGHT)); // opening hand (was the turn-1 refill)
   log(`⚔️ Battle: ${players.map(p=>p.name).join(', ')} vs ${B.icon} ${B.name} (${hp} HP${B.shield?', Shield '+B.shield:''}, ATK ${B.atk}). Relics: ${relics.map(r=>ERELICS[r].name).join(', ')}.`);
   if(relics.includes('ambusherHorn')){ for(let i=0;i<2;i++) summonBoss(EC.cutthroat,{untapped:true,noHasteAttack:true}); log('Ambush! Two Bandit Cutthroats leap out, ready to attack.'); }
   startHeroTurn(0);
@@ -2396,6 +2441,7 @@ function ownsCreature(cr, fromPi){
 function requireActiveHero(fromPi){
   const C=G&&G.combat; if(!C||C.phase!=='hero') return false;
   const F=activeF(); if(!F) return false;
+  if(F.bloodAsk) return false; // answer the Bloodwell question first
   if(typeof TOWN!=='undefined'&&TOWN.on){ const pi=actingPi(fromPi); if(pi!=null && pi!==F.pi) return false; }
   return true;
 }
@@ -2525,8 +2571,12 @@ function manaCardValue(F,x){
   const M=MANA[x.id]; if(!M) return 0;
   return M.mana||(M.primal&&F.field.length>=3?2:1);
 }
-function tapManaForCost(F,cost){
+function manaCardsUntapped(F){ let m=0; for(const x of (F.manaIn||[])) if(!x.tapped) m+=manaCardValue(F,x); return m; }
+function freeManaLeft(F){ return Math.max(0,(F.mana||0)-manaCardsUntapped(F)); } // base 3 + bonuses not tied to a card
+function tapManaForCost(F,cost){ // called after F.mana-=cost: base/bonus mana is spent first, then mana cards tap
   let need=+cost||0;
+  if(need<=0) return;
+  need=Math.max(0, need-Math.max(0,(F.mana+need)-manaCardsUntapped(F)));
   if(need<=0) return;
   for(const x of (F.manaIn||[])){
     if(need<=0) break;
@@ -2545,7 +2595,8 @@ function startHeroTurn(i){
   C.phase='hero'; C.active=i; const F=C.fighters[i], p=FP(F);
   F.field.forEach(c=>{ c.tapped=false; }); F.block=0; F.strikeUsed=false; F.spells=0; F.flags.pact=false; F.flags.altar=0; F.flags.swift=false; F.flags.sylvan=false; F.flags.quiver=false; F.flags.junk=false; F.manaThisTurn=false; F.atkSel={};
   F.manaIn.forEach(x=>{ x.sick=false; x.tapped=false; });
-  F.mana=manaProduce(F)+F.startBonus;
+  F.bloodAsk=false;
+  F.mana=BASE_MANA+manaProduce(F)+F.startBonus;
   log(`— ${p.name}'s turn (round ${C.round}) · ${F.mana} mana —`);
   // upkeep
   for(const cr of F.field.slice()){
@@ -2560,7 +2611,7 @@ function startHeroTurn(i){
     if(C.over) return; }
   if(hasRelic(p,'wolfTotem')&&C.round%2===0&&F.field.filter(c=>c.name==='Wolf Pup').length<2) summon(F,TOKENS.wolfPup,{token:true});
   if(hasRelic(p,'circleThorns')) F.field.forEach(c=>{ if(c.counters>0&&c.shield===0) c.shield=1; });
-  refillHand(F);
+  if(C.round>1) drawCards(F,1); // 1 card per turn (the opening hand is the turn-1 hand)
   if(C.round>1) drawMana(F,1);
   C.step='main1';
 }
@@ -2580,11 +2631,9 @@ function handBought(F){ return F.hand.length; }
 function drawOne(F){
   if(F.hand.length>=HAND_MAX) return false;
   if(F.draw.length){ F.hand.push(F.draw.shift()); return true; }
-  if(!F.flags.junk){ F.flags.junk=true; F.hand.push({u:nextUid(), id:rnd()<0.5?'rustyDagger':'stumble', up:[], junk:1}); log(`${FP(F).name}'s deck is dry: they draw a junk card.`); return true; }
   return false;
 }
 function drawCards(F,n){ for(let i=0;i<n;i++) if(!drawOne(F)) break; }
-function refillHand(F){ while(F.hand.length<HAND_BOUGHT){ if(!drawOne(F)) break; } }
 function clearHeroTemps(F){ F.field.forEach(c=>{ c.temp={atk:0,hp:0}; c.mist=false; }); F.field.slice().forEach(c=>{ if(c.dmg>=effHp(c)) killCreature(c,null); }); }
 
 function toggleAttacker(uid){ if(!requireActiveHero()) return; const F=activeF(); if(!F||G.combat.step!=='attack') return; const c=F.field.find(x=>x.uid===uid); if(!c||c.tapped||!ownsCreature(c)) return; F.atkSel[uid]=!F.atkSel[uid]; }
@@ -2710,7 +2759,7 @@ function playCard(i,fi){
   if(inBlock){ F=C.fighters[fi===undefined?0:fi]; if(!F||F.out) return false; if(typeof TOWN!=='undefined'&&TOWN.on){ const pi=actingPi(); if(pi!=null && pi!==F.pi) return false; } } else { F=activeF(); if(!requireActiveHero()||!F||!inMainStep(C.step)) return false; }
   const inst=F.hand[i]; if(!inst) return false; const c=HC[inst.id];
   if(whyNot(F,inst,inBlock)) return false;
-  if(inBlock&&C.pending){ const it=C.pending.items[C.sel||0]; if(it&&it.blk&&F.field.includes(it.blk)) F.ally=it.blk.uid; }
+  if(inBlock&&C.pending){ const it=C.pending.items[C.sel||0]; if(it&&it.blk&&F.field.includes(it.blk)) F.ally=it.blk.uid; blockUnconfirm(F.pi); }
   const cost=cardCost(F,inst); F.mana-=cost; tapManaForCost(F,cost); F.hand.splice(i,1); const p=FP(F);
   if(c.type==='instant'&&F.manaIn.some(x=>MANA[x.id].sylvan&&!x.sick)) F.flags.sylvan=true;
   if(c.type==='equipment'&&F.flags.freeEquip) F.flags.freeEquip=0;
@@ -2729,14 +2778,21 @@ function playCard(i,fi){
     if(F.spells===2) F.field.forEach(x=>{ if(x.def.sage){ drawCards(F,1); log('Starweaver Sage: draw a card.'); } }); }
   return true;
 }
-function playStrike(){ const C=G.combat, F=activeF(); if(!requireActiveHero()||!F||!inMainStep(C.step)||F.strikeUsed) return false; F.strikeUsed=true; F.block+=1; log(`${FP(F).name} uses Basic Strike.`); damageTarget(F,getTarget(F),2,{}); return true; }
 function playMana(i){ const C=G.combat, F=activeF(); if(!requireActiveHero()||!F||!inMainStep(C.step)||F.manaThisTurn) return false; const id=F.manaHand[i]; if(!id) return false; const M=MANA[id], p=FP(F);
   F.manaHand.splice(i,1); F.manaThisTurn=true; F.manaIn.push({id,sick:!!M.sick,tapped:!!M.sick});
   if(!M.sick) F.mana+= M.mana||(M.primal&&F.field.length>=3?2:1);
   const o=M.onPlay||{}; if(o.heal) healHero(F,o.heal); if(o.draw) drawCards(F,o.draw); if(o.eqDiscount) F.flags.eqDiscount=(F.flags.eqDiscount||0)+1; if(o.shieldAlly){ const a=getAlly(F,'sturdy'); if(a) a.shield++; }
   if(o.recall){ recallBest(F); }
-  if(M.bloodwell&&p.hp>4){ loseHp(F,1,'Bloodwell'); F.mana++; }
+  if(M.bloodwell){ if(p.hp>2) F.bloodAsk=true; else log(`Bloodwell: ${p.name} needs more than 2 HP to pay for extra mana.`); }
   log(`${p.name} plays ${M.name}${M.sick?' (enters sick)':''}.`); if(typeof TOWN!=='undefined'&&TOWN.on) townPost({k:'mana', pi:F.pi, id}); return true; }
+function bloodwellChoice(yes){ // the player who played Bloodwell answers Yes/No
+  const C=G.combat; if(!C||C.over||C.phase!=='hero') return false; const F=activeF(); if(!F||!F.bloodAsk) return false;
+  if(typeof TOWN!=='undefined'&&TOWN.on){ const pi=actingPi(); if(pi!=null&&pi!==F.pi) return false; }
+  F.bloodAsk=false; const p=FP(F);
+  if(yes&&p.hp>2){ loseHp(F,2,'Bloodwell'); F.mana++; log(`${p.name} pays 2 HP for 1 extra mana (Bloodwell).`); }
+  else log(`${p.name} skips the Bloodwell extra mana.`);
+  return true;
+}
 function recallBest(F){ const s=F.used.filter(u=>u.id!=='recall'&&!HC[u.id].junk).sort((a,b)=>HC[b.id].cost-HC[a.id].cost)[0];
   if(s&&F.hand.length<HAND_MAX){ F.used.splice(F.used.indexOf(s),1); F.hand.push(s); log(`${HC[s.id].name} returns to hand.`); } }
 function bloodPact(){ const F=activeF(); if(!requireActiveHero()||!F||!inMainStep(G.combat.step)) return false; const p=FP(F); if(!hasRelic(p,'bloodPact')||F.flags.pact||p.hp<=2) return false; F.flags.pact=1; loseHp(F,2,'Blood Pact'); F.mana++; log(`${p.name} pays 2 HP for 1 mana (Blood Pact).`); return true; }
@@ -2811,7 +2867,7 @@ function bossTurn(){
   B.temp=0;
   C.bossCasts=[];
   const add=sc.mana+(B.ramp||0)+(B.relics.includes('crown')&&C.round>=4?1:0); B.manaPlayed=Math.min(B.manaCap,B.manaPlayed+add); B.mana=B.manaPlayed;
-  for(let i=0;i<sc.draw+(B.drawBonus||0);i++) bossDraw();
+  bossDraw(); // 1 card per turn, same rule as the heroes
   log(`— ${B.name}'s turn · ${B.mana} mana · ${B.hand.length} cards in hand —`);
   if(B.relics.includes('dragonscale')&&C.round%3===0){ B.shield=Math.max(B.shield,3); log('Dragonscale refills.'); }
   if(B.relics.includes('ironWill')) B.shield=Math.min(4,B.shield+1);
@@ -2860,7 +2916,28 @@ function assignBlock(ai,uid){ // attacker index, hero creature uid (or '' to cle
   if(!uid){ if(it.blk && !ownsCreature(it.blk)) return false; it.blk=null; return true; }
   const b=allHeroCreatures().find(c=>c.uid===uid); if(!b||!ownsCreature(b)) return false;
   if(!canBlock(b,it.a)) return false;
-  C.pending.items.forEach(x=>{ if(x.blk===b) x.blk=null; }); it.blk=b; return true;
+  if(it.blk && it.blk!==b && !ownsCreature(it.blk)) return false; // a teammate already blocks this attacker
+  C.pending.items.forEach(x=>{ if(x.blk===b) x.blk=null; }); it.blk=b; blockUnconfirm(b.owner); return true;
+}
+function blockUnconfirm(pi){ const C=G.combat; if(C&&C.pending&&C.pending.ok&&pi!=null) delete C.pending.ok[pi]; }
+function blockHasOptions(F){ // can this hero still do something in the block step?
+  const C=G.combat; if(!C||!C.pending||!F||F.out) return false;
+  if(F.field.some(b=>C.pending.items.some(it=>canBlock(b,it.a)&&(!it.blk||it.blk.owner===F.pi)))) return true;
+  return F.hand.some(h=>HC[h.id].type==='instant'&&!whyNot(F,h,true));
+}
+function blockMultiConfirm(){ const C=G.combat; return !!(C&&typeof TOWN!=='undefined'&&TOWN.on&&C.fighters.filter(F=>!F.out).length>1); }
+function blockWaiting(){ // heroes who still have to confirm (heroes with nothing to block with are not waited on)
+  const C=G.combat; if(!C||C.phase!=='block'||!C.pending) return []; const ok=C.pending.ok||{};
+  return C.fighters.filter(F=>!F.out&&!ok[F.pi]&&blockHasOptions(F));
+}
+function confirmBlocksBy(){ // one player's Confirm blocks
+  const C=G.combat; if(!C||C.phase!=='block'||!C.pending) return false;
+  if(!blockMultiConfirm()) return confirmBlocks();
+  const pi=actingPi(); const F=C.fighters.find(x=>x.pi===pi); if(!F||F.out) return false;
+  C.pending.ok=C.pending.ok||{}; if(C.pending.ok[pi]) return false;
+  C.pending.ok[pi]=true; log(`${FP(F).name} confirms blocks.`);
+  if(!blockWaiting().length) return confirmBlocks();
+  return true;
 }
 function confirmBlocks(){
   const C=G.combat; if(!C||C.phase!=='block') return false; const P_=C.pending; C.pending=null;
@@ -3195,6 +3272,7 @@ function ensureZoom(){
     if(ev.target.closest && ev.target.closest('.combat-hand')) UI.handHover=true;
     if(ev.pointerType && ev.pointerType!=='mouse') return;
     const el=ev.target.closest && ev.target.closest('[data-zoom]');
+    if(!el && UI.zoomHover && !UI.zoomPinned && !(ev.target.closest && ev.target.closest('#cardzoom'))){ UI.zoomHover=false; hideCardZoom(false); }
     if(!el || UI.zoomPinned) return;
     UI.zoomHover=true; UI.ptrX=ev.clientX; UI.ptrY=ev.clientY;
     showCardZoom(el.getAttribute('data-zoom'), false, el);
@@ -3207,7 +3285,7 @@ function ensureZoom(){
     if(ev.pointerType && ev.pointerType!=='mouse') return;
     const from=ev.target.closest && ev.target.closest('[data-zoom]');
     const to=ev.relatedTarget && ev.relatedTarget.closest && ev.relatedTarget.closest('[data-zoom]');
-    if(from && !to) hideCardZoom(false);
+    if(from && !to){ UI.zoomHover=false; hideCardZoom(false); }
   });
   window.addEventListener('resize', ()=>{ if(UI.zoomSrc&&!UI.zoomPinned) placeCardZoom(UI.zoomAnchor); });
 }
@@ -3255,11 +3333,11 @@ function helpHTML(){
   <p><b>Decks:</b> pick any of the 4 prebuilt decks. Each is one 100-card deck split into 3 stacks (Creatures, Spells, Artifacts). Your faction only sets your 3 Relics and your location perks. You start with the 17 starter 1/1 creatures and 3 Plain Mana, plus ${START_GOLD} gold, and earn ${INCOME} gold per round. Better cards come from shops, packs and upgrades — not from the opening deck.</p>
   <p><b>Board:</b> roll a d6 and move forward exactly that many spaces, or stop early on a location (one way only). From the Crossroads the road runs down the middle to the Tavern and Mage Tower, then to the Shrine, where you choose the left loop (Forest, Beast Den, Abbey) or the right loop (Mine, Forge, Hunter's Lodge, Ruins). Both lead back to the Crossroads. You may also stay put. You can't use the same location two rounds in a row. Colored road spaces flip an event card.</p>
   <p><b>Shops:</b> the Beast Den and Hunter's Lodge reveal 5 cards from your Creature stack, the Mage Tower from your Spell stack, and the Forge from your Artifact stack. Buy up to 3; every card you don't buy is <b>exiled</b> for good. The Tavern sells mana cards (Plain Mana always in stock, plus 2 special mana from a shared Tavern stack) and quests. The Forge also spends materials on permanent upgrades.</p>
-  <p><b>Cards are spent:</b> a card you play (and a creature that dies, with its equipment) goes back into your Supply Deck, and you must buy it again. Creatures and artifacts still in play when the fight ends, and unplayed cards, stay yours. If your deck runs dry in a fight you draw one junk card per turn.</p>
+  <p><b>Cards are spent:</b> a card you play (and a creature that dies, with its equipment) goes back into your Supply Deck, and you must buy it again. Creatures and artifacts still in play when the fight ends, and unplayed cards, stay yours. If your deck runs out in a fight, you simply draw nothing.</p>
   <p><b>Quests</b> pay materials (${Object.values(MATS).map(m=>m.icon+' '+m.name).join(', ')}) plus a little gold. Fight quests are called like any fight; errands complete for free when you reach their location.</p>
   <p><b>Call to Fight:</b> instead of a location action, call the next Gauntlet commander, one of your fight quests, or Malgrath, from anywhere. Others accept or decline; if anyone declines, the ones who accepted get another chance to back out, until nobody changes their mind. Then the caller fights or backs out.</p>
   <p><b>Cards:</b> hover a card (or tap the 🔍) to see the full painted card.</p>
-  <p><b>Combat:</b> each fight starts at 0 mana. Your mana cards are a separate mana hand: play 1 per turn; it stays in play and gives mana every turn (special mana may enter <i>sick</i> and give nothing on the turn you play it). Mana and cards can be played the same turn. Your hand is the free Basic Strike (once per turn) plus up to ${HAND_BOUGHT} bought cards, refilled each turn ${G&&G.drawOrder==='random'?'at random':'in the order you bought them'}.</p>
+  <p><b>Combat:</b> every hero gets ${BASE_MANA} mana each turn, even with no mana cards. Your mana cards are a separate mana hand: play 1 per turn; it stays in play and adds its mana every turn on top of the ${BASE_MANA} (special mana may enter <i>sick</i> and give nothing on the turn you play it). Mana and cards can be played the same turn. You start each fight with ${HAND_BOUGHT} cards (drawn ${G&&G.drawOrder==='random'?'at random':'in the order you bought them'}) and draw 1 card at the start of each later turn; nothing if your deck is empty. The commander also draws 1 card per turn. When he attacks, every player confirms their blocks.</p>
   <p><b>Turn order:</b> each hero's turn starts with a <b>first main</b> (play 1 mana card and play cards), then <b>combat</b> (choose attackers; attacking taps them, so they can't block his next attack), then a <b>second main</b> to play more cards. You may play only 1 mana card per turn, across both main phases. New creatures enter <b>tapped</b>. On the commander's turn he untaps, attacks with himself and his creatures, and you choose blockers from your untapped creatures; blockers deal their ATK back. Then he plays mana and cards from his own deck. You can cast instants while blocking.</p>
   <p><b>Shields:</b> a hit is reduced by the Shield count, then the creature (or commander) loses 1 Shield, whatever the hit size. <b>Keywords:</b> ${Object.keys(KW).map(k=>`<b>${KW[k]}</b>: ${KW_HELP[k]}`).join(' ')} <b>Armor</b>: ${KW_HELP.armor}</p>
   <p><b>Difficulty:</b> ${Object.values(DIFFS).map(d=>`<b>${d.name}</b>: ${d.text}`).join(' ')} Commanders scale with the number of heroes in the game. Lone Hero (solo): +${SOLO_HP} max HP, +${SOLO_INCOME} income, +${SOLO_MANA} mana every turn in fights.</p></details>`;
@@ -3306,6 +3384,7 @@ function fitBattlefieldCards(){
     else { best=mid; lo=mid; }
   }
   modal.style.setProperty('--fit-card-w', Math.floor(best)+'px');
+  drawBlockLinks();
 }
 function scheduleFitBattlefields(){
   if(!(G&&G.combat)) return;
@@ -3344,12 +3423,15 @@ function render(){
       if(UI.deckView!==null) h+=renderDeckView(); }
   }
   app.innerHTML=h;
-  if(keepHand){
-    const fresh=app.querySelector('.combat-hand');
-    if(fresh) fresh.replaceWith(keepHand);
+  { // keep the hovered hand only if nothing in it changed (GM-23: block status/confirm lives here)
+    const fresh=app.querySelector('.combat-hand'); const freshHTML=fresh?fresh.innerHTML:null;
+    if(keepHand&&fresh&&UI.lastHandHTML===freshHTML) fresh.replaceWith(keepHand);
+    UI.lastHandHTML=freshHTML;
   }
   scheduleFitBattlefields();
   resumeCardZoom();
+  drawBlockLinks();
+  if(typeof requestAnimationFrame==='function') requestAnimationFrame(()=>{ drawBlockLinks(); requestAnimationFrame(()=>drawBlockLinks()); });
 }
 function renderSetup(){
   const S=UI.setup; let h=`<div class="wrap setup"><div class="panel"><h1 style="color:#e8c46a">Thornhold: Relics of the Warlord</h1><p class="muted">Prototype v3 · co-op deck-building board game · hover or tap 🔍 to zoom a card</p>
@@ -3503,7 +3585,7 @@ function renderModal(m){
 
 // ===== Combat screen =====
 function crHTML(cr,o){ o=o||{};
-  const cls=['cr']; if(cr.side==='boss') cls.push('boss'); if(cr.token) cls.push('token'); if(cr.tapped) cls.push('tapped'); if(o.atk) cls.push('atk'); if(o.ally) cls.push('ally'); if(o.tgt) cls.push('tgt'); if(cr.awakened) cls.push('awakened'); if(G.combat&&G.combat.flash&&G.combat.flash.uid===cr.uid) cls.push('awaken-flash');
+  const cls=['cr']; if(o.cls) cls.push(o.cls); if(cr.side==='boss') cls.push('boss'); if(cr.token) cls.push('token'); if(cr.tapped) cls.push('tapped'); if(o.atk) cls.push('atk'); if(o.ally) cls.push('ally'); if(o.tgt) cls.push('tgt'); if(cr.awakened) cls.push('awakened'); if(G.combat&&G.combat.flash&&G.combat.flash.uid===cr.uid) cls.push('awaken-flash');
   const kws=Object.keys(KW).filter(k=>has(cr,k)).map(k=>KW[k]); if(cr.armor) kws.push('Armor '+cr.armor); if(cr.immune) kws.push('Immune');
   const eq=cr.eq.map(e=>HC[e.id].name).join(', ');
   const src=artForCreature(cr);
@@ -3511,13 +3593,14 @@ function crHTML(cr,o){ o=o||{};
   const title=esc((face?face.name+': '+face.text:cr.name)+(kws.length? ' · '+kws.join(', '):'')+(eq? ' · '+eq:''));
   if(src){
     cls.push('artcr');
-    return `<div class="${cls.join(' ')}" ${o.attrs||''} data-zoom="${esc(src)}" title="${title}">${cr.shield?`<div class="sh">🛡${cr.shield}</div>`:''}${faceImg(src,cr.name)}${zoomBtn(src)}<div class="pt">${effAtk(cr)}/${hpLeft(cr)}${cr.counters?` +${cr.counters}`:''}${eq?' 🗡':''}</div>${cr.tapped?'<div class="muted">tapped</div>':''}</div>`;
+    return `<div class="${cls.join(' ')}" ${o.attrs||''} data-zoom="${esc(src)}" title="${title}">${o.badge||''}${cr.shield?`<div class="sh">🛡${cr.shield}</div>`:''}${faceImg(src,cr.name)}${zoomBtn(src)}<div class="pt">${effAtk(cr)}/${hpLeft(cr)}${cr.counters?` +${cr.counters}`:''}${eq?' 🗡':''}</div>${cr.tapped?'<div class="muted">tapped</div>':''}</div>`;
   }
-  return `<div class="${cls.join(' ')}" ${o.attrs||''} title="${title}">${cr.shield?`<div class="sh">🛡${cr.shield}</div>`:''}<div class="mn">${esc(cr.name)}</div><div class="kw">${esc(kws.join(', '))}${cr.counters?` <span class="ctr">+${cr.counters}</span>`:''}</div>${eq?`<div class="eq">🗡 ${esc(eq)}</div>`:''}<div class="pt">${effAtk(cr)}/${hpLeft(cr)}</div>${cr.tapped?'<div class="muted">tapped</div>':''}</div>`;
+  return `<div class="${cls.join(' ')}" ${o.attrs||''} title="${title}">${o.badge||''}${cr.shield?`<div class="sh">🛡${cr.shield}</div>`:''}<div class="mn">${esc(cr.name)}</div><div class="kw">${esc(kws.join(', '))}${cr.counters?` <span class="ctr">+${cr.counters}</span>`:''}</div>${eq?`<div class="eq">🗡 ${esc(eq)}</div>`:''}<div class="pt">${effAtk(cr)}/${hpLeft(cr)}</div>${cr.tapped?'<div class="muted">tapped</div>':''}</div>`;
 }
 function fighterBonusHTML(Fx){
   const p=FP(Fx);
   const bits=[];
+  if(G.combat&&!G.combat.over){ const fl=freeManaLeft(Fx); bits.push(`<span class="chip base-mana${fl?'':' spent'}" title="Every hero gets ${BASE_MANA} mana each turn, even without mana cards. It is spent before your mana cards tap.">✨ ${fl} base mana left</span>`); }
   p.relics.forEach(r=>{ const c=relicChip(r,false); if(c) bits.push(c); });
   Fx.arts.forEach(a=>{ const asrc=artForInst(a); bits.push(`<span class="chip${asrc?' artchip':''}" title="${esc(HC[a.id].text)}"${asrc?` data-zoom="${esc(asrc)}" data-a="zoom" data-v="${esc(asrc)}"`:''}>${asrc?`<img src="${esc(asrc)}" alt="">`:''}⚙️ ${esc(HC[a.id].name)}</span>`); });
   Fx.manaIn.forEach(x=>{
@@ -3541,11 +3624,17 @@ function townHelpSeen(){ try{ return localStorage.getItem('thornhold_town_howto'
 function townHelpRemember(){ try{ localStorage.setItem('thornhold_town_howto','1'); }catch(e){} }
 function combatCoach(C,F,myTurn){
   if(C.over) return C.won===true?'You won! Tap Return to town.':'Defeated. Tap Return to town to try again.';
+  if(F&&F.bloodAsk) return myTurn?'Bloodwell: choose Yes to pay 2 HP for 1 extra mana, or No.':`${FP(F).name} is deciding whether to pay 2 HP for Bloodwell mana.`;
   if(!myTurn&&F) return `It's ${FP(F).name}'s turn. Wait for them to play.`;
   if(C.phase==='block'){
+    if(UI.blkHint&&UI.blkHint.until>Date.now()) return UI.blkHint.text;
+    const me=TOWN.on?C.fighters.find(x=>x.pi===TOWN.localPi):null, ok=(C.pending&&C.pending.ok)||{};
+    const waitNames=blockWaiting().filter(x=>!me||x!==me).map(x=>FP(x).name);
+    if(me&&blockMultiConfirm()&&(ok[me.pi]||!blockHasOptions(me))) return waitNames.length?`${ok[me.pi]?'You confirmed. ':'Nothing of yours can block. '}Waiting for ${waitNames.join(' and ')} to confirm blocks…`:'Blocks confirmed.';
+    if(UI.blkSel) return 'Now tap the attacking enemy it should block (or drag onto it). Tap your creature again to cancel.';
     const mine=TOWN.on?allHeroCreatures().filter(b=>b.owner===TOWN.localPi):allHeroCreatures();
     const can=mine.some(b=>C.pending&&C.pending.items.some(it=>!it.blk&&canBlock(b,it.a)));
-    return can?'Tap one of your glowing creatures to block an attack, then tap Confirm blocks. Or tap Confirm blocks to take the hits.':'Tap Confirm blocks to take the hits.';
+    return can?'Tap a glowing creature of yours, then tap the attacker it blocks (or drag it onto the attacker). Then tap Confirm blocks.':'Tap Confirm blocks to take the hits.';
   }
   if(F&&C.step==='attack'){
     const n=F.field.filter(c=>!c.tapped).length;
@@ -3563,33 +3652,151 @@ function howtoHTML(){
     <h2>How to fight</h2>
     <p class="howto-lead">Your turn has three parts, then the boss takes a turn.</p>
     <ol>
-      <li><b>First main:</b> play <b>1 mana card</b> from your mana hand (it stays in play and gives mana every turn) and play cards from your hand. Tap the <b>boss's picture</b> to target him. When you're ready, tap <b>Combat</b>.</li>
+      <li><b>First main:</b> you get <b>${BASE_MANA} mana</b> every turn. Play <b>1 mana card</b> from your mana hand (it stays in play and adds mana every turn) and play cards from your hand. You draw 1 card each turn. Tap the <b>boss's picture</b> to target him. When you're ready, tap <b>Combat</b>.</li>
       <li><b>Combat:</b> tap your glowing creatures to attack the boss, then tap <b>Attack</b>. Attacking taps them, so they can't block his next attack. If none can attack, tap <b>Don't attack</b>.</li>
       <li><b>Second main:</b> play more cards (you still get only 1 mana card per turn). When you're done, tap <b>End turn</b>.</li>
-      <li>On the boss's turn he attacks. Tap your glowing creatures to block, then tap <b>Confirm blocks</b>. You can only block with your own creatures. Blockers deal their ATK back.</li>
+      <li>On the boss's turn he attacks. Tap one of your glowing creatures, then tap the <b>attacker</b> it should block (or drag your creature onto the attacker). Tap your creature again to undo. Then tap <b>Confirm blocks</b>; in a party, the fight waits until every player has confirmed. Blockers deal their ATK back.</li>
       <li>Reduce the boss's health to 0 to win. Tap 🔍 on a card to see it up close.</li>
     </ol>
     <button type="button" class="btn primary howto-gotit" data-a="townHelpClose">Got it</button>
   </div></div>`;
 }
 
+const BLK_COLORS=['#ffcf4a','#5fd0ff','#ff7ab6','#8ef06a','#c39bff','#ffa04a','#4affd2','#ff5f5f'];
+function blkColor(i){ return BLK_COLORS[i%BLK_COLORS.length]; }
+function blkSelCreature(){ return UI.blkSel?allHeroCreatures().find(b=>b.uid===UI.blkSel):null; }
+function blkDroppable(i){ const C=G.combat, b=blkSelCreature(); if(!b||!C||!C.pending) return false; const it=C.pending.items[i]; return !!it&&canBlock(b,it.a)&&(!it.blk||it.blk===b||ownsCreature(it.blk,TOWN.on?TOWN.localPi:undefined)); }
+function blockActionsHTML(C){
+  const multi=blockMultiConfirm(), ok=C.pending.ok||{};
+  const me=TOWN.on?C.fighters.find(x=>x.pi===TOWN.localPi):null;
+  const done=me&&multi&&(ok[me.pi]||!blockHasOptions(me));
+  const waitNames=blockWaiting().filter(x=>x!==me).map(x=>FP(x).name);
+  const chips=multi?C.fighters.filter(x=>!x.out).map(x=>{ const c=!!ok[x.pi], need=blockHasOptions(x);
+    return `<span class="blk-who ${c||!need?'done':'wait'}">${esc(FP(x).name)}${me===x?' (you)':''}: ${c?'✓ confirmed':need?'⏳ deciding…':'✓ nothing to block'}</span>`; }).join(''):'';
+  const btn=done
+    ? `<button class="btn blk-waiting" disabled>⏳ Waiting for ${esc(waitNames.join(' and ')||'the party')}…</button>`
+    : `<button class="btn primary glow" data-a="bConfirm">Confirm blocks</button>`;
+  return `<div class="row hand-actions blk-actions">${chips?`<div class="blk-whos" role="status">${chips}</div>`:''}${btn}</div>`;
+}
+function bloodwellPromptHTML(C){
+  const F=C.phase==='hero'?activeF():null; if(!F||!F.bloodAsk||C.over) return '';
+  if(TOWN.on&&F.pi!==TOWN.localPi) return '';
+  const p=FP(F), src=artForMana('bloodwell');
+  return `<div class="blood-ov"><div class="blood-card" role="dialog" aria-label="Bloodwell">${src?`<img src="${esc(src)}" alt="Bloodwell" data-zoom="${esc(src)}">`:''}<div class="blood-body"><h3>🩸 Bloodwell</h3><p>Pay <b>2 HP</b> for <b>1 extra mana</b> this turn?</p><p class="muted">${esc(p.name)} has ${p.hp} HP${p.hp-2>0?` → ${p.hp-2} HP if you pay`:''}.</p><div class="row blood-btns"><button class="btn primary" data-a="cBlood" data-v="1">Yes, pay 2 HP</button><button class="btn" data-a="cBlood" data-v="0">No thanks</button></div></div></div></div>`;
+}
+function blkSend(a,v){ if(TOWN.on) townClick(a,v); else act(a,v); }
+function blkHint(text){ UI.blkHint={text, until:Date.now()+2600}; setTimeout(()=>{ if(UI.blkHint&&UI.blkHint.until<=Date.now()){ UI.blkHint=null; render(); } },2700); }
+function blockUiClick(a,v){ // local-only selection; the actual block is sent as one bAssign action (works for remote co-op too)
+  const C=G&&G.combat; if(a!=='bBlk'&&a!=='bPick') return false;
+  if(!C||C.phase!=='block'||!C.pending){ return true; }
+  const minePi=TOWN.on?TOWN.localPi:undefined;
+  if(a==='bBlk'){
+    const b=allHeroCreatures().find(c=>c.uid===v); if(!b||!ownsCreature(b,minePi)) return true;
+    const ai=C.pending.items.findIndex(it=>it.blk===b);
+    if(UI.blkSel===v){ UI.blkSel=null; render(); return true; }
+    if(ai>=0&&!UI.blkSel){ blkSend('bAssign', ai+':'); return true; } // tap again to undo
+    if(!C.pending.items.some(it=>canBlock(b,it.a))){ blkHint(`${b.name} can't block any of these attackers.`); render(); return true; }
+    UI.blkSel=v; render(); return true;
+  }
+  const i=+v, it=C.pending.items[i]; if(!it) return true;
+  const b=blkSelCreature();
+  if(!b){
+    if(it.blk&&ownsCreature(it.blk,minePi)){ blkSend('bAssign', i+':'); return true; }
+    blkHint(it.blk?`${it.blk.name} (a teammate) already blocks ${srcName(it)}.`:'First tap one of your glowing creatures, then tap this attacker.'); render(); return true;
+  }
+  if(!canBlock(b,it.a)){ blkHint(`${b.name} can't block ${srcName(it)}${!it.a.cmd&&has(it.a,'fly')?' (it has Flying)':''}.`); render(); return true; }
+  if(it.blk&&it.blk!==b&&!ownsCreature(it.blk,minePi)){ blkHint(`${it.blk.name} (a teammate) already blocks ${srcName(it)}.`); render(); return true; }
+  UI.blkSel=null; blkSend('bAssign', i+':'+b.uid); return true;
+}
+function drawBlockLinks(tmp){
+  if(typeof document==='undefined') return;
+  let svg=document.getElementById('blkLinks');
+  const C=G&&G.combat;
+  if(!C||C.phase!=='block'||!C.pending||C.over){ if(svg) svg.innerHTML=''; return; }
+  if(!svg){ svg=document.createElementNS('http://www.w3.org/2000/svg','svg'); svg.id='blkLinks'; svg.setAttribute('aria-hidden','true'); document.body.appendChild(svg); }
+  const W=window.innerWidth, H=window.innerHeight; svg.setAttribute('viewBox',`0 0 ${W} ${H}`); svg.setAttribute('width',W); svg.setAttribute('height',H);
+  const ctr=el=>{ const r=el.getBoundingClientRect(); return {x:r.left+r.width/2, y:r.top+r.height/2, r}; };
+  let defs='<defs>', out='';
+  const line=(a,b,col,k,dash)=>{ // from blocker a to attacker b, arrow at the attacker
+    const dx=b.x-a.x, dy=b.y-a.y, L=Math.hypot(dx,dy)||1, ux=dx/L, uy=dy/L;
+    const ra=Math.min(a.r?a.r.height*0.32:0, L*0.3), rb=Math.min(b.r?b.r.height*0.36:0, L*0.3);
+    const x1=a.x+ux*ra, y1=a.y+uy*ra, x2=b.x-ux*rb, y2=b.y-uy*rb;
+    defs+=`<marker id="blkArr${k}" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="${col}"/></marker>`;
+    out+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#000" stroke-opacity=".55" stroke-width="8" stroke-linecap="round"/><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="4" stroke-linecap="round"${dash?' stroke-dasharray="9 7"':''} marker-end="url(#blkArr${k})"/>`;
+    out+=`<circle cx="${x1}" cy="${y1}" r="5" fill="${col}" stroke="#000" stroke-width="1.5"/>`;
+  };
+  C.pending.items.forEach((it,i)=>{ if(!it.blk) return;
+    const be=document.querySelector(`#app [data-blk="${it.blk.uid}"]`), ae=document.querySelector(`#app .cr[data-atk="${i}"], #app .bossbox[data-atk="${i}"]`);
+    if(!be||!ae) return; line(ctr(be),ctr(ae),blkColor(i),i,false); });
+  if(tmp&&tmp.from){ const be=document.querySelector(`#app [data-blk="${tmp.from}"]`); if(be) line(ctr(be),{x:tmp.x,y:tmp.y,r:null},tmp.col||'#fff','t',true); }
+  svg.innerHTML=defs+'</defs>'+out;
+}
+if(typeof window!=='undefined'&&!window.__blkBound){
+  window.__blkBound=1;
+  window.addEventListener('resize',()=>drawBlockLinks());
+  document.addEventListener('scroll',()=>drawBlockLinks(),true);
+  // drag a blocker onto an attacker (mouse, pen and touch)
+  let d=null;
+  const dropTarget=(x,y)=>{ const el=document.elementFromPoint(x,y); return el&&el.closest&&el.closest('[data-atk],[data-atk-strip]'); };
+  const endDrag=()=>{ if(d&&d.ghost) d.ghost.remove(); document.body.classList.remove('blk-dragging'); document.querySelectorAll('.drop-hover').forEach(e=>e.classList.remove('drop-hover')); };
+  document.addEventListener('pointerdown',e=>{
+    const C=G&&G.combat; if(!C||C.phase!=='block'||!C.pending||C.over) return;
+    if(e.button>0||(e.target.closest&&e.target.closest('.zoom-btn'))) return;
+    const el=e.target.closest&&e.target.closest('.cr.can-blk[data-blk]'); if(!el) return;
+    d={uid:el.dataset.blk, x:e.clientX, y:e.clientY, id:e.pointerId, ghost:null};
+  },true);
+  document.addEventListener('pointermove',e=>{
+    if(!d||e.pointerId!==d.id) return;
+    const dx=e.clientX-d.x, dy=e.clientY-d.y;
+    if(!d.ghost){
+      if(dx*dx+dy*dy<81) return;
+      const src=document.querySelector(`#app [data-blk="${d.uid}"]`); if(!src){ d=null; return; }
+      if(typeof clearZoomHold==='function') clearZoomHold(); if(typeof hideCardZoom==='function') hideCardZoom(true);
+      const g=src.cloneNode(true); g.classList.add('blk-ghost'); g.removeAttribute('data-blk'); g.removeAttribute('data-a'); g.removeAttribute('data-zoom');
+      const r=src.getBoundingClientRect(); g.style.width=r.width+'px'; document.body.appendChild(g); d.ghost=g; d.w=r.width; d.h=r.height;
+      document.body.classList.add('blk-dragging'); UI.blkSel=d.uid;
+    }
+    d.ghost.style.transform=`translate(${e.clientX-d.w/2}px,${e.clientY-d.h/2}px) rotate(-4deg) scale(.85)`;
+    document.querySelectorAll('.drop-hover').forEach(x=>x.classList.remove('drop-hover'));
+    const t=dropTarget(e.clientX,e.clientY); if(t) t.classList.add('drop-hover');
+    drawBlockLinks({from:d.uid, x:e.clientX, y:e.clientY, col:'#ffffff'});
+    e.preventDefault(); e.stopPropagation();
+  },{capture:true,passive:false});
+  const up=e=>{
+    if(!d||e.pointerId!==d.id) return;
+    const dragged=!!d.ghost, uid=d.uid, t=dragged&&e.type==='pointerup'?dropTarget(e.clientX,e.clientY):null;
+    endDrag(); d=null;
+    if(!dragged) return;
+    UI.blkDragEnd=Date.now(); e.stopPropagation();
+    if(t){ UI.blkSel=uid; blockUiClick('bPick', t.dataset.atk!=null?t.dataset.atk:t.dataset.atkStrip); }
+    else { UI.blkSel=null; render(); }
+  };
+  document.addEventListener('pointerup',up,true);
+  document.addEventListener('pointercancel',up,true);
+}
 function renderCombat(){
   const C=G.combat, B=C.boss; const F=activeF();
   const tg=F?getTarget(F):null;
   const myF=TOWN.on?C.fighters[TOWN.localPi]:null;
   const myTurn=!(!F||(TOWN.on&&F.pi!==TOWN.localPi));
-  let h=`<div class="overlay combat-ov"><div class="modal combat-modal"><div class="combat-table">`;
+  const blocking=C.phase==='block'&&!!C.pending&&!C.over;
+  if(!blocking) UI.blkSel=null;
+  else if(UI.blkSel&&!allHeroCreatures().some(b=>b.uid===UI.blkSel&&!b.tapped)) UI.blkSel=null;
+  const blkIdx={}; if(blocking) C.pending.items.forEach((it,i)=>{ if(it.blk) blkIdx[it.blk.uid]=i; });
+  let h=`<div class="overlay combat-ov"><div class="modal combat-modal${blocking?' blocking':''}${blocking&&UI.blkSel?' blk-picking':''}"><div class="combat-table">`;
   const bsrc=artForBoss(B.cid);
   const bossBonus=B.relics.map(r=>relicChip(r,true)).join('')+B.arts.map(a=>{ const asrc=artForEnemy(a); return `<span class="chip${asrc?' artchip':''}" title="${esc(EC[a].text)}"${asrc?` data-zoom="${esc(asrc)}" data-a="zoom" data-v="${esc(asrc)}"`:''}>${asrc?`<img src="${esc(asrc)}" alt="">`:''}<span class="chip-name">⚙️ ${esc(EC[a].name)}</span></span>`; }).join('');
   const bossGlow=(TOWN.on&&myTurn&&!C.over&&C.phase!=='block'&&C.step!=='attack')?' coach-glow':'';
-  h+=`<div class="bosspanel"><div class="bossbox ${tg==='boss'?'tgt':''}${bossGlow}" data-a="cTarget" data-v="boss">${bsrc?`<img class="boss-art" src="${esc(bsrc)}" alt="${esc(B.name)}" data-zoom="${esc(bsrc)}">`:''}<div><div class="bname">${B.icon} ${esc(B.name)}</div>
+  const cmdI=blocking?C.pending.items.findIndex(it=>it.a.cmd):-1;
+  const bossAttrs=cmdI>=0?`data-a="bPick" data-v="${cmdI}" data-atk="${cmdI}" style="--bc:${blkColor(cmdI)}"`:`data-a="cTarget" data-v="boss"`;
+  h+=`<div class="bosspanel"><div class="bossbox ${tg==='boss'?'tgt':''}${bossGlow}${cmdI>=0?' attacking'+(blkDroppable(cmdI)?' droppable':''):''}" ${bossAttrs}>${cmdI>=0?`<span class="blk-badge atk">⚔${cmdI+1}</span>`:''}${bsrc?`<img class="boss-art" src="${esc(bsrc)}" alt="${esc(B.name)}" data-zoom="${esc(bsrc)}">`:''}<div><div class="bname">${B.icon} ${esc(B.name)}</div>
    <div class="bar"><i style="width:${Math.max(0,B.hp)/B.maxHp*100}%"></i></div><div class="bstats"><span class="bstats-full">❤ ${Math.max(0,B.hp)}/${B.maxHp} ${B.shield?`· 🛡 Shield ${B.shield}`:''} · ⚔ ATK ${Math.max(0,B.atk-B.curse+B.temp)} · 💧 ${B.manaPlayed} mana in play (max ${B.manaCap}) · ✋ ${B.hand.length} · deck ${B.deck.length}</span><span class="bstats-short">❤ ${Math.max(0,B.hp)}/${B.maxHp}${B.shield?` · 🛡 ${B.shield}`:''} · ⚔ ${Math.max(0,B.atk-B.curse+B.temp)} · 💧 ${B.manaPlayed}/${B.manaCap} · ✋ ${B.hand.length} · deck ${B.deck.length}</span></div></div></div>
    ${bossBonus?`<div class="boss-relics">${bossBonus}</div>`:''}
    <div class="clog">${C.log.slice(0,40).map(l=>`<div>${esc(l)}</div>`).join('')}</div></div>`;
   // phase banner
   let ph='';
   if(C.over) ph=`<b>${C.won===true?'🏆 Victory!':C.won===false?'💀 Defeat':'Withdrawn'}</b> <button class="btn primary" data-a="leave">${TOWN.on?'Return to town':'Continue'}</button>`;
-  else if(C.phase==='block') ph=`<b>${esc(B.name)} attacks!</b><span class="phase-hint"> Pick an attack, then click one of your untapped creatures to block it (blockers deal their ATK back). You can cast ⚡ instants now. Then confirm.</span>`;
+  else if(C.phase==='block') ph=`<b>${esc(B.name)} attacks!</b><span class="phase-hint"> Click your creature, then the attacker it blocks (or drag it onto the attacker). Click it again to undo. Blockers deal their ATK back. You can cast ⚡ instants now. Then confirm.</span>`;
   else if(F&&C.step==='attack') ph=`<b>${esc(FP(F).name)}: combat.</b>`+(myTurn?`<span class="phase-hint"> Click your untapped creatures to choose attackers (they tap and can't block his next attack), then attack or skip.</span>`:`<span class="phase-hint"> Waiting for ${esc(FP(F).name)} to attack.</span>`);
   else if(F&&C.step==='main2') ph=`<b>${esc(FP(F).name)}: second main.</b>`+(myTurn?`<span class="phase-hint"> Play more cards, then End turn. You may play only 1 mana card per turn.</span>`:`<span class="phase-hint"> Waiting for ${esc(FP(F).name)} to play.</span>`);
   else if(F) ph=`<b>${esc(FP(F).name)}: first main.</b>`+(myTurn?`<span class="phase-hint"> Play 1 mana card and play cards, then go to Combat.</span>`:`<span class="phase-hint"> Waiting for ${esc(FP(F).name)} to play.</span>`);
@@ -3599,22 +3806,27 @@ function renderCombat(){
   if(TOWN.on) h+=`<div class="coach" role="status"><span class="coach-text">${esc(combatCoach(C,F,myTurn))}</span><button type="button" class="howto-btn" data-a="townHelp" title="How to fight" aria-label="How to fight">?</button></div>`;
   const minePi=TOWN.on?TOWN.localPi:(F?F.pi:null);
   const myCreatures=(list)=> minePi==null?list:list.filter(b=>b.owner===minePi);
-  h+=`<div class="combat-fields${C.fighters.length>1?' multi':''}"><div class="battle-row is-foe"><div class="muted">Boss battlefield · ${esc(B.name)} <span class="wide-hint">(click to target)</span></div>${fieldHTML(B.field.map(c=>crHTML(c,{tgt:tg===c.uid,attrs:`data-a="cTarget" data-v="${c.uid}"`})))}</div>`;
-  if(C.phase==='block'&&C.pending){
-    h+=`<div class="panel respond">${C.pending.items.map((it,i)=>{ const cands=myCreatures(allHeroCreatures().filter(b=>canBlock(b,it.a)));
-      const blkMine=!it.blk||minePi==null||it.blk.owner===minePi;
-      return `<div class="atkrow ${C.sel===i?'sel':''} ${it.cancel?'cancel':''}" data-a="bSel" data-v="${i}"><b>${esc(srcName(it))}</b> (${atkOf(it)} ATK${!it.a.cmd&&has(it.a,'fly')?', Flying':''}${!it.a.cmd&&has(it.a,'trample')?', Trample':''}) → ${esc(FP(it.tgt).name)} ·
-       ${it.blk?`blocked by <b>${esc(it.blk.name)}</b>${blkMine?` <button class="btn small" data-a="bAssign" data-v="${i}:">unblock</button>`:''}`:'unblocked'}
-       ${cands.filter(b=>b!==it.blk).map(b=>`<button class="btn small" data-a="bAssign" data-v="${i}:${b.uid}">Block with ${esc(b.name)} (${effAtk(b)}/${hpLeft(b)})</button>`).join('')}</div>`; }).join('')}
-      <button class="btn primary glow" data-a="bConfirm">Confirm blocks</button></div>`;
+  const foeCards=B.field.map(c=>{
+    const ai=blocking?C.pending.items.findIndex(it=>it.a===c):-1;
+    if(ai<0) return crHTML(c,{tgt:tg===c.uid,attrs:`data-a="cTarget" data-v="${c.uid}"`});
+    return crHTML(c,{tgt:tg===c.uid,cls:'attacking'+(blkDroppable(ai)?' droppable':''),badge:`<span class="blk-badge atk">⚔${ai+1}</span>`,attrs:`data-a="bPick" data-v="${ai}" data-atk="${ai}" style="--bc:${blkColor(ai)}"`}); });
+  h+=`<div class="combat-fields${C.fighters.length>1?' multi':''}"><div class="battle-row is-foe"><div class="muted">Boss battlefield · ${esc(B.name)} <span class="wide-hint">${blocking?'(attackers are numbered)':'(click to target)'}</span></div>${fieldHTML(foeCards)}</div>`;
+  if(blocking){
+    h+=`<div class="panel respond blockbar">${C.pending.items.map((it,i)=>`<div class="blk-item${it.blk?' is-blocked':''}${it.cancel?' cancel':''}${blkDroppable(i)?' droppable':''}" style="--bc:${blkColor(i)}" data-a="bPick" data-v="${i}" data-atk-strip="${i}"><span class="blk-num">⚔${i+1}</span> <b>${esc(srcName(it))}</b> ${atkOf(it)} ATK${!it.a.cmd&&has(it.a,'fly')?' · Flying':''}${!it.a.cmd&&has(it.a,'trample')?' · Trample':''} → ${esc(FP(it.tgt).name)} · ${it.blk?`<span class="blk-by">🛡${i+1} ${esc(it.blk.name)}</span>`:'<i>unblocked</i>'}</div>`).join('')}</div>`;
   }
   // player battlefields; two or more sit side by side on desktop so cards aren't cut off
   if(C.fighters.length>1) h+=`<div class="hero-fields">`;
   C.fighters.forEach((Fx,fi)=>{ const p=FP(Fx); const isA=F===Fx; const mine=!TOWN.on||Fx.pi===TOWN.localPi;
     const label=(C.fighters.length>1?`${esc(p.name)}'s battlefield`:'Your battlefield')+`<span class="field-stats"> · ❤ ${p.hp}/${p.maxHp} · 🛡 ${Fx.block} · 💧 ${Fx.mana} mana · draw ${Fx.draw.length} · mana deck ${(Fx.manaDraw&&Fx.manaDraw.length)||0}</span>`;
-    const cards=Fx.field.map(c=>{ let attrs='';
-      if(C.phase==='block'&&C.pending&&mine){ attrs=`data-a="bAssign" data-v="${C.sel||0}:${c.uid}"`; }
-      else if(isA&&mine&&C.step==='attack'&&!c.tapped) attrs=`data-a="cToggleAtk" data-v="${c.uid}"`;
+    const cards=Fx.field.map(c=>{ let attrs='', cls='', badge='';
+      if(blocking){ const bi=blkIdx[c.uid];
+        if(bi!=null){ cls+=' blocking'; badge=`<span class="blk-badge blk" style="--bc:${blkColor(bi)}">🛡${bi+1}</span>`; }
+        const able=mine&&C.pending.items.some(it=>canBlock(c,it.a));
+        if(mine&&(able||bi!=null)){ attrs=`data-a="bBlk" data-v="${c.uid}" data-blk="${c.uid}"`; if(able) cls+=' can-blk'; if(UI.blkSel===c.uid) cls+=' blk-sel'; }
+        else attrs=`data-blk="${c.uid}"`;
+        if(bi!=null) attrs+=` style="--bcb:${blkColor(bi)}"`;
+        return crHTML(c,{cls:cls.trim(),badge,attrs}); }
+      if(isA&&mine&&C.step==='attack'&&!c.tapped) attrs=`data-a="cToggleAtk" data-v="${c.uid}"`;
       else if(isA&&mine) attrs=`data-a="cAlly" data-v="${c.uid}"`;
       return crHTML(c,{atk:isA&&Fx.atkSel[c.uid],ally:isA&&Fx.ally===c.uid,attrs}); });
     h+=`<div class="battle-row ours ${isA?'act':''}${Fx.out?' is-out':''}${mine?' is-mine':''}"><div class="muted">${label}</div>${fieldHTML(cards)}</div>`;
@@ -3629,12 +3841,9 @@ function renderCombat(){
   } else if(F&&!C.over){
     if(C.step==='attack'){ const n=Object.values(F.atkSel).filter(x=>x).length; const canAtk=F.field.some(c=>!c.tapped); h+=`<div class="row hand-actions"><button class="btn danger${n>0?' glow':''}" data-a="cDeclare">⚔️ Attack with ${n} creature${n===1?'':'s'}</button><button class="btn${canAtk?'':' primary'} glow" data-a="cSkip">Don't attack</button></div>`; }
     else {
-      h+=`<div class="combat-hand-rows"><div class="hand-block"><div class="muted hand-label">Your hand (Basic Strike + ${F.hand.length}/${HAND_BOUGHT} bought cards):</div><div class="cards play-row" style="--hand-n:${1+F.hand.length}">`;
-      { const ssrc=artPath('hc','strike'); const scls=`card spell ${ssrc?'artcard':''} ${F.strikeUsed?'cant':'play'}`; const sattrs=`style="--i:0"${F.strikeUsed?'':` data-a="cStrike"`}`;
-        h+= ssrc
-          ? `<div class="${scls}" ${sattrs} data-zoom="${esc(ssrc)}" title="Basic Strike: Deal 2 damage to your target. Gain 1 Block. Never spent.">${faceImg(ssrc,'Basic Strike')}${zoomBtn(ssrc)}</div>`
-          : `<div class="${scls}" ${sattrs}><div class="mana">0</div><div class="cname">Basic Strike</div><div class="ctype">✨ free · once per turn</div><div class="ctext">Deal 2 damage to your target. Gain 1 Block. Never spent.</div></div>`; }
-      F.hand.forEach((x,i)=>{ const w=whyNot(F,x,false); h+=cardHTML(x,{F,play:!w,cant:!!w,why:w,attrs:`style="--i:${i+1}"${w?'':` data-a="cPlay" data-v="${i}"`}`}); });
+      h+=`<div class="combat-hand-rows"><div class="hand-block"><div class="muted hand-label">Your hand (${F.hand.length} card${F.hand.length===1?'':'s'} · ${F.draw.length} left in your deck · you draw 1 per turn):</div><div class="cards play-row" style="--hand-n:${Math.max(1,F.hand.length)}">`;
+      F.hand.forEach((x,i)=>{ const w=whyNot(F,x,false); h+=cardHTML(x,{F,play:!w,cant:!!w,why:w,attrs:`style="--i:${i}"${w?'':` data-a="cPlay" data-v="${i}"`}`}); });
+      if(!F.hand.length) h+=`<i class="muted">No cards in hand${F.draw.length?' — you draw 1 next turn':' and your deck is empty'}.</i>`;
       h+=`</div></div><div class="hand-block"><div class="muted">Mana hand (play 1 per turn${F.manaThisTurn?' — already played this turn':''}) · mana deck ${(F.manaDraw&&F.manaDraw.length)||0}:</div><div class="cards mana-row">${F.manaHand.map((id,i)=>manaCardHTML(id,{play:!F.manaThisTurn,cant:F.manaThisTurn,attrs:F.manaThisTurn?'':`data-a="cMana" data-v="${i}"`})).join('')||`<i class="muted">${(F.manaDraw&&F.manaDraw.length)?'mana deck still has cards':'no mana left'}</i>`}</div></div></div>`;
       h+=`<div class="row hand-actions"><button class="btn primary glow" data-a="${C.step==='main1'?'cCombat':'cEnd'}">${C.step==='main1'?'Combat ▶':'End turn ▶'}</button>${hasRelic(FP(F),'bloodPact')?`<button class="btn" data-a="cPact" ${F.flags.pact||FP(F).hp<=2?'disabled':''}>Blood Pact: 2 HP → 1 mana</button>`:''}${F.field.filter(c=>c.def.sacMana).map(c=>`<button class="btn small" data-a="cSac" data-v="${c.uid}">Sacrifice ${esc(c.name)} for 1 mana</button>`).join('')}<button class="btn small" data-a="cRetreat">Retreat (−2 gold)</button></div>`;
     }
@@ -3645,8 +3854,10 @@ function renderCombat(){
       const inst=Fx.hand.map((x,i)=>({x,i})).filter(o=>HC[o.x.id].type==='instant');
       if(inst.length) h+=`<div class="muted">Instants (${Fx.mana} mana left):</div><div class="cards">${inst.map(o=>{ const w=whyNot(Fx,o.x,true); return cardHTML(o.x,{F:Fx,play:!w,cant:!!w,why:w,attrs:w?'':`data-a="bInstant" data-v="${fi}:${o.i}"`}); }).join('')}</div>`;
     });
+    if(C.pending) h+=blockActionsHTML(C);
   }
   h+=`</div>`;
+  h+=bloodwellPromptHTML(C);
   if(TOWN.on&&TOWN.help) h+=howtoHTML();
   h+=`</div></div>`;
   return h;
@@ -3693,17 +3904,17 @@ function act(a,v,fromPi){
       case 'cDeclare': declareAttack(); break;
       case 'cSkip': declareAttack([]); break;
       case 'cCombat': goToCombat(); break;
-      case 'cStrike': playStrike(); break;
       case 'cPlay': playCard(+v); break;
       case 'cMana': playMana(+v); break;
       case 'cEnd': endHeroTurn(); break;
       case 'cRetreat': retreat(); break;
       case 'cPact': bloodPact(); break;
+      case 'cBlood': bloodwellChoice(v==='1'); break;
       case 'cSac': sacThrall(v); break;
       case 'bSel': if(G.combat) G.combat.sel=+v; break;
       case 'bAssign': { const [i,u]=v.split(':'); if(G.combat){ G.combat.sel=+i; assignBlock(+i,u); } break; }
       case 'bInstant': { const [fi,i]=v.split(':'); playCard(+i,+fi); break; }
-      case 'bConfirm': confirmBlocks(); break;
+      case 'bConfirm': confirmBlocksBy(); break;
       case 'leave': leaveCombat(); break;
       case 'zoom': showCardZoom(v, true); return;
       case 'closeZoom': hideCardZoom(true); return;
@@ -3771,7 +3982,7 @@ if(typeof window!=='undefined'){
   });
 }
 if(typeof document!=='undefined'){
-  document.addEventListener('click',e=>{ const el=e.target.closest('[data-a]'); if(!el) return; e.stopPropagation(); if(TOWN.on) townClick(el.dataset.a, el.dataset.v); else act(el.dataset.a, el.dataset.v); });
+  document.addEventListener('click',e=>{ const el=e.target.closest('[data-a]'); if(!el) return; e.stopPropagation(); if(UI.blkDragEnd&&Date.now()-UI.blkDragEnd<400) return; if(blockUiClick(el.dataset.a, el.dataset.v)) return; if(TOWN.on) townClick(el.dataset.a, el.dataset.v); else act(el.dataset.a, el.dataset.v); });
   document.addEventListener('input',e=>{ const t=e.target; if(t&&t.dataset&&t.dataset.name!==undefined) UI.setup.names[+t.dataset.name]=t.value||('Player '+(+t.dataset.name+1)); });
   window.TH={get G(){return G;}, forgeReveal, act, newGame, startTownFight, setSeed, render, reachable, getActions, activeF, HC, P, callTargets, showCardZoom, hideCardZoom, TOWN, awakenToUrsanox, damageCreature, canAwaken, exileHighestUntilLeave};
   const boot=()=>{ ensureZoom(); if(TOWN.on){ document.body.classList.add('embed'); townPost({k:'ready'}); } render(); };
