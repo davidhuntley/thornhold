@@ -542,6 +542,27 @@ svg.board{width:100%;height:auto;display:block}
   border-radius:4px;
   box-shadow:0 3px 8px #000;
 }
+.tray-bonuses{align-items:flex-end;overflow:visible}
+.tray-mana, .tray-bonuses .card.inplay{display:inline-flex}
+.tray-bonuses .card.inplay,
+.tray-bonuses .card.artcard.inplay{
+  width:58px;
+  flex:0 0 auto;
+  position:relative;
+  margin:0 4px 0 0;
+}
+.tray-bonuses .card.inplay.tapped,
+.tray-bonuses .card.artcard.inplay.tapped{
+  transform:rotate(9deg);
+  transform-origin:center center;
+  opacity:.7;
+  filter:saturate(.65);
+}
+.tray-bonuses .card.inplay > .muted{
+  position:absolute;left:0;right:0;top:42%;
+  text-align:center;font-weight:bold;font-size:9px;
+  text-shadow:0 1px 3px #000;pointer-events:none;
+}
 .combat-hand-rows{flex:1 1 auto;min-width:0}
 .combat-modal .fighters.slim{background:transparent;border:none;padding:0 4px}
 .combat-modal .fighters.slim .fighter{padding:1px 8px;border:none;background:transparent;min-width:0}
@@ -2017,7 +2038,7 @@ function startCombat(spec, players){
     const manaDraw=shuffle(p.manaExact?p.mana.slice():(p.mana&&p.mana.length?p.mana.slice():['plain','plain','plain']));
     const manaHand=[]; while(manaHand.length<MANA_OPEN_HAND && manaDraw.length) manaHand.push(manaDraw.shift());
     const F={pi:p.idx, hand:[], draw, used:[], field:[], arts:[], dead:[], bench:[], manaHand, manaDraw, manaIn:[], mana:0, block:0,
-      target:null, ally:null, strikeUsed:false, flags:{}, out:false, retreated:false, startBonus:(p.blessed?1:0)+(N===1?SOLO_MANA:0), spells:0, atkSel:{}};
+      target:null, ally:null, strikeUsed:false, flags:{}, out:false, retreated:false, startBonus:(p.blessed?1:0)+(N===1&&spec.kind!=='town'?SOLO_MANA:0), spells:0, atkSel:{}};
     p.owned=[]; C.fighters.push(F);
     if(hasRelic(p,'hawk')) summon(F,TOKENS.hawk,{token:true});
     if(hasRelic(p,'impFamiliar')) summon(F,TOKENS.impTok,{token:true});
@@ -2268,14 +2289,31 @@ function exileCreature(cr){
 }
 
 // ---------- hero turn ----------
-function manaProduce(F){ let m=0; for(const x of F.manaIn){ if(x.sick) continue; const M=MANA[x.id]; m+= M.mana||(M.primal&&F.field.length>=3?2:1); } return m; }
+function manaCardValue(F,x){
+  if(!x||x.sick) return 0;
+  const M=MANA[x.id]; if(!M) return 0;
+  return M.mana||(M.primal&&F.field.length>=3?2:1);
+}
+function tapManaForCost(F,cost){
+  let need=+cost||0;
+  if(need<=0) return;
+  for(const x of (F.manaIn||[])){
+    if(need<=0) break;
+    if(x.tapped||x.sick) continue;
+    const v=manaCardValue(F,x);
+    if(!v) continue;
+    x.tapped=true;
+    need-=v;
+  }
+}
+function manaProduce(F){ let m=0; for(const x of F.manaIn) m+=manaCardValue(F,x); return m; }
 function startHeroTurn(i){
   const C=G.combat; if(C.over) return;
   while(i<C.fighters.length && C.fighters[i].out) i++;
   if(i>=C.fighters.length){ bossTurn(); return; }
   C.phase='hero'; C.active=i; const F=C.fighters[i], p=FP(F);
   F.field.forEach(c=>{ c.tapped=false; }); F.block=0; F.strikeUsed=false; F.spells=0; F.flags.pact=false; F.flags.altar=0; F.flags.swift=false; F.flags.sylvan=false; F.flags.quiver=false; F.flags.junk=false; F.manaThisTurn=false; F.atkSel={};
-  F.manaIn.forEach(x=>x.sick=false);
+  F.manaIn.forEach(x=>{ x.sick=false; x.tapped=false; });
   F.mana=manaProduce(F)+F.startBonus;
   log(`— ${p.name}'s turn (round ${C.round}) · ${F.mana} mana —`);
   // upkeep
@@ -2442,7 +2480,7 @@ function playCard(i,fi){
   const inst=F.hand[i]; if(!inst) return false; const c=HC[inst.id];
   if(whyNot(F,inst,inBlock)) return false;
   if(inBlock&&C.pending){ const it=C.pending.items[C.sel||0]; if(it&&it.blk&&F.field.includes(it.blk)) F.ally=it.blk.uid; }
-  const cost=cardCost(F,inst); F.mana-=cost; F.hand.splice(i,1); const p=FP(F);
+  const cost=cardCost(F,inst); F.mana-=cost; tapManaForCost(F,cost); F.hand.splice(i,1); const p=FP(F);
   if(c.type==='instant'&&F.manaIn.some(x=>MANA[x.id].sylvan&&!x.sick)) F.flags.sylvan=true;
   if(c.type==='equipment'&&F.flags.freeEquip) F.flags.freeEquip=0;
   log(`${p.name} plays ${c.name}${inst.up.length?' ★':''} (${cost} mana).`);
@@ -2462,7 +2500,7 @@ function playCard(i,fi){
 }
 function playStrike(){ const C=G.combat, F=activeF(); if(!requireActiveHero()||!F||!inMainStep(C.step)||F.strikeUsed) return false; F.strikeUsed=true; F.block+=1; log(`${FP(F).name} uses Basic Strike.`); damageTarget(F,getTarget(F),2,{}); return true; }
 function playMana(i){ const C=G.combat, F=activeF(); if(!requireActiveHero()||!F||!inMainStep(C.step)||F.manaThisTurn) return false; const id=F.manaHand[i]; if(!id) return false; const M=MANA[id], p=FP(F);
-  F.manaHand.splice(i,1); F.manaThisTurn=true; F.manaIn.push({id,sick:!!M.sick});
+  F.manaHand.splice(i,1); F.manaThisTurn=true; F.manaIn.push({id,sick:!!M.sick,tapped:!!M.sick});
   if(!M.sick) F.mana+= M.mana||(M.primal&&F.field.length>=3?2:1);
   const o=M.onPlay||{}; if(o.heal) healHero(F,o.heal); if(o.draw) drawCards(F,o.draw); if(o.eqDiscount) F.flags.eqDiscount=(F.flags.eqDiscount||0)+1; if(o.shieldAlly){ const a=getAlly(F,'sturdy'); if(a) a.shield++; }
   if(o.recall){ recallBest(F); }
@@ -3251,7 +3289,15 @@ function fighterBonusHTML(Fx){
   const bits=[];
   p.relics.forEach(r=>{ const c=relicChip(r,false); if(c) bits.push(c); });
   Fx.arts.forEach(a=>{ const asrc=artForInst(a); bits.push(`<span class="chip${asrc?' artchip':''}" title="${esc(HC[a.id].text)}"${asrc?` data-zoom="${esc(asrc)}" data-a="zoom" data-v="${esc(asrc)}"`:''}>${asrc?`<img src="${esc(asrc)}" alt="">`:''}⚙️ ${esc(HC[a.id].name)}</span>`); });
-  Fx.manaIn.forEach(x=>{ const msrc=artForMana(x.id); bits.push(`<span class="chip${msrc?' artchip':''}" title="${esc(MANA[x.id].text)}"${msrc?` data-zoom="${esc(msrc)}" data-a="zoom" data-v="${esc(msrc)}"`:''}>${msrc?`<img src="${esc(msrc)}" alt="">`:''}💧${esc(MANA[x.id].name)}${x.sick?' (sick)':''}</span>`); });
+  Fx.manaIn.forEach(x=>{
+    const M=MANA[x.id], msrc=artForMana(x.id);
+    const st=x.sick?'sick':(x.tapped?'tapped':'');
+    const title=esc((M?M.name+': '+M.text:x.id)+(st?' — '+st:''));
+    const cls=`card manac artcard inplay${x.tapped?' tapped':''}${x.sick?' sick':''}`;
+    bits.push(msrc
+      ? `<div class="${cls}" data-zoom="${esc(msrc)}" title="${title}">${faceImg(msrc,M?M.name:x.id)}${zoomBtn(msrc)}${st?`<div class="muted">${st}</div>`:''}</div>`
+      : `<div class="${cls}" title="${title}"><div class="mana">💧</div><div class="cname">${esc(M?M.name:x.id)}</div>${st?`<div class="muted">${st}</div>`:''}</div>`);
+  });
   return bits.length?`<div class="tray-bonuses">${bits.join('')}</div>`:'';
 }
 function fieldHTML(items){
