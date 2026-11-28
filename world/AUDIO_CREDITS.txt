@@ -1,0 +1,10 @@
+Thornhold audio credits
+=======================
+All music and sound effects are synthesized live in the browser with the WebAudio API (src/audio.js, mirrored inline in the 2D
+card game). There are no audio files, no samples and no third-party assets, so there is nothing to license. Original work for
+this project, free to use with the game. No paid services were used.
+
+Music: calm medieval town loop (D dorian: lute, flute, frame drum, drone) and a faster combat loop (D minor: war drums, bass,
+strings, brass), both generated from short chord progressions; the game crossfades between them (about 2 s).
+Effects: footsteps, UI click, card play, mana card, card draw, attack hit, damage taken, victory, defeat, coin/purchase.
+Settings (mute + volume) are stored in localStorage key thornhold_audio_v1.
